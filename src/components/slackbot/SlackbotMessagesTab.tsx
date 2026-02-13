@@ -27,6 +27,9 @@ import { BlockKitRenderer } from "@/components/block-kit/BlockKitRenderer";
 import type { SlackBlock } from "@/components/block-kit/BlockKitRenderer";
 import { cn } from "@/lib/utils";
 import { DEMO_USER_NAME } from "@/context/DemoDataContext";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
+
+const T = SLACK_TOKENS;
 
 const PILL_ACTIONS = [
   { id: "discover", label: "Discover", icon: Star, query: "What would it take to close the gap?" },
@@ -206,9 +209,14 @@ export function SlackbotMessagesTab() {
                   key={id}
                   type="button"
                   onClick={() => sendMessage(query)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#f0f0f0] text-[14px] font-medium text-[#1d1c1d] hover:bg-[#e5e5e5] transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-md border text-[14px] font-medium hover:bg-[#f8f8f8] transition-colors"
+                  style={{
+                    backgroundColor: T.colors.background,
+                    borderColor: T.colors.border,
+                    color: T.colors.text,
+                  }}
                 >
-                  <Icon size={16} className="text-[#616061]" />
+                  <Icon size={16} style={{ color: T.colors.textSecondary }} />
                   {label}
                 </button>
               ))}

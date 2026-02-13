@@ -42,8 +42,8 @@ function renderTextObject(obj: { type: string; text: string }) {
   if (obj.type === "mrkdwn") {
     return (
       <span
-        className="text-[15px] leading-[1.46668]"
-        style={{ color: T.colors.text }}
+        className="text-[15px]"
+        style={{ color: T.colors.text, lineHeight: T.typography.bodyLineHeight }}
       >
         {renderMrkdwn(obj.text)}
       </span>
@@ -51,8 +51,8 @@ function renderTextObject(obj: { type: string; text: string }) {
   }
   return (
     <span
-      className="text-[15px] leading-[1.46668]"
-      style={{ color: T.colors.text }}
+      className="text-[15px]"
+      style={{ color: T.colors.text, lineHeight: T.typography.bodyLineHeight }}
     >
       {obj.text}
     </span>
@@ -80,8 +80,8 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
             {block.fields.map((f, i) => (
               <div
                 key={i}
-                className="text-[15px] leading-[1.46668]"
-                style={{ color: T.colors.text }}
+                className="text-[15px]"
+                style={{ color: T.colors.text, lineHeight: T.typography.bodyLineHeight }}
               >
                 {f.type === "mrkdwn" ? renderMrkdwn(f.text) : f.text}
               </div>
@@ -93,8 +93,8 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
         content.push(
           <div
             key="text"
-            className="text-[15px] leading-[1.46668] mb-2"
-            style={{ color: T.colors.text }}
+            className="text-[15px] mb-2"
+            style={{ color: T.colors.text, lineHeight: T.typography.bodyLineHeight }}
           >
             {block.text.type === "mrkdwn" ? renderMrkdwn(block.text.text) : block.text.text}
           </div>
@@ -122,6 +122,7 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
                 }`}
                 style={{
                   borderRadius: `${T.radius.button}px`,
+                  boxShadow: isPrimary ? T.shadows.button : undefined,
                   ...(isPrimary
                     ? { backgroundColor: T.colors.primaryButton }
                     : { borderColor: T.colors.border, color: T.colors.text }),

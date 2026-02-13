@@ -1,69 +1,87 @@
 /**
- * Slack design tokens - single source of truth.
- * Based on pixel-perfect audit of reference images.
+ * Slack design tokens - from Figma design system (node 803:59733).
+ * Source: Figma MCP get_variable_defs.
  */
 
 export const SLACK_TOKENS = {
   colors: {
-    // Sidebar
-    iconBar: "#1a1d21", // Dark grey (Salesforce Activity reference)
-    iconBarAlt: "#4a154b", // Purple (Slack DM reference)
+    // From Figma: 🌞Light/Primary, Content
+    text: "#1D1C1D",
+    textSecondary: "#616061", // Max Contrast Gray
+    textTertiary: "#7c7a7f", // Core Content Tertiary
+    textHighlight: "#454447", // Core Content Secondary
+
+    // From Figma: Theme (purple sidebar)
+    sidebar: "#611f69", // Window BG Primary
+    iconBar: "#611f69", // Same as sidebar (left nav)
+    sidebarDark: "#39063a", // Window BG Secondary
     sidebarHover: "rgba(255, 255, 255, 0.1)",
     sidebarActive: "rgba(255, 255, 255, 0.15)",
-    
+    themeImportant: "#4a154b", // Content Important
+    themeBase: "#eabdfb", // Base Important
+    themeSurface: "#F9EDFF", // Inverse Primary
+
+    // From Figma: Core
+    background: "#FFFFFF",
+    backgroundAlt: "#f8f8f8", // Base Secondary
+    border: "#e8e8e8",
+    borderSecondary: "#5e5d6073",
+    borderTertiary: "#5E5D60",
+
+    // From Figma: Links & Buttons
+    link: "#1264a3", // Content Highlight 1
+    primaryButton: "#20a271", // Inverse Highlight 2 (Figma green)
+    primaryButtonHover: "#1a8a5f",
+
     // Notifications
     notificationRed: "#e01e5a",
-    notificationRedAlt: "#d92d20",
-    
-    // Text
-    text: "#1d1c1d",
-    textSecondary: "#616061",
-    
-    // Borders & Backgrounds
-    border: "#e8e8e8",
-    borderSubtle: "#d1d1d1",
-    background: "#ffffff",
-    backgroundAlt: "#f8f8f8",
-    backgroundGrey: "#f0f0f0",
-    backgroundGreyAlt: "#ebebeb",
-    backgroundHover: "#e5e5e5",
-    
-    // Links & Buttons
-    link: "#1264a3",
-    activeItem: "#1264a3",
-    primaryButton: "#2eb886",
-    primaryButtonHover: "#269873",
-    
-    // Badges & Tags
+
+    // Badges & Avatars
     betaBadgeBg: "#e8f4fc",
     betaBadgeText: "#1264a3",
-    
-    // Avatars
     avatarBg: "#611f69",
     avatarBgVariants: ["#611f69", "#e01e5a", "#36c5f0", "#2eb886", "#ecb22e"],
   },
-  
+
   typography: {
-    // Font Family
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Lato", sans-serif',
-    
+    fontFamily: '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+
+    // From Figma: Body - Regular
+    body: "15px",
+    bodyLineHeight: "22px",
+    bodyWeight: 400,
+
+    // From Figma: Caption
+    caption: "13px",
+    captionLineHeight: "18px",
+
+    // From Figma: Micro
+    micro: "12px",
+    microLineHeight: "18px",
+
     // Sizes
     header: "18px",
-    body: "15px",
-    bodyLineHeight: "1.46668",
+    title: "22px",
     medium: "14px",
     small: "13px",
     smaller: "12px",
-    tiny: "11px",
-    mini: "10px",
-    
+
     // Weights
     weightRegular: 400,
     weightMedium: 500,
-    weightSemibold: 600,
     weightBold: 700,
+    weightBlack: 900,
   },
-  
+
+  shadows: {
+    // From Figma: Level 1 - Button Shadow
+    button: "0 1px 3px 0 rgba(0, 0, 0, 0.08)",
+    // From Figma: Level 2 - Menu Shadow
+    menu: "0 4px 12px 0 rgba(0, 0, 0, 0.1)",
+    // From Figma: Level 3 - Modal Shadow
+    modal: "0 18px 48px 0 rgba(0, 0, 0, 0.1)",
+  },
+
   spacing: {
     xxs: 2,
     xs: 4,
@@ -75,7 +93,7 @@ export const SLACK_TOKENS = {
     xxl: 20,
     xxxl: 24,
   },
-  
+
   radius: {
     subtle: 3,
     small: 4,
@@ -86,44 +104,30 @@ export const SLACK_TOKENS = {
     button: 4,
     input: 8,
   },
-  
+
   iconSizes: {
-    // Left icon bar
     logo: 32,
     navIcon: 20,
     navIconPlus: 18,
-    
-    // Sidebar
     channelAvatar: 32,
     sidebarAction: 12,
-    
-    // Channel header
     channelHeader: 16,
-    
-    // Message feed
     messageAvatar: 36,
-    
-    // Input
     inputToolbar: 14,
     inputActions: 16,
-    
-    // Slackbot panel
     slackbotLogo: 24,
     slackbotHeader: 16,
     slackbotTab: 14,
     actionButton: 16,
-    
-    // Mascot
     mascot: 120,
   },
-  
+
   dimensions: {
     iconBarWidth: 60,
     sidebarWidth: 260,
     channelHeaderHeight: 49,
     slackbotPanelMinWidth: 300,
     slackbotPanelMaxWidth: 480,
-    
     notificationBadge: 18,
     avatarProfile: 32,
     avatarChannel: 32,

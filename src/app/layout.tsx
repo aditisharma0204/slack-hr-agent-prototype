@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Lato } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next";
 
 import "./globals.css";
@@ -10,8 +10,9 @@ import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
 
-const inter = Inter({
+const lato = Lato({
   subsets: ["latin"],
+  weight: ["400", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.className} `}>
+      <body className={lato.className}>
         {hasConvex ? (
           <ConvexAuthNextjsServerProvider>{content}</ConvexAuthNextjsServerProvider>
         ) : (
