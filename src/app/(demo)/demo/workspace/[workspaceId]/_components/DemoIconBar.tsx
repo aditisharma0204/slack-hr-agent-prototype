@@ -30,7 +30,7 @@ export function DemoIconBar() {
   return (
     <aside
       className="w-[60px] flex-shrink-0 flex flex-col items-center py-4 gap-1"
-      style={{ backgroundColor: T.colors.sidebar }}
+      style={{ backgroundColor: T.colors.iconBar }}
     >
       <div className="mb-4">
         <Image

@@ -39,7 +39,7 @@ export function DemoSidebar() {
   });
 
   return (
-    <aside className="w-[260px] flex-shrink-0 flex flex-col bg-white border-r" style={{ borderColor: T.colors.border }}>
+    <aside className="w-[260px] flex-shrink-0 flex flex-col border-r" style={{ backgroundColor: T.colors.activitySidebar, borderColor: T.colors.border }}>
       <div className="px-3 py-3 border-b flex items-center gap-2" style={{ borderColor: T.colors.border }}>
         <span className="font-semibold text-[15px]" style={{ color: T.colors.text }}>Activity</span>
         <span className="px-1.5 py-0.5 text-[10px] font-medium rounded" style={{ backgroundColor: T.colors.betaBadgeBg, color: T.colors.link }}>Beta</span>
