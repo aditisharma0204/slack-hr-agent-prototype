@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibeface — Slack Simulator Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: {} } }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4">
+  <div class="max-w-md mx-auto">
+    <div class="flex items-center gap-2 mb-6">
+      <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      <span class="font-semibold text-lg">Vibeface</span>
+    </div>
+
+    <div class="flex border-b border-slate-700 mb-4">
+      <button id="tab-reactive" class="flex-1 py-3 px-4 text-sm font-medium text-slate-400 hover:text-white border-b-2 border-transparent">
+        Reactive
+      </button>
+      <button id="tab-proactive" class="flex-1 py-3 px-4 text-sm font-medium text-white border-b-2 border-purple-500">
+        Proactive
+      </button>
+    </div>
+
+    <div id="panel-reactive" class="hidden">
+      <div class="space-y-4 p-4 rounded-lg bg-slate-800/50">
+        <p class="text-sm text-slate-300">Ask me about your pipeline, meetings, or follow-ups.</p>
+        <div class="flex flex-wrap gap-2">
+          <button class="preset-query px-3 py-2 text-sm rounded border border-slate-600 hover:bg-slate-700">Tell me about Global Industries</button>
+          <button class="preset-query px-3 py-2 text-sm rounded border border-slate-600 hover:bg-slate-700">What would it take to close the gap?</button>
+          <button class="preset-query px-3 py-2 text-sm rounded border border-slate-600 hover:bg-slate-700">What's my risk today?</button>
+        </div>
+        <div id="chat-messages" class="space-y-3"></div>
+        <div class="flex gap-2 pt-2">
+          <input id="chat-input" type="text" placeholder="Reply..." class="flex-1 rounded px-3 py-2 bg-slate-800 border border-slate-600 text-sm">
+          <button id="chat-send" class="px-4 py-2 rounded bg-purple-600 hover:bg-purple-500 text-sm">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-proactive" class="space-y-4">
+      <div id="verdict-block" class="p-4 rounded-lg bg-slate-800/50"></div>
+      <div class="p-4 rounded-lg bg-slate-800/50">
+        <label class="text-sm font-medium block mb-2">Meet quota by:</label>
+        <select id="ambition-days" class="w-full rounded px-3 py-2 bg-slate-800 border border-slate-600 text-sm">
+          <option value="14">14 days (aggressive)</option>
+          <option value="30">30 days</option>
+          <option value="45" selected>45 days</option>
+          <option value="60">60 days (current pace)</option>
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <button class="period-btn active px-4 py-2 rounded text-sm bg-purple-600" data-period="today">Today</button>
+        <button class="period-btn px-4 py-2 rounded text-sm border border-slate-600" data-period="week">This week</button>
+        <button class="period-btn px-4 py-2 rounded text-sm border border-slate-600" data-period="month">This month</button>
+      </div>
+      <div id="action-cards" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <script>
+    const formatCurrency = (n) => {
+      if (n == null || isNaN(n)) return '$0';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+      return '$' + Math.round(n).toLocaleString();
+    };
+
+    const buildScanData = (d) => {
+      const opps = d?.opportunities || [];
+      const seller = d?.seller || { quota: 1e6, commission_rate: 0.07 };
+      const quota = seller.quota || 1e6;
+      const cr = seller.commission_rate || 0.07;
+      let onTrack = 0;
+      opps.filter(o => ['Commit','Best Case'].includes(o.forecast_category) || ['Negotiation','Proposal'].includes(o.stage))
+        .forEach(o => { onTrack += (o.amount || 0) * 0.5; });
+      if (onTrack === 0 && opps.length) onTrack = quota * 0.4;
+      const pipeline = opps.reduce((s,o) => s + (o.amount||0), 0);
+      const gap = Math.max(0, quota - onTrack);
+      return {
+        formattedOnTrackToClose: formatCurrency(onTrack),
+        formattedQuota: formatCurrency(quota),
+        formattedGap: formatCurrency(gap),
+        formattedCommissionAtPace: formatCurrency(onTrack * cr),
+        formattedCommissionAtQuota: formatCurrency(quota * cr),
+        onTrackToCloseValue: onTrack,
+        quota,
+        gap,
+        pipelineValue: pipeline,
+        opportunityCount: opps.length,
+        meetingCount: d?.meetings_today?.length ?? 2,
+        avgDealCycleDays: 34,
+        winRatePct: 38
+      };
+    };
+
+    const getVerdict = (scan, cardsCount) => {
+      const pacePct = scan.quota > 0 ? Math.round((scan.onTrackToCloseValue / scan.quota) * 100) : 0;
+      const weeksLeft = 8;
+      const deals = Math.min(cardsCount, 2);
+      let health = 'at_risk', msg = '';
+      if (pacePct >= 100) { health = 'ok'; msg = `You're above quota pace with ${weeksLeft} weeks left.`; }
+      else if (pacePct >= 70) msg = `You're at ${pacePct}% of quota pace with ${weeksLeft} weeks left. ${deals} deal(s) need you today.`;
+      else msg = `You're at ${pacePct}% of quota pace. You need to activate new pipeline.`;
+      return {
+        numberBlock: `${scan.formattedOnTrackToClose} on track | Quota: ${scan.formattedQuota} | Gap: ${scan.formattedGap}`,
+        commissionLine: `Commission at pace: ${scan.formattedCommissionAtPace} | At quota: ${scan.formattedCommissionAtQuota}`,
+        healthSentence: msg,
+        healthStatus: health
+      };
+    };
+
+    const buildCards = (d) => {
+      const cards = [];
+      const opps = d?.opportunities || [];
+      const meetings = d?.meetings_today || [];
+      const fmt = formatCurrency;
+
+      const risk = opps.find(o => o.champion_status === 'silent' && (o.amount||0) > 100000);
+      if (risk) cards.push({ title: 'Deal at risk', description: `${risk.name} — ${fmt(risk.amount)} — no touchpoint in ${risk.last_touchpoint_days} days.`, primary: 'Review', secondary: 'Dismiss', horizon: 'today', recordId: risk.id });
+
+      const prep = meetings.find(m => m.brief_ready);
+      if (prep) cards.push({ title: 'Meeting prep available', description: `${prep.type} with ${prep.account} at ${prep.time}`, primary: 'Yes, prep it', secondary: "I'll handle it", horizon: 'today', recordId: 'm'+prep.opp_id });
+
+      const stale = opps.find(o => (o.last_touchpoint_days||0) >= 8);
+      if (stale) cards.push({ title: 'Follow-up needed', description: `${stale.champion} at ${stale.name} — ${fmt(stale.amount)}. No activity in ${stale.last_touchpoint_days} days.`, primary: 'Review draft', secondary: 'Dismiss', horizon: 'week', recordId: stale.id });
+
+      if ((d?.follow_ups_overdue||0) > 0) cards.push({ title: 'Overdue follow-up', description: `${d.follow_ups_overdue} follow-ups overdue.`, primary: 'Draft batch', secondary: 'Later', horizon: 'today', recordId: 'overdue' });
+
+      return cards.map(c => ({ ...c, horizon: c.horizon === 'week' ? 'this_week' : c.horizon === 'month' ? 'this_month' : c.horizon }));
+    };
+
+    const RESPONSES = {
+      'global industries': '**Global Industries — Enterprise Platform** ($180K, Negotiation). Champion Marcus Lee has been silent for 12 days. I recommend reaching out this week.',
+      'close the gap': 'Your gap is ~$820K. To close in 45 days you need ~$1.2M more pipeline and ~8 meetings/week.',
+      'risk today': '**Deal at risk:** Global Industries ($180K). **Meeting prep:** TechStart QBR at 2:00 PM. **Overdue:** 3 follow-ups.'
+    };
+
+    let demoData = null;
+    let activePeriod = 'today';
+    let dismissed = new Set();
+
+    function renderProactive() {
+      if (!demoData) return;
+      const scan = buildScanData(demoData);
+      const cards = buildCards(demoData).filter(c => !dismissed.has(c.recordId));
+      const verdict = getVerdict(scan, cards.length);
+      const filtered = cards.filter(c => (activePeriod === 'today' ? c.horizon === 'today' : activePeriod === 'week' ? c.horizon === 'this_week' : c.horizon === 'this_month'));
+
+      document.getElementById('verdict-block').innerHTML = `
+        <div class="font-semibold">${verdict.numberBlock}</div>
+        <div class="text-sm text-slate-400 mt-1">${verdict.commissionLine}</div>
+        <div class="text-sm mt-2 ${verdict.healthStatus === 'ok' ? 'text-green-400' : verdict.healthStatus === 'trouble' ? 'text-amber-400' : 'text-slate-300'}">${verdict.healthSentence}</div>
+      `;
+
+      const cardsEl = document.getElementById('action-cards');
+      cardsEl.innerHTML = filtered.map(c => `
+        <div class="p-4 rounded-lg border border-slate-600 bg-slate-800/50" data-id="${c.recordId}">
+          <div class="font-medium">${c.title}</div>
+          <div class="text-sm text-slate-400 mt-1">${c.description}</div>
+          <div class="flex gap-2 mt-3">
+            <button class="card-action px-3 py-1 rounded bg-purple-600 text-sm">${c.primary}</button>
+            <button class="card-action px-3 py-1 rounded border border-slate-600 text-sm">${c.secondary}</button>
+          </div>
+        </div>
+      `).join('');
+
+      cardsEl.querySelectorAll('.card-action').forEach(btn => {
+        btn.onclick = () => {
+          const card = btn.closest('[data-id]');
+          if (['Dismiss','Later',"I'll handle it"].includes(btn.textContent)) dismissed.add(card.dataset.id);
+          renderProactive();
+        };
+      });
+    }
+
+    document.querySelectorAll('.period-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.period-btn').forEach(b => { b.classList.remove('active','bg-purple-600'); b.classList.add('border','border-slate-600'); });
+        btn.classList.add('active','bg-purple-600'); btn.classList.remove('border','border-slate-600');
+        activePeriod = btn.dataset.period;
+        renderProactive();
+      };
+    });
+
+    document.getElementById('ambition-days').onchange = renderProactive;
+
+    document.getElementById('tab-reactive').onclick = () => {
+      document.getElementById('tab-reactive').classList.add('text-white','border-purple-500'); document.getElementById('tab-reactive').classList.remove('text-slate-400','border-transparent');
+      document.getElementById('tab-proactive').classList.remove('text-white','border-purple-500'); document.getElementById('tab-proactive').classList.add('text-slate-400','border-transparent');
+      document.getElementById('panel-reactive').classList.remove('hidden');
+      document.getElementById('panel-proactive').classList.add('hidden');
+    };
+    document.getElementById('tab-proactive').onclick = () => {
+      document.getElementById('tab-proactive').classList.add('text-white','border-purple-500'); document.getElementById('tab-proactive').classList.remove('text-slate-400','border-transparent');
+      document.getElementById('tab-reactive').classList.remove('text-white','border-purple-500'); document.getElementById('tab-reactive').classList.add('text-slate-400','border-transparent');
+      document.getElementById('panel-proactive').classList.remove('hidden');
+      document.getElementById('panel-reactive').classList.add('hidden');
+    };
+
+    function addChatMsg(role, text) {
+      const div = document.createElement('div');
+      div.className = role === 'user' ? 'ml-4 p-3 rounded bg-purple-900/30 text-sm' : 'mr-4 p-3 rounded bg-slate-700 text-sm';
+      div.innerHTML = `<div class="text-xs text-slate-400 mb-1">${role === 'user' ? 'You' : 'Vibeface'}</div><div>${text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>`;
+      document.getElementById('chat-messages').appendChild(div);
+    }
+
+    function getReply(q) {
+      const lower = q.toLowerCase();
+      for (const [k, v] of Object.entries(RESPONSES)) if (lower.includes(k)) return v;
+      return "I can help with deal summaries, gap analysis, meeting prep. Try a suggested question.";
+    }
+
+    document.querySelectorAll('.preset-query').forEach(btn => {
+      btn.onclick = () => {
+        const q = btn.textContent;
+        addChatMsg('user', q);
+        setTimeout(() => addChatMsg('bot', getReply(q)), 500);
+      };
+    });
+
+    document.getElementById('chat-send').onclick = () => {
+      const input = document.getElementById('chat-input');
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      addChatMsg('user', q);
+      setTimeout(() => addChatMsg('bot', getReply(q)), 500);
+    };
+
+    fetch('demo-data.json').then(r => r.json()).then(d => {
+      demoData = d;
+      renderProactive();
+    }).catch(() => { document.getElementById('verdict-block').innerHTML = '<p class="text-amber-400">Failed to load demo data. Ensure demo-data.json is in the same folder.</p>'; });
+  </script>
+</body>
+</html>
