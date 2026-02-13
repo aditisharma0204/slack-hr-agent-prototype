@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useDemoMessages } from "@/context/DemoDataContext";
-import { DemoChannelHeader } from "../_components/DemoChannelHeader";
-import { DemoMessageList } from "../_components/DemoMessageList";
+import { DemoChannelHeader } from "./_components/DemoChannelHeader";
+import { DemoMessageList } from "./_components/DemoMessageList";
 
 export default function DemoChannelPage() {
   const params = useParams();
