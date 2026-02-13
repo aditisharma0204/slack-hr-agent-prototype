@@ -1,7 +1,7 @@
 "use client";
 
 import { useDemoData } from "@/context/DemoDataContext";
-import { useSlackbot } from "../../../layout";
+import { useSlackbot } from "../../../_context/demo-layout-context";
 import {
   IconUsers,
   IconHeadphones,

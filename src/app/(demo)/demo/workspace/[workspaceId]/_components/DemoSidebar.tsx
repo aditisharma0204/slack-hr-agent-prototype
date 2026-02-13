@@ -13,7 +13,7 @@ import {
   IconLink,
   IconMoreVertical,
   IconPlus,
-  IconFile,
+  IconFolder,
   IconBookmark,
   IconChevronDown,
   IconPencil,
@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
-import { useNav } from "../layout";
+import { useNav } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -275,7 +275,7 @@ export function DemoSidebar() {
             )}
             style={channelId === file.channelId ? { backgroundColor: T.colors.backgroundAlt, boxShadow: `inset 0 0 0 1px ${T.colors.border}` } : {}}
           >
-            <IconFile width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
+            <IconFolder width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
             <div className="flex-1 min-w-0">
               <span className="truncate block" style={{ fontSize: T.typography.body, color: T.colors.text }}>{file.name}</span>
             </div>

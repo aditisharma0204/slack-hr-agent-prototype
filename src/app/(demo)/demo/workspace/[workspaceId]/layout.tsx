@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, createContext, useContext } from "react";
+import { useState } from "react";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
-
-const T = SLACK_TOKENS;
 import {
   ResizableHandle,
   ResizablePanel,
@@ -13,29 +11,12 @@ import { AppHeader } from "./_components/AppHeader";
 import { DemoIconBar } from "./_components/DemoIconBar";
 import { DemoSidebar } from "./_components/DemoSidebar";
 import { SlackbotPanel } from "@/components/slackbot/SlackbotPanel";
+import {
+  DemoLayoutProviders,
+  type NavView,
+} from "./_context/demo-layout-context";
 
-// Create context for Slackbot panel visibility
-const SlackbotContext = createContext<{
-  isOpen: boolean;
-  toggle: () => void;
-}>({
-  isOpen: true,
-  toggle: () => {},
-});
-
-export const useSlackbot = () => useContext(SlackbotContext);
-
-// Nav context for left icon bar
-type NavView = "home" | "dms" | "activity" | "files" | "later" | "agentforce" | "more";
-const NavContext = createContext<{
-  activeNav: NavView;
-  setActiveNav: (v: NavView) => void;
-}>({
-  activeNav: "activity",
-  setActiveNav: () => {},
-});
-
-export const useNav = () => useContext(NavContext);
+const T = SLACK_TOKENS;
 
 export default function DemoWorkspaceLayout({
   children,
@@ -46,12 +27,11 @@ export default function DemoWorkspaceLayout({
   const [activeNav, setActiveNav] = useState<NavView>("activity");
 
   return (
-    <NavContext.Provider value={{ activeNav, setActiveNav }}>
-    <SlackbotContext.Provider
-      value={{
-        isOpen: isSlackbotOpen,
-        toggle: () => setIsSlackbotOpen((prev) => !prev),
-      }}
+    <DemoLayoutProviders
+      isSlackbotOpen={isSlackbotOpen}
+      setIsSlackbotOpen={setIsSlackbotOpen}
+      activeNav={activeNav}
+      setActiveNav={setActiveNav}
     >
       <div
         className="h-full flex flex-col min-h-0 overflow-hidden"
@@ -101,7 +81,6 @@ export default function DemoWorkspaceLayout({
           </ResizablePanelGroup>
         </div>
       </div>
-    </SlackbotContext.Provider>
-    </NavContext.Provider>
+    </DemoLayoutProviders>
   );
 }

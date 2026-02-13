@@ -11,7 +11,7 @@ import {
   IconPlus,
   IconHashtag,
 } from "@/components/icons";
-import { useNav } from "../layout";
+import { useNav } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 

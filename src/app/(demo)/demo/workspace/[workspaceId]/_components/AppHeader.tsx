@@ -1,6 +1,6 @@
 "use client";
 
-import { useSlackbot } from "../layout";
+import { useSlackbot } from "../_context/demo-layout-context";
 import Image from "next/image";
 import { IconSearch } from "@/components/icons";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
