@@ -1,16 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import {
+  Sparkles,
+  Pencil,
+  Search,
+  Lightbulb,
+  Plus,
+  Type,
+  Smile,
+  AtSign,
+  Paperclip,
+  Send,
+  ChevronDown,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Link,
+  List,
+  ListOrdered,
+  Code,
+} from "lucide-react";
 import { BlockKitRenderer } from "@/components/block-kit/BlockKitRenderer";
 import type { SlackBlock } from "@/components/block-kit/BlockKitRenderer";
 import { cn } from "@/lib/utils";
+import { DEMO_USER_NAME } from "@/context/DemoDataContext";
 
-const PRESET_QUERIES = [
-  "Tell me about Global Industries",
-  "What would it take to close the gap?",
-  "What's my risk today?",
-  "Prep me for my TechStart meeting",
-  "What follow-ups are overdue?",
+const PILL_ACTIONS = [
+  { id: "discover", label: "Discover", icon: Sparkles, query: "What would it take to close the gap?" },
+  { id: "create", label: "Create", icon: Pencil, query: "Prep me for my TechStart meeting" },
+  { id: "find", label: "Find", icon: Search, query: "Tell me about Global Industries" },
+  { id: "brainstorm", label: "Brainstorm", icon: Lightbulb, query: "What's my risk today?" },
 ];
 
 const RESPONSE_BLOCKS: Record<string, SlackBlock[]> = {
@@ -113,7 +135,7 @@ function getResponseBlocks(query: string): SlackBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "I can help with: deal summaries, gap analysis, meeting prep, and follow-up drafts. Try one of the suggested questions.",
+        text: "I can help with: deal summaries, gap analysis, meeting prep, and follow-up drafts. Try one of the suggested actions.",
       },
     },
   ];
@@ -168,17 +190,26 @@ export function SlackbotMessagesTab() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto space-y-4 p-4 min-h-0">
         {messages.length === 0 && (
-          <div className="text-sm text-[#616061] space-y-3">
-            <p>Ask me anything about your pipeline, meetings, or follow-ups.</p>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_QUERIES.map((q) => (
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+            <div className="w-32 h-32 mb-4 rounded-full bg-[#4a154b]/10 flex items-center justify-center">
+              <Image src="/logo.svg" alt="" width={64} height={64} className="object-contain opacity-80" />
+            </div>
+            <h2 className="text-[18px] font-bold text-[#1d1c1d] mb-1">
+              Good morning, {DEMO_USER_NAME}!
+            </h2>
+            <p className="text-[15px] text-[#616061] mb-6">
+              The day loads, one unread message at a time.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {PILL_ACTIONS.map(({ id, label, icon: Icon, query }) => (
                 <button
-                  key={q}
+                  key={id}
                   type="button"
-                  onClick={() => sendMessage(q)}
-                  className="text-left px-3 py-2 rounded border text-sm border-[#e8e8e8] text-[#1d1c1d] hover:bg-[#f8f8f8]"
+                  onClick={() => sendMessage(query)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full border text-[14px] font-medium border-[#e8e8e8] text-[#1d1c1d] hover:bg-[#f8f8f8] hover:border-[#d1d1d1] transition-colors"
                 >
-                  {q}
+                  <Icon size={16} className="text-[#616061]" />
+                  {label}
                 </button>
               ))}
             </div>
@@ -211,22 +242,67 @@ export function SlackbotMessagesTab() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="border-t p-3 shrink-0" style={{ borderColor: "#e8e8e8" }}>
-        <div className="flex gap-2">
+      <form onSubmit={handleSubmit} className="border-t shrink-0" style={{ borderColor: "#e8e8e8" }}>
+        <div className="flex flex-wrap gap-1 p-2">
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Bold">
+            <Bold size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Italic">
+            <Italic size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Underline">
+            <Underline size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Strikethrough">
+            <Strikethrough size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Link">
+            <Link size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Bullet list">
+            <List size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Numbered list">
+            <ListOrdered size={14} />
+          </button>
+          <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Code block">
+            <Code size={14} />
+          </button>
+        </div>
+        <div
+          className="flex items-center gap-2 mx-2 mb-2 px-3 py-2 rounded-lg border min-h-[44px]"
+          style={{ borderColor: "#e8e8e8", backgroundColor: "#f8f8f8" }}
+        >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Reply..."
-            className="flex-1 rounded border px-3 py-2 text-sm placeholder:text-[#616061] focus:outline-none focus:ring-1 focus:ring-[#1264a3]"
-            style={{ borderColor: "#e8e8e8" }}
+            className="flex-1 min-w-0 bg-transparent text-[15px] placeholder:text-[#616061] focus:outline-none"
           />
-          <button
-            type="submit"
-            className="px-4 py-2 rounded text-sm font-medium bg-[#1264a3] text-white hover:bg-[#0b4c8c]"
-          >
-            Send
-          </button>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="Add">
+              <Plus size={16} />
+            </button>
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="Format">
+              <Type size={16} />
+            </button>
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="Emoji">
+              <Smile size={16} />
+            </button>
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="Mention">
+              <AtSign size={16} />
+            </button>
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="Attachment">
+              <Paperclip size={16} />
+            </button>
+            <button type="submit" className="p-1.5 rounded text-[#1264a3] hover:bg-white/80" title="Send">
+              <Send size={16} />
+            </button>
+            <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-white/80" title="More">
+              <ChevronDown size={16} />
+            </button>
+          </div>
         </div>
       </form>
     </div>

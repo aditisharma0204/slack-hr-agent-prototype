@@ -5,7 +5,8 @@ import { ConvexReactClient } from "convex/react";
 import { ReactNode } from "react";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+const isDemoMode = !convexUrl || convexUrl.includes("demo-disabled");
+const convex = !isDemoMode ? new ConvexReactClient(convexUrl) : null;
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   if (!convex) {

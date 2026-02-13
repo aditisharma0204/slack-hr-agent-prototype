@@ -1,23 +1,32 @@
-import {
-  convexAuthNextjsMiddleware,
-  createRouteMatcher,
-  isAuthenticatedNextjs,
-  nextjsMiddlewareRedirect,
-} from "@convex-dev/auth/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isPublicPage = createRouteMatcher(["/auth", "/", "/demo", "/demo/(.*)"]);
+// Demo mode: skip Convex auth when NEXT_PUBLIC_CONVEX_URL is not set or is placeholder
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const hasConvex = !!convexUrl && !convexUrl.includes("demo-disabled");
 
-export default convexAuthNextjsMiddleware((request) => {
-  if (!isPublicPage(request) && !isAuthenticatedNextjs()) {
-    return nextjsMiddlewareRedirect(request, "/auth");
+export async function middleware(request: NextRequest) {
+  if (!hasConvex) {
+    return NextResponse.next();
   }
-  if (isPublicPage(request) && isAuthenticatedNextjs()) {
-    return nextjsMiddlewareRedirect(request, "/");
-  }
-});
+
+  const { convexAuthNextjsMiddleware, createRouteMatcher, isAuthenticatedNextjs, nextjsMiddlewareRedirect } =
+    await import("@convex-dev/auth/nextjs/server");
+
+  const isPublicPage = createRouteMatcher(["/auth", "/", "/demo", "/demo/(.*)"]);
+
+  const convexMiddleware = convexAuthNextjsMiddleware((req) => {
+    if (!isPublicPage(req) && !isAuthenticatedNextjs()) {
+      return nextjsMiddlewareRedirect(req, "/auth");
+    }
+    if (isPublicPage(req) && isAuthenticatedNextjs()) {
+      return nextjsMiddlewareRedirect(req, "/");
+    }
+  });
+
+  return convexMiddleware(request);
+}
 
 export const config = {
-  // The following matcher runs middleware on all routes
-  // except static assets.
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

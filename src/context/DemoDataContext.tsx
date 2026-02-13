@@ -49,6 +49,16 @@ const DEMO_DMS: DemoDM[] = [
   { id: "slackbot", name: "Slackbot", isSlackbot: true },
 ];
 
+export const DEMO_USER_NAME = "Rita";
+
+function getLastMessagePreview(messages: DemoMessage[]): string {
+  if (!messages?.length) return "";
+  const last = messages[messages.length - 1];
+  if (last.body) return last.body.slice(0, 40) + (last.body.length > 40 ? "..." : "");
+  if (last.blocks?.[0]?.text?.text) return last.blocks[0].text.text.slice(0, 40) + "...";
+  return "";
+}
+
 interface DemoDataContextValue {
   workspace: DemoWorkspace;
   channels: DemoChannel[];
@@ -56,6 +66,7 @@ interface DemoDataContextValue {
   messages: Record<string, DemoMessage[]>;
   demoData: Record<string, unknown> | null;
   blockKitMessages: Record<string, unknown> | null;
+  getChannelPreview: (channelId: string) => { preview: string; timestamp: string };
 }
 
 const DemoDataContext = createContext<DemoDataContextValue | null>(null);
@@ -83,6 +94,15 @@ export function DemoDataProvider({ children }: { children: React.ReactNode }) {
       .catch(console.error);
   }, []);
 
+  const getChannelPreview = (channelId: string) => {
+    const msgs = messages[channelId] || [];
+    const last = msgs[msgs.length - 1];
+    return {
+      preview: getLastMessagePreview(msgs),
+      timestamp: last?.timestamp ?? "",
+    };
+  };
+
   const value: DemoDataContextValue = {
     workspace: DEMO_WORKSPACE,
     channels: DEMO_CHANNELS,
@@ -90,6 +110,7 @@ export function DemoDataProvider({ children }: { children: React.ReactNode }) {
     messages,
     demoData,
     blockKitMessages,
+    getChannelPreview,
   };
 
   return (
