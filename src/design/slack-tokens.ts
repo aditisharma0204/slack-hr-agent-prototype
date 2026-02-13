@@ -58,10 +58,10 @@ export const SLACK_TOKENS = {
     mini: "10px",
     
     // Weights
-    regular: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700,
+    weightRegular: 400,
+    weightMedium: 500,
+    weightSemibold: 600,
+    weightBold: 700,
   },
   
   spacing: {
