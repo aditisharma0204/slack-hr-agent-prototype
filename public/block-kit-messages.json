@@ -1,0 +1,199 @@
+{
+  "channel_messages": {
+    "general": [
+      {
+        "id": "msg_1",
+        "author": "Rita Patel",
+        "authorImage": null,
+        "timestamp": "10:32 AM",
+        "body": "Hey team — checking in on Q3 pipeline. Slackbot has my daily brief ready.",
+        "blocks": null
+      },
+      {
+        "id": "msg_2",
+        "author": "Slackbot",
+        "authorImage": null,
+        "timestamp": "10:33 AM",
+        "body": null,
+        "blocks": [
+          {
+            "type": "header",
+            "text": { "type": "plain_text", "text": "Your quota snapshot", "emoji": true }
+          },
+          {
+            "type": "section",
+            "fields": [
+              { "type": "mrkdwn", "text": "*On track:*\n$185,000" },
+              { "type": "mrkdwn", "text": "*Quota:*\n$1.0M" },
+              { "type": "mrkdwn", "text": "*Gap:*\n$815,000" },
+              { "type": "mrkdwn", "text": "*Commission at pace:*\n$12,950" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "You're at 19% of quota pace. 2 deals need your attention today — *Global Industries* and *TechStart QBR prep*. Open the Slackbot panel on the right →"
+            }
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "Review", "emoji": true },
+                "action_id": "review_quota"
+              },
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "Dismiss", "emoji": true },
+                "action_id": "dismiss_quota"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "msg_3",
+        "author": "Rita Patel",
+        "authorImage": null,
+        "timestamp": "10:35 AM",
+        "body": "What about Global Industries?",
+        "blocks": null
+      },
+      {
+        "id": "msg_4",
+        "author": "Slackbot",
+        "authorImage": null,
+        "timestamp": "10:36 AM",
+        "body": null,
+        "blocks": [
+          {
+            "type": "header",
+            "text": { "type": "plain_text", "text": "Deal at risk: Global Industries", "emoji": true }
+          },
+          {
+            "type": "section",
+            "fields": [
+              { "type": "mrkdwn", "text": "*Amount:*\n$180,000" },
+              { "type": "mrkdwn", "text": "*Stage:*\nNegotiation" },
+              { "type": "mrkdwn", "text": "*Champion:*\nMarcus Lee" },
+              { "type": "mrkdwn", "text": "*Last touch:*\n12 days ago" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Champion has been silent for 12 days. No exec sponsor identified. Re-engaging now could salvage this deal."
+            }
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "Review", "emoji": true },
+                "action_id": "review_global",
+                "style": "primary"
+              },
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "Dismiss", "emoji": true },
+                "action_id": "dismiss_global"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "sales": [
+      {
+        "id": "msg_s1",
+        "author": "Rita Patel",
+        "authorImage": null,
+        "timestamp": "9:15 AM",
+        "body": "TechStart QBR is at 2 PM today. Slackbot prepped my talking points.",
+        "blocks": null
+      },
+      {
+        "id": "msg_s2",
+        "author": "Slackbot",
+        "authorImage": null,
+        "timestamp": "9:16 AM",
+        "body": null,
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Meeting prep ready for *TechStart QBR* at 2:00 PM. Sarah Chen (champion) is active. Deal: $95K, Proposal stage."
+            }
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "View brief", "emoji": true },
+                "action_id": "view_brief",
+                "style": "primary"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "q3-pipeline": [
+      {
+        "id": "msg_q1",
+        "author": "Rita Patel",
+        "authorImage": null,
+        "timestamp": "Yesterday",
+        "body": "Pipeline review for Q3. Gap is $815K — need to accelerate.",
+        "blocks": null
+      }
+    ],
+    "slackbot": [
+      {
+        "id": "dm_1",
+        "author": "Slackbot",
+        "authorImage": null,
+        "timestamp": "Today",
+        "body": null,
+        "blocks": [
+          {
+            "type": "header",
+            "text": { "type": "plain_text", "text": "Proactive insights for today", "emoji": true }
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Hi Rita! Here's what needs your attention:"
+            }
+          },
+          {
+            "type": "section",
+            "fields": [
+              { "type": "mrkdwn", "text": "*Deal at risk*\nGlobal Industries ($180K)" },
+              { "type": "mrkdwn", "text": "*Meeting prep*\nTechStart QBR at 2 PM" },
+              { "type": "mrkdwn", "text": "*Overdue*\n3 follow-ups" }
+            ]
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": { "type": "plain_text", "text": "View details", "emoji": true },
+                "action_id": "view_details",
+                "style": "primary"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

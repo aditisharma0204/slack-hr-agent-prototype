@@ -9,7 +9,7 @@ import {
 import Sidebar from "./_components/Sidebar";
 import { Toolbar } from "./_components/Toolbar";
 import { WorkspaceSidebar } from "./_components/WorkspaceSidebar";
-import { VibefacePanel } from "@/components/vibeface/VibefacePanel";
+import { SlackbotPanel } from "@/components/slackbot/SlackbotPanel";
 
 interface WorkspaceIdLayoutProps {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel minSize={22} defaultSize={25}>
-            <VibefacePanel />
+            <SlackbotPanel />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
