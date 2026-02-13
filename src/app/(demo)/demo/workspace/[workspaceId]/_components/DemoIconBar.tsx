@@ -12,9 +12,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
 
-const ICON_BAR_BG = "#4a154b";
-const ICON_SIZE = 20;
+const T = SLACK_TOKENS;
 
 const navItems = [
   { icon: Home, label: "Home" },
@@ -30,7 +30,7 @@ export function DemoIconBar() {
   return (
     <aside
       className="w-[60px] flex-shrink-0 flex flex-col items-center py-4 gap-1"
-      style={{ backgroundColor: ICON_BAR_BG }}
+      style={{ backgroundColor: T.colors.sidebar }}
     >
       <div className="mb-4">
         <Image
@@ -53,7 +53,7 @@ export function DemoIconBar() {
             )}
             title={item.label}
           >
-            <Icon size={ICON_SIZE} className="text-white" />
+            <Icon size={T.iconSizes.sidebar} className="text-white" />
           </button>
         );
       })}
@@ -63,7 +63,7 @@ export function DemoIconBar() {
         className="flex items-center justify-center w-8 h-8 rounded-full border border-white/30 text-white hover:bg-white/10 transition-colors"
         title="Add"
       >
-        <Plus size={18} />
+        <Plus size={T.iconSizes.sidebarSmall} />
       </button>
       <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center mt-2" title="Profile">
         <span className="text-[10px] font-bold text-white">P</span>

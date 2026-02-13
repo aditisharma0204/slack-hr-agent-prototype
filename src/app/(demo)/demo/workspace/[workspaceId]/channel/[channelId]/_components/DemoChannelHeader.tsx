@@ -11,6 +11,9 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
+
+const T = SLACK_TOKENS;
 
 interface DemoChannelHeaderProps {
   channelId: string;
@@ -33,29 +36,29 @@ export function DemoChannelHeader({ channelId }: DemoChannelHeaderProps) {
   return (
     <header
       className="flex flex-col shrink-0 border-b"
-      style={{ borderColor: "#e8e8e8" }}
+      style={{ borderColor: T.colors.border }}
     >
       <div className="flex items-center justify-between px-4 h-[49px]">
-        <span className="text-[18px] font-semibold text-[#1d1c1d]">{displayName}</span>
+        <span className="text-[18px] font-semibold" style={{ color: T.colors.text }}>{displayName}</span>
         <div className="flex items-center gap-1">
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="People">
-            <Users size={18} />
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="People">
+            <Users size={T.iconSizes.channelHeader} />
           </button>
-          <span className="text-[13px] text-[#616061]">8</span>
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Call">
-            <Headphones size={18} />
+          <span className="text-[13px]" style={{ color: T.colors.textSecondary }}>8</span>
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Call">
+            <Headphones size={T.iconSizes.channelHeader} />
           </button>
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Pin">
-            <Pin size={18} />
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Pin">
+            <Pin size={T.iconSizes.channelHeader} />
           </button>
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Search">
-            <Search size={18} />
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Search">
+            <Search size={T.iconSizes.channelHeader} />
           </button>
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="More">
-            <MoreHorizontal size={18} />
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="More">
+            <MoreHorizontal size={T.iconSizes.channelHeader} />
           </button>
-          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Close">
-            <X size={18} />
+          <button type="button" className="p-2 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Close">
+            <X size={T.iconSizes.channelHeader} />
           </button>
         </div>
       </div>
@@ -66,13 +69,14 @@ export function DemoChannelHeader({ channelId }: DemoChannelHeaderProps) {
             type="button"
             className={cn(
               "px-3 py-1 text-[13px] font-medium rounded",
-              tab.active ? "text-[#1d1c1d] bg-[#f8f8f8]" : "text-[#616061] hover:bg-[#f8f8f8]"
+              tab.active ? "" : "hover:bg-[#f8f8f8]"
             )}
+            style={tab.active ? { color: T.colors.text, backgroundColor: T.colors.backgroundAlt } : { color: T.colors.textSecondary }}
           >
             {tab.label}
           </button>
         ))}
-        <button type="button" className="p-1 rounded text-[#616061] hover:bg-[#f8f8f8]" title="More tabs">
+        <button type="button" className="p-1 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="More tabs">
           <ChevronDown size={14} />
         </button>
       </div>

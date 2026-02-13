@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
 
 export interface SlackBlock {
   type: string;
@@ -35,11 +36,27 @@ function renderMrkdwn(text: string) {
     });
 }
 
+const T = SLACK_TOKENS;
+
 function renderTextObject(obj: { type: string; text: string }) {
   if (obj.type === "mrkdwn") {
-    return <span className="text-[15px] leading-[1.46668] text-[#1d1c1d]">{renderMrkdwn(obj.text)}</span>;
+    return (
+      <span
+        className="text-[15px] leading-[1.46668]"
+        style={{ color: T.colors.text }}
+      >
+        {renderMrkdwn(obj.text)}
+      </span>
+    );
   }
-  return <span className="text-[15px] leading-[1.46668] text-[#1d1c1d]">{obj.text}</span>;
+  return (
+    <span
+      className="text-[15px] leading-[1.46668]"
+      style={{ color: T.colors.text }}
+    >
+      {obj.text}
+    </span>
+  );
 }
 
 function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: string) => void }) {
@@ -47,7 +64,10 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
     case "header": {
       const text = block.text?.text ?? "";
       return (
-        <div className="text-[15px] font-bold text-[#1d1c1d] mb-2 mt-3 first:mt-0">
+        <div
+          className="text-[15px] font-bold mb-2 mt-3 first:mt-0"
+          style={{ color: T.colors.text }}
+        >
           {text}
         </div>
       );
@@ -58,7 +78,11 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
         content.push(
           <div key="fields" className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
             {block.fields.map((f, i) => (
-              <div key={i} className="text-[15px] leading-[1.46668] text-[#1d1c1d]">
+              <div
+                key={i}
+                className="text-[15px] leading-[1.46668]"
+                style={{ color: T.colors.text }}
+              >
                 {f.type === "mrkdwn" ? renderMrkdwn(f.text) : f.text}
               </div>
             ))}
@@ -67,7 +91,11 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
       }
       if (block.text) {
         content.push(
-          <div key="text" className="text-[15px] leading-[1.46668] text-[#1d1c1d] mb-2">
+          <div
+            key="text"
+            className="text-[15px] leading-[1.46668] mb-2"
+            style={{ color: T.colors.text }}
+          >
             {block.text.type === "mrkdwn" ? renderMrkdwn(block.text.text) : block.text.text}
           </div>
         );
@@ -75,7 +103,7 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
       return <div className="mb-2">{content}</div>;
     }
     case "divider":
-      return <hr className="my-3 border-t border-[#e8e8e8]" />;
+      return <hr className="my-3 border-t" style={{ borderColor: T.colors.border }} />;
     case "actions": {
       if (!block.elements) return null;
       return (
@@ -89,11 +117,15 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
                 key={i}
                 type="button"
                 onClick={() => el.action_id && onAction?.(el.action_id)}
-                className={`px-4 py-2 rounded text-sm font-medium ${
-                  isPrimary
-                    ? "bg-[#2eb886] text-white hover:bg-[#269873]"
-                    : "bg-white border border-[#e8e8e8] text-[#1d1c1d] hover:bg-[#f8f8f8]"
+                className={`px-4 py-2 text-sm font-medium ${
+                  isPrimary ? "text-white hover:opacity-90" : "bg-white border hover:bg-[#f8f8f8]"
                 }`}
+                style={{
+                  borderRadius: `${T.radius.button}px`,
+                  ...(isPrimary
+                    ? { backgroundColor: T.colors.primaryButton }
+                    : { borderColor: T.colors.border, color: T.colors.text }),
+                }}
               >
                 {label}
               </button>
@@ -105,7 +137,10 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
     case "context": {
       if (!block.elements) return null;
       return (
-        <div className="flex flex-wrap gap-2 mt-2 text-[13px] text-[#616061]">
+        <div
+          className="flex flex-wrap gap-2 mt-2 text-[13px]"
+          style={{ color: T.colors.textSecondary }}
+        >
           {block.elements.map((el, i) => (
             <span key={i}>{el.text?.text ?? ""}</span>
           ))}

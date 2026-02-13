@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  Hash,
   Search,
   Square,
   LayoutGrid,
@@ -17,6 +16,9 @@ import {
 } from "lucide-react";
 import { useDemoData } from "@/context/DemoDataContext";
 import { cn } from "@/lib/utils";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
+
+const T = SLACK_TOKENS;
 
 type ViewFilter = "all" | "dms";
 
@@ -37,19 +39,20 @@ export function DemoSidebar() {
   });
 
   return (
-    <aside className="w-[260px] flex-shrink-0 flex flex-col bg-white border-r" style={{ borderColor: "#e8e8e8" }}>
-      <div className="px-3 py-3 border-b flex items-center gap-2" style={{ borderColor: "#e8e8e8" }}>
-        <span className="font-semibold text-[15px] text-[#1d1c1d]">Activity</span>
-        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-[#e8f4fc] text-[#1264a3]">Beta</span>
+    <aside className="w-[260px] flex-shrink-0 flex flex-col bg-white border-r" style={{ borderColor: T.colors.border }}>
+      <div className="px-3 py-3 border-b flex items-center gap-2" style={{ borderColor: T.colors.border }}>
+        <span className="font-semibold text-[15px]" style={{ color: T.colors.text }}>Activity</span>
+        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded" style={{ backgroundColor: T.colors.betaBadgeBg, color: T.colors.link }}>Beta</span>
       </div>
 
-      <div className="flex items-center gap-1 px-2 py-2 border-b" style={{ borderColor: "#e8e8e8" }}>
+      <div className="flex items-center gap-1 px-2 py-2 border-b" style={{ borderColor: T.colors.border }}>
         <button
           type="button"
           className={cn(
             "px-3 py-1.5 text-sm font-medium rounded",
-            filter === "all" ? "bg-[#f8f8f8] text-[#1d1c1d]" : "text-[#616061] hover:bg-[#f8f8f8]"
+            filter === "all" ? "" : "hover:bg-[#f8f8f8]"
           )}
+          style={filter === "all" ? { backgroundColor: T.colors.backgroundAlt, color: T.colors.text } : { color: T.colors.textSecondary }}
           onClick={() => setFilter("all")}
         >
           All
@@ -58,8 +61,9 @@ export function DemoSidebar() {
           type="button"
           className={cn(
             "px-3 py-1.5 text-sm font-medium rounded",
-            filter === "dms" ? "bg-[#f8f8f8] text-[#1d1c1d]" : "text-[#616061] hover:bg-[#f8f8f8]"
+            filter === "dms" ? "" : "hover:bg-[#f8f8f8]"
           )}
+          style={filter === "dms" ? { backgroundColor: T.colors.backgroundAlt, color: T.colors.text } : { color: T.colors.textSecondary }}
           onClick={() => setFilter("dms")}
         >
           DMs
@@ -73,27 +77,28 @@ export function DemoSidebar() {
         </button>
       </div>
 
-      <div className="flex items-center gap-1 px-2 py-1.5 border-b" style={{ borderColor: "#e8e8e8" }}>
-        <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Checkbox">
+      <div className="flex items-center gap-1 px-2 py-1.5 border-b" style={{ borderColor: T.colors.border }}>
+        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Checkbox">
           <Square size={14} strokeWidth={2} />
         </button>
-        <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Grid">
+        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Grid">
           <LayoutGrid size={14} />
         </button>
-        <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="Filter">
+        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Filter">
           <Filter size={14} />
         </button>
-        <button type="button" className="p-1.5 rounded text-[#616061] hover:bg-[#f8f8f8]" title="List">
+        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="List">
           <List size={14} />
         </button>
-        <div className="flex-1 flex items-center gap-1.5 px-2 py-1 rounded bg-[#f8f8f8]">
-          <Search size={14} className="text-[#616061] shrink-0" />
+        <div className="flex-1 flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: T.colors.backgroundAlt }}>
+          <Search size={14} className="shrink-0" style={{ color: T.colors.textSecondary }} />
           <input
             type="text"
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-0 text-sm bg-transparent placeholder:text-[#616061] focus:outline-none"
+            className="flex-1 min-w-0 text-sm bg-transparent focus:outline-none"
+            style={{ color: T.colors.text }}
           />
         </div>
       </div>
@@ -108,35 +113,36 @@ export function DemoSidebar() {
               href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
               className={cn(
                 "flex items-start gap-2 px-3 py-2 mx-1 rounded group",
-                isActive ? "bg-[#f8f8f8] ring-1 ring-[#e8e8e8]" : "hover:bg-[#f8f8f8]"
+                isActive ? "" : "hover:bg-[#f8f8f8]"
               )}
+              style={isActive ? { backgroundColor: T.colors.backgroundAlt, boxShadow: `inset 0 0 0 1px ${T.colors.border}` } : {}}
             >
-              <div className="size-8 rounded-full bg-[#611f69] flex items-center justify-center text-white text-xs font-semibold shrink-0 mt-0.5">
+              <div className="size-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 mt-0.5" style={{ backgroundColor: T.colors.avatarBg }}>
                 {item.type === "channel" ? item.name.charAt(0).toUpperCase() : item.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <span className="text-[15px] text-[#1d1c1d] truncate font-medium">
+                  <span className="text-[15px] truncate font-medium" style={{ color: T.colors.text }}>
                     {item.type === "channel" ? `#${item.name}` : item.name}
                   </span>
                 </div>
                 {preview && (
-                  <p className="text-[13px] text-[#616061] truncate mt-0.5">{preview}</p>
+                  <p className="text-[13px] truncate mt-0.5" style={{ color: T.colors.textSecondary }}>{preview}</p>
                 )}
               </div>
               <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button type="button" className="p-1 rounded hover:bg-white/80" title="Copy">
-                  <Copy size={12} className="text-[#616061]" />
+                  <Copy size={12} style={{ color: T.colors.textSecondary }} />
                 </button>
                 <button type="button" className="p-1 rounded hover:bg-white/80" title="Link">
-                  <LinkIcon size={12} className="text-[#616061]" />
+                  <LinkIcon size={12} style={{ color: T.colors.textSecondary }} />
                 </button>
                 <button type="button" className="p-1 rounded hover:bg-white/80" title="More">
-                  <MoreVertical size={12} className="text-[#616061]" />
+                  <MoreVertical size={12} style={{ color: T.colors.textSecondary }} />
                 </button>
               </div>
               {timestamp && (
-                <span className="text-[12px] text-[#616061] shrink-0 mt-0.5">{timestamp}</span>
+                <span className="text-[12px] shrink-0 mt-0.5" style={{ color: T.colors.textSecondary }}>{timestamp}</span>
               )}
             </Link>
           );

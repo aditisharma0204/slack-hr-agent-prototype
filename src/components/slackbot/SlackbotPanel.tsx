@@ -13,6 +13,9 @@ import {
 import { SlackbotProactiveTab } from "./SlackbotProactiveTab";
 import { SlackbotMessagesTab } from "./SlackbotMessagesTab";
 import { cn } from "@/lib/utils";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
+
+const T = SLACK_TOKENS;
 
 type TabId = "messages" | "history" | "files" | "proactive";
 
@@ -23,36 +26,36 @@ export function SlackbotPanel() {
     <div
       className="flex flex-col h-full w-[360px] min-w-[360px] max-w-[400px] shrink-0"
       style={{
-        backgroundColor: "#ffffff",
-        borderLeft: "1px solid #e8e8e8",
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Lato", sans-serif',
+        backgroundColor: T.colors.background,
+        borderLeft: `1px solid ${T.colors.border}`,
+        fontFamily: T.typography.fontFamily,
       }}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: "#e8e8e8" }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: T.colors.border }}>
         <div className="flex items-center gap-2">
           <Image src="/logo.svg" alt="" width={24} height={24} className="object-contain" />
-          <span className="font-semibold text-[15px] text-[#1d1c1d]">Slackbot</span>
+          <span className="font-semibold text-[15px]" style={{ color: T.colors.text }}>Slackbot</span>
         </div>
         <div className="flex items-center gap-0.5">
-          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Star">
+          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Star">
             <Star size={16} />
           </button>
-          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Edit">
+          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Edit">
             <Pencil size={16} />
           </button>
-          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Close">
+          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Close">
             <X size={16} />
           </button>
-          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Maximize">
+          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Maximize">
             <Maximize2 size={16} />
           </button>
-          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8] text-[#616061]" title="Minimize">
+          <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Minimize">
             <Minimize2 size={16} />
           </button>
         </div>
       </div>
 
-      <div className="flex border-b shrink-0" style={{ borderColor: "#e8e8e8" }}>
+      <div className="flex border-b shrink-0" style={{ borderColor: T.colors.border }}>
         {[
           { id: "messages" as const, label: "Messages" },
           { id: "history" as const, label: "History" },
@@ -65,16 +68,14 @@ export function SlackbotPanel() {
             onClick={() => setActiveTab(tab.id)}
             className={cn(
               "px-3 py-2.5 text-[13px] font-medium transition-colors",
-              activeTab === tab.id
-                ? "text-[#1264a3] border-b-2"
-                : "text-[#616061] hover:text-[#1d1c1d]"
+              activeTab === tab.id ? "border-b-2" : "hover:text-[#1d1c1d]"
             )}
-            style={activeTab === tab.id ? { borderBottomColor: "#1264a3" } : {}}
+            style={activeTab === tab.id ? { color: T.colors.link, borderBottomColor: T.colors.link } : { color: T.colors.textSecondary }}
           >
             {tab.label}
           </button>
         ))}
-        <button type="button" className="p-2 text-[#616061] hover:bg-[#f8f8f8]" title="Add">
+        <button type="button" className="p-2 hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Add">
           <Plus size={14} />
         </button>
       </div>
@@ -87,7 +88,7 @@ export function SlackbotPanel() {
           </div>
         )}
         {(activeTab === "history" || activeTab === "files") && (
-          <div className="p-4 text-[13px] text-[#616061]">Coming soon.</div>
+          <div className="p-4 text-[13px]" style={{ color: T.colors.textSecondary }}>Coming soon.</div>
         )}
       </div>
     </div>
