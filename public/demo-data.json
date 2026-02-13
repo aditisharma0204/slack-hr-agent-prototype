@@ -1,0 +1,85 @@
+{
+  "seller": {
+    "name": "Rita Patel",
+    "quota": 1000000,
+    "commission_rate": 0.07
+  },
+  "opportunities": [
+    {
+      "id": "opp_001",
+      "name": "Global Industries — Enterprise Platform",
+      "amount": 180000,
+      "stage": "Negotiation",
+      "forecast_category": "Best Case",
+      "close_date": "2025-08-15",
+      "champion": "Marcus Lee",
+      "champion_status": "silent",
+      "last_touchpoint_days": 12,
+      "risk_signals": ["Champion silent 12 days", "No exec sponsor"],
+      "confidence": 0.45
+    },
+    {
+      "id": "opp_002",
+      "name": "TechStart — QBR Expansion",
+      "amount": 95000,
+      "stage": "Proposal",
+      "forecast_category": "Commit",
+      "close_date": "2025-07-30",
+      "champion": "Sarah Chen",
+      "champion_status": "active",
+      "last_touchpoint_days": 3,
+      "risk_signals": [],
+      "confidence": 0.78,
+      "meeting": {
+        "date": "today",
+        "time": "2:00 PM",
+        "type": "QBR",
+        "brief_ready": true
+      }
+    },
+    {
+      "id": "opp_003",
+      "name": "Meridian Corp — Platform Migration",
+      "amount": 220000,
+      "stage": "Discovery",
+      "forecast_category": "Pipeline",
+      "close_date": "2025-09-30",
+      "champion": "James Rivera",
+      "champion_status": "active",
+      "last_touchpoint_days": 7,
+      "risk_signals": [],
+      "confidence": 0.35
+    },
+    {
+      "id": "opp_004",
+      "name": "Greentech — SaaS Subscription",
+      "amount": 95000,
+      "stage": "Proposal",
+      "forecast_category": "Pipeline",
+      "close_date": "2025-08-20",
+      "champion": "Sarah Chen",
+      "champion_status": "active",
+      "last_touchpoint_days": 8,
+      "risk_signals": [],
+      "confidence": 0.62
+    }
+  ],
+  "meetings_today": [
+    {
+      "account": "TechStart",
+      "time": "2:00 PM",
+      "type": "QBR",
+      "opp_id": "opp_002",
+      "brief_ready": true
+    },
+    {
+      "account": "Pinnacle Group",
+      "time": "4:00 PM",
+      "type": "Discovery",
+      "opp_id": "opp_007",
+      "brief_ready": false
+    }
+  ],
+  "follow_ups_overdue": 3,
+  "high_intent_leads": 4
+}
