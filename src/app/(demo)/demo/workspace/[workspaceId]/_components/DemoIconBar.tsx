@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
 import {
   IconHome,
   IconMessage,
@@ -18,16 +20,20 @@ import { SLACK_TOKENS } from "@/design/slack-tokens";
 const T = SLACK_TOKENS;
 
 const navItems = [
-  { icon: IconHome, label: "Home", id: "home" as const },
-  { icon: IconMessage, label: "DMs", id: "dms" as const, badge: 7 },
-  { icon: IconBell, label: "Activity", id: "activity" as const, badge: 3 },
-  { icon: IconFolder, label: "Files", id: "files" as const },
-  { icon: IconBookmark, label: "Later", id: "later" as const },
-  { icon: IconBot, label: "Agentforce", id: "agentforce" as const },
-  { icon: IconMore, label: "More", id: "more" as const },
+  { icon: IconHome, label: "Home", id: "home" as const, href: "/activity" },
+  { icon: IconMessage, label: "DMs", id: "dms" as const, badge: 7, href: "/dms" },
+  { icon: IconBell, label: "Activity", id: "activity" as const, badge: 3, href: "/activity" },
+  { icon: IconFolder, label: "Files", id: "files" as const, href: "/files" },
+  { icon: IconBookmark, label: "Later", id: "later" as const, href: "/later" },
+  { icon: IconBot, label: "Agentforce", id: "agentforce" as const, href: "/agentforce" },
+  { icon: IconMore, label: "More", id: "more" as const, href: "/more" },
 ];
 
 export function DemoIconBar() {
+  const params = useParams();
+  const pathname = usePathname();
+  const workspaceId = params.workspaceId as string;
+  const base = `/demo/workspace/${workspaceId}`;
   const { activeNav, setActiveNav } = useNav();
 
   return (
@@ -40,11 +46,12 @@ export function DemoIconBar() {
       </div>
       {navItems.map((item) => {
         const Icon = item.icon;
-        const isActive = activeNav === item.id;
+        const href = base + item.href;
+        const isActive = activeNav === item.id || pathname === href;
         return (
-          <button
+          <Link
             key={item.label}
-            type="button"
+            href={href}
             onClick={() => setActiveNav(item.id)}
             className={cn(
               "relative flex flex-col items-center justify-center w-full py-2 px-1 rounded transition-colors",
@@ -75,7 +82,7 @@ export function DemoIconBar() {
                 {item.badge}
               </span>
             )}
-          </button>
+          </Link>
         );
       })}
       <div className="flex-1" />

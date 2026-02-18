@@ -13,9 +13,9 @@ export const SLACK_TOKENS = {
 
     // Global fill - darkest purple for header, left nav, root (Slack aubergine base)
     globalBg: "#4A154B",
-    // DM sidebar - subtle vertical gradient (slightly brighter top, darker bottom)
-    dmSidebarBg: "linear-gradient(180deg, #4F1B50 0%, #4A154B 25%, #451245 75%, #3F0E40 100%)",
-    dmSidebarBgSolid: "#4D1A4E", // Fallback / midpoint
+    // DM sidebar - deep purple (reference #350D35)
+    dmSidebarBg: "#350D35",
+    dmSidebarBgSolid: "#350D35", // Fallback
     // From Figma: Window BG Primary - purple left sidebar (legacy)
     iconBar: "#611f69", // Purple (Figma Window BG Primary)
     sidebar: "#611f69", // Same - purple
@@ -34,10 +34,14 @@ export const SLACK_TOKENS = {
     dmSidebar: "#4D1A4E", // DM list base (slightly lighter than global for differentiation)
     dmSidebarSelect: "#5a2b5e", // Selected item in DM list
     dmSidebarHover: "#52215A", // Hover in DM list
-    dmSearchBg: "#5B2C5C", // Search input background in dark DM panel
-    dmSearchPlaceholder: "#AA81AB", // Placeholder text in dark DM panel
-    dmToggleTrack: "#6A376B", // Unreads toggle track
-    dmToggleThumb: "#AA81AB", // Unreads toggle thumb (active)
+    dmSearchBg: "#623e78", // Search body (from reference)
+    dmSearchGlow: "#a189b2", // Outer soft glow border
+    dmSearchBorder: "#FFFFFF", // Inner crisp white border
+    dmSearchPlaceholder: "#c1acD1", // Icon and placeholder (light desaturated purple)
+    dmToggleTrack: "#4A234A", // Unreads toggle track (off state)
+    dmToggleThumb: "#D3D3D3", // Unreads toggle thumb (off state)
+    dmToggleThumbOn: "#FFFFFF", // Thumb when on
+    dmMutedText: "#B0B0B0", // Timestamp, message preview in DM list
     border: "#e8e8e8",
     borderSecondary: "#5e5d6073",
     borderTertiary: "#5E5D60",
@@ -141,7 +145,7 @@ export const SLACK_TOKENS = {
 
   dimensions: {
     iconBarWidth: 72,
-    sidebarWidth: 260,
+    sidebarWidth: 340,
     channelHeaderHeight: 49,
     slackbotPanelMinWidth: 300,
     slackbotPanelMaxWidth: 480,

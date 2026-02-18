@@ -15,9 +15,9 @@ import {
   IconPlus,
   IconFolder,
   IconBookmark,
+  IconSettings,
   IconChevronDown,
   IconPencil,
-  IconMessage,
   IconHeadphones,
   IconHome,
 } from "@/components/icons";
@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
+import { ActivityListItem } from "./ActivityListItem";
 import { useNav } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
@@ -72,11 +73,12 @@ export function DemoSidebar() {
   const params = useParams();
   const channelId = params.channelId as string;
   const { activeNav } = useNav();
-  const { workspace, channels, dms, files, savedItems, getChannelPreview } = useDemoData();
+  const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead } = useDemoData();
   const [filter, setFilter] = useState<ViewFilter>("all");
   const [search, setSearch] = useState("");
   const [unreadsOnly, setUnreadsOnly] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "compact">("list");
 
   const showAllDmsTabs = activeNav === "home" || activeNav === "activity" || activeNav === "more";
   const showSearchAndFilters = activeNav !== "files" && activeNav !== "later";
@@ -93,11 +95,13 @@ export function DemoSidebar() {
   });
 
   const dmsOnly = dms.filter((dm) => {
+    if (unreadsOnly && !dm.unread) return false;
     if (!search) return true;
     return dm.name.toLowerCase().includes(search.toLowerCase());
   });
 
   const agentforceItems = dms.filter((dm) => dm.isSlackbot).filter((dm) => {
+    if (unreadsOnly && !dm.unread) return false;
     if (!search) return true;
     return dm.name.toLowerCase().includes(search.toLowerCase());
   });
@@ -116,40 +120,39 @@ export function DemoSidebar() {
 
   return (
     <aside
-      className="w-[260px] flex-shrink-0 flex flex-col border-r"
+      className="w-[340px] flex-shrink-0 flex flex-col border-r"
       style={{
-        background: useDarkTheme ? T.colors.dmSidebarBg : T.colors.activitySidebar,
+        background: useDarkTheme ? T.colors.dmSidebarBg : "#ffffff",
         borderColor: useDarkTheme ? "transparent" : T.colors.border,
         ...(useDarkTheme && {
           boxShadow: "inset 1px 0 0 rgba(255,255,255,0.06)",
         }),
       }}
     >
-      {/* DM-specific header: Direct messages + dropdown, Unreads toggle, edit icon */}
+      {/* DM header: Direct messages + dropdown, Unreads toggle, Edit icon, then search bar */}
       {isDmView ? (
         <>
-          <div className="px-3 py-3 flex items-center justify-between gap-2">
-            <button type="button" className="flex items-center gap-1 hover:opacity-90">
-              <IconMessage width={18} height={18} className="text-white shrink-0" stroke="currentColor" />
-              <span className="font-bold text-white" style={{ fontSize: T.typography.header }}>Direct messages</span>
+          <div className="px-4 py-4 flex items-center justify-between gap-3">
+            <button type="button" className="flex items-center gap-1.5 hover:opacity-90 shrink-0">
+              <span className="font-bold text-white whitespace-nowrap" style={{ fontSize: T.typography.header }}>Direct messages</span>
               <IconChevronDown width={14} height={14} className="text-white shrink-0" stroke="currentColor" />
             </button>
-            <div className="flex items-center gap-2">
-              <span className="text-white text-sm">Unreads</span>
+            <div className="flex items-center gap-3">
+              <span className="text-white text-sm font-normal">Unreads</span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={unreadsOnly}
                 onClick={() => setUnreadsOnly((v) => !v)}
-                className={cn(
-                  "w-9 h-5 rounded-full transition-colors relative",
-                  unreadsOnly ? "" : ""
-                )}
-                style={{ backgroundColor: unreadsOnly ? T.colors.dmToggleThumb : T.colors.dmToggleTrack }}
+                className="w-9 h-5 rounded-full transition-colors relative"
+                style={{ backgroundColor: T.colors.dmToggleTrack }}
               >
                 <span
-                  className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
-                  style={{ left: unreadsOnly ? "18px" : "4px" }}
+                  className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
+                  style={{
+                    left: unreadsOnly ? "18px" : "4px",
+                    backgroundColor: unreadsOnly ? T.colors.dmToggleThumbOn : T.colors.dmToggleThumb,
+                  }}
                 />
               </button>
               <button type="button" className="p-1.5 rounded hover:bg-white/10 text-white" title="New message">
@@ -157,10 +160,13 @@ export function DemoSidebar() {
               </button>
             </div>
           </div>
-          <div className="px-2 pb-2">
+          <div className="px-4 pb-4">
             <div
-              className="flex items-center gap-2 px-2 py-1.5 rounded"
-              style={{ backgroundColor: T.colors.dmSearchBg, border: "1px solid #714674" }}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-150 focus-within:border-white focus-within:shadow-[0_0_0_1px_#fff,0_0_0_2px_#a189b2,0_0_12px_rgba(161,137,178,0.35)]"
+              style={{
+                backgroundColor: T.colors.dmSearchBg,
+                border: `1px solid ${T.colors.dmSearchGlow}`,
+              }}
             >
               <IconSearch width={14} height={14} style={{ color: T.colors.dmSearchPlaceholder }} stroke="currentColor" />
               <input
@@ -168,7 +174,7 @@ export function DemoSidebar() {
                 placeholder="Find a DM"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 min-w-0 bg-transparent focus:outline-none placeholder:text-[#AA81AB]"
+                className="flex-1 min-w-0 bg-transparent focus:outline-none placeholder:text-[#c1acD1]"
                 style={{ color: "#fff", fontSize: T.typography.small }}
               />
             </div>
@@ -176,11 +182,16 @@ export function DemoSidebar() {
         </>
       ) : (
         <>
-          <div className="px-3 py-3 border-b flex items-center gap-2" style={{ borderColor: T.colors.border }}>
-            <span className="font-semibold" style={{ fontSize: T.typography.body, color: T.colors.text }}>{title}</span>
-            {(activeNav === "activity" || activeNav === "home") && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded" style={{ backgroundColor: T.colors.betaBadgeBg, color: T.colors.betaBadgeText }}>Beta</span>
-            )}
+          <div className="px-3 py-3 border-b flex items-center justify-between gap-2" style={{ borderColor: T.colors.border }}>
+            <div className="flex items-center gap-2">
+              <span className="font-bold" style={{ fontSize: T.typography.header, color: T.colors.text }}>{title}</span>
+              {(activeNav === "activity" || activeNav === "home") && (
+                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded" style={{ backgroundColor: T.colors.betaBadgeBg, color: T.colors.betaBadgeText }}>Beta</span>
+              )}
+            </div>
+            <button type="button" className="p-2 rounded-md hover:bg-[#e8e8e8] ml-auto flex items-center justify-center" style={{ color: "#555" }} title="Settings">
+              <IconSettings width={18} height={18} stroke="currentColor" />
+            </button>
           </div>
 
           {showAllDmsTabs && (
@@ -188,24 +199,27 @@ export function DemoSidebar() {
         <button
           type="button"
           className={cn(
-            "px-3 py-1.5 font-medium rounded",
+            "relative px-3 py-1.5 font-medium rounded flex items-center gap-1.5",
             filter === "all" ? "" : "hover:bg-[#f8f8f8]"
           )}
-          style={filter === "all" ? { backgroundColor: T.colors.backgroundAlt, color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
+          style={filter === "all" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
           onClick={() => setFilter("all")}
         >
           All
+          <span className="min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full text-[11px] font-medium text-white" style={{ backgroundColor: T.colors.avatarBg }}>{channelAndDmItems.length}</span>
+          {filter === "all" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
         </button>
         <button
           type="button"
           className={cn(
-            "px-3 py-1.5 font-medium rounded",
+            "relative px-3 py-1.5 font-medium rounded",
             filter === "dms" ? "" : "hover:bg-[#f8f8f8]"
           )}
-          style={filter === "dms" ? { backgroundColor: T.colors.backgroundAlt, color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
+          style={filter === "dms" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
           onClick={() => setFilter("dms")}
         >
           DMs
+          {filter === "dms" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
         </button>
         <button
           type="button"
@@ -220,28 +234,43 @@ export function DemoSidebar() {
 
       {showSearchAndFilters && (
       <div className="flex items-center gap-1 px-2 py-1.5 border-b" style={{ borderColor: T.colors.border }}>
-        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Checkbox">
+        <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Select">
           <IconSquare width={14} height={14} stroke="currentColor" strokeWidth={2} />
+          <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
+          <IconChevronDown width={12} height={12} stroke="currentColor" />
         </button>
-        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Grid">
+        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Capture">
           <IconLayoutGrid width={14} height={14} stroke="currentColor" />
         </button>
-        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Filter">
+        <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Filter">
           <IconFilter width={14} height={14} stroke="currentColor" />
+          <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
+          <IconChevronDown width={12} height={12} stroke="currentColor" />
         </button>
-        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="List">
-          <IconList width={14} height={14} stroke="currentColor" />
-        </button>
-        <div className="flex-1 flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: T.colors.backgroundAlt }}>
-          <IconSearch width={14} height={14} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-          <input
-            type="text"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent focus:outline-none"
-            style={{ color: T.colors.text, fontSize: T.typography.small }}
-          />
+        <div className="flex-1" />
+        <div className="flex rounded overflow-hidden border" style={{ borderColor: T.colors.border }}>
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            className={cn("p-1.5", viewMode === "list" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
+            style={{ color: T.colors.textSecondary }}
+            title="List view"
+          >
+            <IconList width={14} height={14} stroke="currentColor" strokeWidth={viewMode === "list" ? 2.5 : 2} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("compact")}
+            className={cn("p-1.5 border-l", viewMode === "compact" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
+            style={{ borderColor: T.colors.border, color: T.colors.textSecondary }}
+            title="Compact view"
+          >
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
         </div>
       </div>
       )}
@@ -264,16 +293,19 @@ export function DemoSidebar() {
         </>
       )}
 
-      <div className="flex-1 overflow-y-auto min-h-0 py-1">
+      <div className="flex-1 overflow-y-auto min-h-0 p-3 flex flex-col gap-2">
         {activeNav === "files" && filteredFiles.map((file) => (
           <Link
             key={file.id}
             href={`/demo/workspace/${workspace.id}/channel/${file.channelId}`}
             className={cn(
-              "flex items-center gap-2 px-2.5 py-1.5 mx-1 rounded group",
-              channelId === file.channelId ? "" : "hover:bg-[#f8f8f8]"
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
+              channelId === file.channelId ? "" : "hover:bg-[#f0e6f0]"
             )}
-            style={channelId === file.channelId ? { backgroundColor: T.colors.backgroundAlt, boxShadow: `inset 0 0 0 1px ${T.colors.border}` } : {}}
+            style={{
+              ...(channelId === file.channelId ? { backgroundColor: "#ebe0eb", boxShadow: "inset 0 0 0 1px rgba(97,31,105,0.25)" } : {}),
+              borderBottom: "1px solid rgba(97,31,105,0.12)",
+            }}
           >
             <IconFolder width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
             <div className="flex-1 min-w-0">
@@ -287,14 +319,17 @@ export function DemoSidebar() {
             key={saved.id}
             href={`/demo/workspace/${workspace.id}/channel/${saved.channelId}`}
             className={cn(
-              "flex items-start gap-2 px-2.5 py-1.5 mx-1 rounded group",
-              channelId === saved.channelId ? "" : "hover:bg-[#f8f8f8]"
+              "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
+              channelId === saved.channelId ? "" : "hover:bg-[#f0e6f0]"
             )}
-            style={channelId === saved.channelId ? { backgroundColor: T.colors.backgroundAlt, boxShadow: `inset 0 0 0 1px ${T.colors.border}` } : {}}
+            style={{
+              ...(channelId === saved.channelId ? { backgroundColor: "#ebe0eb", boxShadow: "inset 0 0 0 1px rgba(97,31,105,0.25)" } : {}),
+              borderBottom: "1px solid rgba(97,31,105,0.12)",
+            }}
           >
             <IconBookmark width={16} height={16} className="shrink-0 mt-0.5" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
             <div className="flex-1 min-w-0">
-              <p className="truncate" style={{ fontSize: T.typography.small, color: T.colors.text }}>{saved.preview}</p>
+              <p className="min-w-0 line-clamp-2 break-words" style={{ fontSize: T.typography.small, color: T.colors.text }}>{saved.preview}</p>
             </div>
             <span className="shrink-0" style={{ fontSize: T.typography.smaller, color: T.colors.textSecondary }}>{saved.timestamp}</span>
           </Link>
@@ -308,7 +343,7 @@ export function DemoSidebar() {
               key={item.id}
               href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
               className={cn(
-                "flex items-start gap-2 px-3 py-2 rounded group w-full transition-colors",
+                "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
                 isActive ? "" : "hover:bg-[#52215A]"
               )}
               style={{
@@ -317,7 +352,7 @@ export function DemoSidebar() {
               }}
             >
               <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-full object-cover" />
+                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
@@ -325,7 +360,7 @@ export function DemoSidebar() {
                   <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
                 </div>
                 {preview && (
-                  <p className="truncate mt-0.5 text-[#B8A2B9]">{preview}</p>
+                  <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
                 )}
               </div>
               {/* On hover: white action card (bookmark + more); otherwise timestamp. Keep visible when dropdown open. */}
@@ -394,7 +429,7 @@ export function DemoSidebar() {
                   </DropdownMenu>
                 </div>
                 {timestamp && (
-                  <span className={cn("text-[#AA81AB] text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller }}>{timestamp}</span>
+                  <span className={cn("text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller, color: T.colors.dmMutedText }}>{timestamp}</span>
                 )}
               </div>
             </Link>
@@ -409,7 +444,7 @@ export function DemoSidebar() {
               key={item.id}
               href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
               className={cn(
-                "flex items-start gap-2 px-3 py-2 rounded group w-full transition-colors",
+                "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
                 isActive ? "" : "hover:bg-[#52215A]"
               )}
               style={{
@@ -418,7 +453,7 @@ export function DemoSidebar() {
               }}
             >
               <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-full object-cover" />
+                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
@@ -426,7 +461,7 @@ export function DemoSidebar() {
                   <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
                 </div>
                 {preview && (
-                  <p className="truncate mt-0.5 text-[#B8A2B9]">{preview}</p>
+                  <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
                 )}
               </div>
               <div className="shrink-0 mt-0.5 w-[72px] flex justify-end items-center" onClick={(e) => e.stopPropagation()}>
@@ -494,58 +529,27 @@ export function DemoSidebar() {
                   </DropdownMenu>
                 </div>
                 {timestamp && (
-                  <span className={cn("text-[#AA81AB] text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller }}>{timestamp}</span>
+                  <span className={cn("text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller, color: T.colors.dmMutedText }}>{timestamp}</span>
                 )}
               </div>
             </Link>
           );
         })}
-        {(activeNav === "home" || activeNav === "activity" || activeNav === "more") && channelAndDmItems.map((item) => {
-          const isActive = channelId === item.id;
-          const { preview, timestamp } = getChannelPreview(item.id);
-          const displayName = item.type === "channel" ? `#${item.name}` : item.name;
-          const avatarSrc = item.type === "dm" ? ((item as { avatarUrl?: string }).avatarUrl || getAvatarUrl(item.name, 64)) : getAvatarUrl(item.name, 64);
-          return (
-            <Link
-              key={item.id}
-              href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
-              className={cn(
-                "flex items-start gap-2 px-2.5 py-1.5 mx-1 rounded group",
-                isActive ? "" : "hover:bg-[#f0e6f0]"
-              )}
-              style={isActive ? { backgroundColor: T.colors.backgroundAlt, boxShadow: `inset 0 0 0 1px ${T.colors.border}` } : {}}
-            >
-              <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded object-cover" />
-                {item.type === "dm" && "status" in item && <StatusDot status={item.status} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="truncate font-medium" style={{ fontSize: T.typography.body, color: T.colors.text }}>
-                    {item.type === "channel" ? `#${item.name}` : item.name}
-                  </span>
-                </div>
-                {preview && (
-                  <p className="truncate mt-0.5" style={{ fontSize: T.typography.small, color: T.colors.textSecondary }}>{preview}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" className="p-1 rounded hover:bg-white/80" title="Copy">
-                  <IconCopy width={12} height={12} style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-                </button>
-                <button type="button" className="p-1 rounded hover:bg-white/80" title="Link">
-                  <IconLink width={12} height={12} style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-                </button>
-                <button type="button" className="p-1 rounded hover:bg-white/80" title="More">
-                  <IconMoreVertical width={12} height={12} style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-                </button>
-              </div>
-              {timestamp && (
-                <span className="shrink-0 mt-0.5" style={{ fontSize: T.typography.smaller, color: T.colors.textSecondary }}>{timestamp}</span>
-              )}
-            </Link>
-          );
-        })}
+        {(activeNav === "home" || activeNav === "activity" || activeNav === "more") && channelAndDmItems.map((item) => (
+          <ActivityListItem
+            key={item.id}
+            item={{
+              id: item.id,
+              name: item.name,
+              type: item.type,
+              avatarUrl: "avatarUrl" in item ? item.avatarUrl : undefined,
+              status: "status" in item ? item.status : undefined,
+              unread: ("unread" in item ? item.unread : false) && !isChannelRead(item.id),
+            }}
+            isActive={channelId === item.id}
+            workspaceId={workspace.id}
+          />
+        ))}
       </div>
     </aside>
   );

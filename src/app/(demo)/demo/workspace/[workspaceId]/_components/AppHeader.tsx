@@ -15,15 +15,11 @@ export function AppHeader() {
       className="h-12 shrink-0 flex items-center w-full"
       style={{ backgroundColor: T.colors.globalBg }}
     >
-      {/* Left: Window controls + Nav arrows */}
-      <div className="flex items-center gap-1 pl-3 pr-4 shrink-0">
-        {/* macOS-style window controls */}
-        <div className="flex items-center gap-1.5 mr-2">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-          <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-          <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-        </div>
-        {/* Back / Forward */}
+      {/* Spacer: align with list pillar (72px icon bar) - arrows start after */}
+      <div className="w-[72px] shrink-0" aria-hidden />
+
+      {/* Left: Nav arrows (after list pillar) */}
+      <div className="flex items-center gap-1 pl-2 pr-4 shrink-0">
         <button className="p-1.5 rounded hover:bg-white/10 text-white/80 transition-colors" title="Back">
           <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -48,8 +44,8 @@ export function AppHeader() {
         </div>
       </div>
 
-      {/* Right: Slackbot + Call + Bell + Help + Give Feedback + User */}
-      <div className="flex items-center gap-1 pr-4 shrink-0">
+      {/* Right: Slackbot + Call + Bell + Help + Give Feedback + User (right-aligned) */}
+      <div className="flex items-center gap-1 pl-4 pr-4 shrink-0 ml-auto">
         {/* Slackbot Toggle - next to search */}
         <button
           type="button"
