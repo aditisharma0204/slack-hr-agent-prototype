@@ -3,6 +3,7 @@
 import type { DemoMessage } from "@/context/DemoDataContext";
 import { getMessageAvatarUrl } from "@/context/DemoDataContext";
 import { BlockKitRenderer } from "@/components/block-kit/BlockKitRenderer";
+import { useSlackbot } from "../../../_context/demo-layout-context";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 import Image from "next/image";
 
@@ -13,6 +14,13 @@ interface DemoMessageListProps {
 }
 
 export function DemoMessageList({ messages }: DemoMessageListProps) {
+  const { open: openSlackbot } = useSlackbot();
+
+  const handleAction = (actionId: string) => {
+    if (actionId === "view_seller_edge") {
+      openSlackbot();
+    }
+  };
   const reversed = [...messages].reverse();
 
   if (messages.length === 0) {
@@ -78,7 +86,7 @@ export function DemoMessageList({ messages }: DemoMessageListProps) {
                     backgroundColor: T.colors.background
                   }}
                 >
-                  <BlockKitRenderer blocks={msg.blocks} />
+                  <BlockKitRenderer blocks={msg.blocks} onAction={handleAction} />
                 </div>
               ) : (
                 <p className="text-[15px] leading-[1.46668] whitespace-pre-wrap" style={{ color: T.colors.text }}>

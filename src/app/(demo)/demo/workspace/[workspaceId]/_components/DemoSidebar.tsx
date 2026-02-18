@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
 import { ActivityListItem } from "./ActivityListItem";
-import { useNav } from "../_context/demo-layout-context";
+import { useNav, usePresentationMode } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -71,8 +71,9 @@ function StatusDot({ status }: { status?: "online" | "away" | "dnd" | "call" }) 
 
 export function DemoSidebar() {
   const params = useParams();
-  const channelId = params.channelId as string;
+  const channelId = (params.channelId as string) || undefined;
   const { activeNav } = useNav();
+  const { isPresentationMode } = usePresentationMode();
   const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead } = useDemoData();
   const [filter, setFilter] = useState<ViewFilter>("all");
   const [search, setSearch] = useState("");
@@ -338,18 +339,126 @@ export function DemoSidebar() {
           const isActive = channelId === item.id;
           const { preview, timestamp } = getChannelPreview(item.id);
           const avatarSrc = item.avatarUrl || getAvatarUrl(item.name, 64);
+          const className = cn(
+            "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
+            isActive ? "" : "hover:bg-[#52215A]"
+          );
+          const style = {
+            ...(isActive ? { backgroundColor: T.colors.dmSidebarSelect } : openDropdownId === item.id ? { backgroundColor: "#52215A" } : {}),
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          };
+          
+          if (isPresentationMode) {
+            // In presentation mode, only Slackbot can be selected, others are disabled
+            const isClickable = item.id === "slackbot";
+            return (
+              <div
+                key={item.id}
+                className={className}
+                style={{
+                  ...style,
+                  cursor: isClickable ? "default" : "not-allowed",
+                  opacity: isActive ? 1 : (isClickable ? 1 : 0.6),
+                }}
+                onClick={(e) => {
+                  // Prevent any action for non-Slackbot items
+                  if (!isClickable) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+              >
+              <div className="relative shrink-0 mt-0.5">
+                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
+                <StatusDot status={item.status} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
+                </div>
+                {preview && (
+                  <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
+                )}
+              </div>
+              {/* On hover: white action card (bookmark + more); otherwise timestamp. Keep visible when dropdown open. */}
+              <div className="shrink-0 mt-0.5 w-[72px] flex justify-end items-center" onClick={(e) => e.stopPropagation()}>
+                <div className={cn("items-center gap-1 px-2 py-1 rounded-lg bg-white shadow-sm", (openDropdownId === item.id ? "flex" : "hidden group-hover:flex"))}>
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="Save for later">
+                    <IconBookmark width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
+                  </button>
+                  <DropdownMenu modal={false} open={openDropdownId === item.id} onOpenChange={(open) => setOpenDropdownId(open ? item.id : null)}>
+                    <DropdownMenuTrigger asChild>
+                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="More options">
+                        <IconMoreVertical width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" side="right" className="w-56 bg-white rounded-lg shadow-lg border border-gray-200" sideOffset={4}>
+                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
+                        <IconSquare width={14} height={14} stroke="currentColor" />
+                        Mark as unread
+                        <DropdownMenuShortcut>U</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
+                        <IconBookmark width={14} height={14} stroke="currentColor" />
+                        Save for later
+                        <DropdownMenuShortcut>A</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
+                          Remind me about this
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
+                          <DropdownMenuItem className="cursor-pointer text-sm">In 20 minutes</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">In 1 hour</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">In 3 hours</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">Tomorrow</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">Next week</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">Custom...</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
+                          Copy
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
+                          <DropdownMenuItem className="cursor-pointer text-sm">Copy name</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">Copy link</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-sm">Copy huddle link</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
+                        <IconHome width={14} height={14} stroke="currentColor" />
+                        Open in home
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
+                        <IconLayoutGrid width={14} height={14} stroke="currentColor" />
+                        Open in split view
+                        <DropdownMenuShortcut>⌘ Opt Click</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
+                        <IconLink width={14} height={14} stroke="currentColor" />
+                        Open in new window
+                        <DropdownMenuShortcut>⌘ Click</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {timestamp && (
+                  <span className={cn("text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller, color: T.colors.dmMutedText }}>{timestamp}</span>
+                )}
+              </div>
+              </div>
+            );
+          }
+          
           return (
             <Link
               key={item.id}
               href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
-              className={cn(
-                "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors",
-                isActive ? "" : "hover:bg-[#52215A]"
-              )}
-              style={{
-                ...(isActive ? { backgroundColor: T.colors.dmSidebarSelect } : openDropdownId === item.id ? { backgroundColor: "#52215A" } : {}),
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
-              }}
+              className={className}
+              style={style}
             >
               <div className="relative shrink-0 mt-0.5">
                 <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />

@@ -9,6 +9,8 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
+import { PresentationSceneProvider } from "@/context/PresentationSceneContext";
+import { PresenterDockWrapper } from "@/components/presentation/PresenterDockWrapper";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -31,9 +33,13 @@ export default function RootLayout({
   const content = (
     <ConvexClientProvider>
       <JotaiProvider>
-        <Toaster />
-        {hasConvex && <Modals />}
-        <NuqsAdapter>{children}</NuqsAdapter>
+        <PresentationSceneProvider>
+          <Toaster />
+          {hasConvex && <Modals />}
+          <NuqsAdapter>{children}</NuqsAdapter>
+          {/* PresenterDock - globally mounted, persists across all routes */}
+          <PresenterDockWrapper />
+        </PresentationSceneProvider>
       </JotaiProvider>
     </ConvexClientProvider>
   );

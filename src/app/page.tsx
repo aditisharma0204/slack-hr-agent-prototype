@@ -1,18 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { TheStage } from "@/components/presentation/TheStage";
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/demo");
-  }, [router]);
-
-  return (
-    <div className="h-screen flex items-center justify-center bg-[#f8f8f8]">
-      <p className="text-[#616061]">Redirecting to demo...</p>
-    </div>
-  );
+  return <TheStage />;
 }
