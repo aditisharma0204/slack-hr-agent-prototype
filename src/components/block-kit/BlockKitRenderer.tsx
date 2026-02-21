@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { IconLayoutGrid, IconInfo, IconBell, IconClock } from "@/components/icons";
 
 export interface SlackBlock {
   type: string;
@@ -90,13 +91,19 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
         );
       }
       if (block.text) {
+        const text = block.text.type === "mrkdwn" ? renderMrkdwn(block.text.text) : block.text.text;
+        // Check if this is the warning message (contains ⚠️)
+        const isWarning = typeof block.text.text === 'string' && block.text.text.includes('⚠️');
         content.push(
           <div
             key="text"
-            className="text-[15px] mb-2"
-            style={{ color: T.colors.text, lineHeight: T.typography.bodyLineHeight }}
+            className={`text-[15px] mb-2 ${isWarning ? 'bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg' : ''}`}
+            style={{ 
+              color: isWarning ? '#92400e' : T.colors.text, 
+              lineHeight: T.typography.bodyLineHeight 
+            }}
           >
-            {block.text.type === "mrkdwn" ? renderMrkdwn(block.text.text) : block.text.text}
+            {text}
           </div>
         );
       }
@@ -106,29 +113,38 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
       return <hr className="my-3 border-t" style={{ borderColor: T.colors.border }} />;
     case "actions": {
       if (!block.elements) return null;
+      
+      // Icon mapping for buttons
+      const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+        plan_q1: IconLayoutGrid,
+        reflect_q4: IconInfo,
+        review_risk: IconBell,
+        today_plate: IconClock,
+      };
+      
       return (
         <div className="flex flex-wrap gap-2 mt-2">
           {block.elements.map((el, i) => {
             if (el.type !== "button") return null;
             const label = el.text?.text ?? "";
-            const isPrimary = el.style === "primary";
+            // Remove emoji from label if present
+            const cleanLabel = label.replace(/^[\u{1F300}-\u{1F9FF}]+\s*/u, '').trim();
+            const IconComponent = el.action_id ? iconMap[el.action_id] : null;
+            
             return (
               <button
                 key={i}
                 type="button"
                 onClick={() => el.action_id && onAction?.(el.action_id)}
-                className={`px-4 py-2 text-sm font-medium ${
-                  isPrimary ? "text-white hover:opacity-90" : "bg-white border hover:bg-[#f8f8f8]"
-                }`}
+                className="px-4 py-2 text-sm font-medium bg-white border hover:bg-[#f8f8f8] flex items-center gap-2"
                 style={{
                   borderRadius: `${T.radius.button}px`,
-                  boxShadow: isPrimary ? T.shadows.button : undefined,
-                  ...(isPrimary
-                    ? { backgroundColor: T.colors.primaryButton }
-                    : { borderColor: T.colors.border, color: T.colors.text }),
+                  borderColor: T.colors.border,
+                  color: T.colors.text,
                 }}
               >
-                {label}
+                {IconComponent && <IconComponent className="w-4 h-4" />}
+                {cleanLabel}
               </button>
             );
           })}
@@ -143,7 +159,7 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
           style={{ color: T.colors.textSecondary }}
         >
           {block.elements.map((el, i) => (
-            <span key={i}>{el.text?.text ?? ""}</span>
+            <span key={i}>{el.type === "mrkdwn" ? renderMrkdwn(el.text) : el.text?.text ?? ""}</span>
           ))}
         </div>
       );

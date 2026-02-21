@@ -152,23 +152,23 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
   ];
 
   return (
-    <div className="w-full bg-[#0059FF] overflow-hidden flex text-white relative" style={{ height: "calc(100vh - 40px)", marginTop: "40px" }}>
-      {/* Fixed Image (Left) - No Parallax */}
+    <div 
+      className="relative w-full h-full bg-[#0047FF] overflow-hidden flex text-white"
+    >
+      {/* Hero Image (Left) - Using image mask like SceneLayout */}
       <div
-        className="fixed left-0 w-[65%] z-[5] pointer-events-none opacity-100"
+        className="absolute left-0 top-0 w-[65%] h-full z-[5] pointer-events-none"
         style={{
-          top: "40px",
-          height: "calc(100vh - 40px)",
-          WebkitMaskImage: 'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
-          maskImage: 'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, white 80%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to right, white 80%, transparent 100%)'
         }}
       >
         <img
           src="/Rita_Intro.png"
           alt="Rita"
-          className="w-full object-cover object-top scale-110" style={{ height: "calc(100vh - 40px)" }}
+          className="w-full h-full object-cover object-left"
           onError={(e) => {
-            (e.target as HTMLImageElement).parentElement!.style.background = "var(--bg-1)";
+            (e.target as HTMLImageElement).style.display = "none";
           }}
         />
       </div>
@@ -176,11 +176,11 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
       {/* Master Scroll Column (Right) */}
       <div
         onScroll={(e) => setScrollY(e.currentTarget.scrollTop)}
-        className="ml-[35%] w-[65%] overflow-y-auto snap-y snap-mandatory scroll-smooth relative z-10 pb-32 bg-transparent" style={{ height: "calc(100vh - 40px)" }}
+        className="ml-[35%] w-[65%] overflow-y-auto snap-y snap-mandatory scroll-smooth relative z-10 pb-32 bg-transparent h-full"
       >
         {/* Section 1: Brand */}
         <div className="min-h-screen flex flex-col justify-center snap-start">
-          <div className="w-full max-w-[640px] px-12 md:px-16 mx-auto flex flex-col items-start text-left">
+          <div className="w-full max-w-[640px] px-20 mx-auto flex flex-col items-start text-left">
             {/* Eyebrow / Brand Row */}
             <div className="flex items-center gap-8 mb-6">
               <div className="flex items-center gap-3 flex-shrink-0">
@@ -205,7 +205,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
 
         {/* Section 2: The CRM Paradox */}
         <div className="min-h-screen flex flex-col justify-center snap-start">
-          <div className="w-full max-w-[640px] px-12 md:px-16 mx-auto flex flex-col items-start text-left">
+          <div className="w-full max-w-[640px] px-20 mx-auto flex flex-col items-start text-left">
             <span className="tracking-widest text-xs uppercase mb-4 block" style={{ color: '#66B3FF' }}>
               The CRM Paradox
             </span>
@@ -220,7 +220,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
 
         {/* Section 3: Our Approach */}
         <div className="min-h-screen flex flex-col justify-center snap-start">
-          <div className="w-full max-w-[640px] px-12 md:px-16 mx-auto flex flex-col items-start text-left">
+          <div className="w-full max-w-[640px] px-20 mx-auto flex flex-col items-start text-left">
             <span className="tracking-widest text-xs uppercase mb-4 block" style={{ color: '#66B3FF' }}>
               Our Approach
             </span>
@@ -235,7 +235,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
 
         {/* Section 4: The Persona - Unboxed */}
         <section id="persona-section" className="min-h-screen flex flex-col justify-center snap-start">
-          <div className="w-full max-w-[640px] px-12 md:px-16 mx-auto flex flex-col items-start text-left">
+          <div className="w-full max-w-[640px] px-20 mx-auto flex flex-col items-start text-left">
             <div className="text-[11px] font-medium tracking-[0.18em] uppercase mb-6" style={{ color: "#66B3FF" }}>
               The Persona
             </div>
@@ -260,7 +260,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
 
         {/* Section 5: The Chaotic Scrap Pile */}
         <section className="min-h-[90vh] flex flex-col justify-center snap-center relative">
-          <div className="relative z-10 flex flex-col items-start w-full h-full px-12 md:px-16 ml-[100px]">
+          <div className="relative z-10 flex flex-col items-start w-full h-full px-20 ml-[100px]">
             <div className={`w-full max-w-xl mx-auto flex flex-col items-start text-left transition-all duration-700 ease-out ${
               clearedGroups.length > 0 ? 'opacity-0 pointer-events-none translate-y-[-10px]' : 'opacity-100 translate-y-0'
             }`}>
@@ -345,7 +345,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
 
         {/* Section 6: The Unbundled Reality & Final CTA */}
         <section className="min-h-[80vh] flex flex-col justify-center snap-start">
-          <div className="w-full max-w-xl px-12 md:px-16 mx-auto flex flex-col items-start text-left">
+          <div className="w-full max-w-xl px-20 mx-auto flex flex-col items-start text-left">
             {/* Header */}
             <h3 className="tracking-widest text-sm uppercase mb-6 text-left" style={{ color: '#66B3FF' }}>
               The Unbundled Reality

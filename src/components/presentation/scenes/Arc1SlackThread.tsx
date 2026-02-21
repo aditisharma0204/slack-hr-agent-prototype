@@ -5,7 +5,11 @@ import Image from "next/image";
 import { BlockKitRenderer, type SlackBlock } from "@/components/block-kit/BlockKitRenderer";
 import { MessageInput } from "@/components/shared/MessageInput";
 import { PulseDataCard } from "./PulseDataCard";
-import { useRef, useEffect, useState } from "react";
+import { WinRateCard } from "./WinRateCard";
+import { PipelineHealthCard } from "./PipelineHealthCard";
+import { DealVelocityCard } from "./DealVelocityCard";
+import { useRef, useEffect, useState, memo, useMemo } from "react";
+import { IconLayoutGrid, IconInfo, IconBell, IconClock } from "@/components/icons";
 
 type Screen = 1 | 2 | 3 | 4 | 5;
 
@@ -28,6 +32,108 @@ interface Arc1SlackThreadProps {
   onMessageSend: (message: string) => void;
 }
 
+// Stable data for cards - defined outside component to prevent recreation
+const Q4_DEALS_DATA = [
+  { name: "Acme Corp", days: 21 },
+  { name: "Greentech", days: 21 },
+  { name: "Runners Club", days: 67 },
+  { name: "Sporty Nation", days: 45 },
+] as const;
+
+// Extract dashboard grid - removed memo to allow remounting when Scene 1 resets
+function DashboardGrid() {
+  return (
+    <div className="mb-3 ml-11 pr-4">
+      {/* 2x2 Grid Layout - Aggressively Compacted - Fills container width */}
+      <div className="grid grid-cols-2 gap-3">
+        <PulseDataCard key="pulse-card" attainment={471000} quota={500000} commissionMissed={4200} index={0} />
+        <WinRateCard key="winrate-card" winRate={52} previousWinRate={44} personalEngagement={68} delegatedRate={41} index={1} />
+        <PipelineHealthCard
+          key="pipeline-card"
+          totalPipeline={1200000}
+          onTrack={410000}
+          needsYou={90000}
+          blocked={0}
+          dealCount={14}
+          index={2}
+        />
+        <DealVelocityCard
+          key="velocity-card"
+          avgCycle={48}
+          fastestClose={21}
+          fastestDeal="Greentech"
+          q4Deals={Q4_DEALS_DATA}
+          index={3}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Module-level Set to track if amber alert has become static
+const staticAlerts = new Set<string>();
+
+// Extract amber alert into separate memoized component
+const AmberAlert = memo(function AmberAlert() {
+  const alertKey = "amber-alert-1";
+  const [isStatic, setIsStatic] = useState(staticAlerts.has(alertKey));
+  
+  // Switch to static after animation completes
+  useEffect(() => {
+    if (staticAlerts.has(alertKey)) {
+      setIsStatic(true);
+      return;
+    }
+    
+    const timer = setTimeout(() => {
+      staticAlerts.add(alertKey);
+      setIsStatic(true);
+    }, 1200); // Animation delay (0.8s) + duration (0.4s)
+    return () => clearTimeout(timer);
+  }, [alertKey]);
+  
+  // Static version (no animations)
+  if (isStatic) {
+    return (
+      <div className="mb-4 ml-11 pr-4 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+        <div className="flex items-start gap-2">
+          <span className="text-amber-600 text-lg">⚠️</span>
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-amber-900">
+              You missed your accelerator by $29K last quarter.
+            </div>
+            <div className="text-xs text-amber-700 mt-1">
+              That was $4.2K in commission left on the table.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Animated version (only on first render)
+  return (
+    <motion.div
+      className="mb-4 ml-11 pr-4 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg"
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: 0.8 }}
+    >
+      <div className="flex items-start gap-2">
+        <span className="text-amber-600 text-lg">⚠️</span>
+        <div className="flex-1">
+          <div className="text-sm font-semibold text-amber-900">
+            You missed your accelerator by $29K last quarter.
+          </div>
+          <div className="text-xs text-amber-700 mt-1">
+            That was $4.2K in commission left on the table.
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
 export function Arc1SlackThread({
   currentScreen,
   stepperValue,
@@ -47,24 +153,23 @@ export function Arc1SlackThread({
   }, [messages]);
 
   const handleSubmit = (message: string) => {
-    if (message.trim()) {
-      onMessageSend(message);
-      setInputValue("");
-    }
+    // Don't send messages to main chat - all interactions stay in panel
+    // Just clear the input
+    setInputValue("");
   };
+
+  // Check if welcome message exists (for dashboard rendering) - memoized to prevent recalculation
+  const hasWelcomeMessage = useMemo(() => 
+    messages.some(msg => msg.id === "welcome-q4"),
+    [messages]
+  );
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
       {/* Body - Scrollable content area */}
       <div className="flex-1 overflow-y-auto min-h-0 p-3">
-        {/* Main chat is static - show empty state or static content */}
-        {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <p>Slack DM thread</p>
-          </div>
-        )}
-        {/* Render message history (if any) */}
-        {messages.map((msg) => (
+        {/* Render message history */}
+        {messages.map((msg, index) => (
           <div key={msg.id} className="mb-4">
             <div className="flex items-start gap-3 mb-2">
               {msg.role === "bot" && (
@@ -117,11 +222,69 @@ export function Arc1SlackThread({
             </div>
           </div>
         ))}
-
-        {/* Tableau Pulse Card - Show on Screen 1 after welcome message */}
-        {currentScreen === 1 && messages.length > 0 && messages[0].role === "bot" && (
-          <div className="mb-4">
-            <PulseDataCard attainment={471000} quota={500000} commissionMissed={4200} />
+        
+        {/* Q4 Analytics Cards - Rendered ONCE outside messages.map() to prevent remounting */}
+        {/* CRITICAL: Stable key ensures React never remounts these components */}
+        {hasWelcomeMessage && (
+          <div key="dashboard-container">
+            <DashboardGrid />
+            {/* CTAs below tableau cards */}
+            <div className="mb-4 ml-11 pr-4">
+              <div className="flex flex-wrap gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => onIntentSelect("🎯 Plan my Q1 commit")}
+                  className="px-4 py-2 text-sm font-medium bg-white border hover:bg-[#f8f8f8] flex items-center gap-2"
+                  style={{
+                    borderRadius: "4px",
+                    borderColor: "#e8e8e8",
+                    color: "#1d1c1d",
+                  }}
+                >
+                  <IconLayoutGrid className="w-4 h-4" />
+                  Launch Q1 Planner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onIntentSelect("📊 Reflect on Q4 performance")}
+                  className="px-4 py-2 text-sm font-medium bg-white border hover:bg-[#f8f8f8] flex items-center gap-2"
+                  style={{
+                    borderRadius: "4px",
+                    borderColor: "#e8e8e8",
+                    color: "#1d1c1d",
+                  }}
+                >
+                  <IconInfo className="w-4 h-4" />
+                  Reflect on Q4
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onIntentSelect("⚠️ Review at-risk pipeline")}
+                  className="px-4 py-2 text-sm font-medium bg-white border hover:bg-[#f8f8f8] flex items-center gap-2"
+                  style={{
+                    borderRadius: "4px",
+                    borderColor: "#e8e8e8",
+                    color: "#1d1c1d",
+                  }}
+                >
+                  <IconBell className="w-4 h-4" />
+                  Review at-risk deals
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onIntentSelect("📅 See what's on my plate today")}
+                  className="px-4 py-2 text-sm font-medium bg-white border hover:bg-[#f8f8f8] flex items-center gap-2"
+                  style={{
+                    borderRadius: "4px",
+                    borderColor: "#e8e8e8",
+                    color: "#1d1c1d",
+                  }}
+                >
+                  <IconClock className="w-4 h-4" />
+                  What's on my plate?
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

@@ -21,7 +21,7 @@ const T = SLACK_TOKENS;
 
 const navItems = [
   { icon: IconHome, label: "Home", id: "home" as const, href: "/activity" },
-  { icon: IconMessage, label: "DMs", id: "dms" as const, badge: 7, href: "/dms" },
+  { icon: IconMessage, label: "DMs", id: "dms" as const, href: "/dms" },
   { icon: IconBell, label: "Activity", id: "activity" as const, badge: 3, href: "/activity" },
   { icon: IconFolder, label: "Files", id: "files" as const, href: "/files" },
   { icon: IconBookmark, label: "Later", id: "later" as const, href: "/later" },
@@ -29,7 +29,12 @@ const navItems = [
   { icon: IconMore, label: "More", id: "more" as const, href: "/more" },
 ];
 
-export function DemoIconBar() {
+interface DemoIconBarProps {
+  onPrimaryNavChange?: (nav: "activity" | "dms") => void;
+  showDMBadge?: boolean;
+}
+
+export function DemoIconBar({ onPrimaryNavChange, showDMBadge = false }: DemoIconBarProps = {}) {
   const params = useParams();
   const pathname = usePathname();
   // Fallback to "demo-1" in presentation mode where workspaceId param doesn't exist
@@ -51,12 +56,23 @@ export function DemoIconBar() {
         const href = base + item.href;
         // Single source of truth: only activeNav determines active state
         const isActive = activeNav === item.id;
+        
+        // For DMs, use dynamic badge if provided, otherwise use item.badge
+        const shouldShowBadge = item.id === "dms" 
+          ? showDMBadge 
+          : (item.badge !== undefined);
+        const badgeValue = item.id === "dms" && showDMBadge ? 1 : item.badge;
+        
         return (
           <Link
             key={item.label}
             href={href}
             onClick={(e) => {
               setActiveNav(item.id);
+              // Handle primary nav change for activity/dms in Arc 1
+              if (onPrimaryNavChange && (item.id === "activity" || item.id === "dms")) {
+                onPrimaryNavChange(item.id);
+              }
               // In presentation mode, prevent navigation - only update state
               if (isPresentationMode) {
                 e.preventDefault();
@@ -83,12 +99,12 @@ export function DemoIconBar() {
             >
               {item.label}
             </span>
-            {item.badge && (
+            {shouldShowBadge && badgeValue && (
               <span
                 className="absolute top-0.5 right-1 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white"
                 style={{ backgroundColor: T.colors.notificationRed }}
               >
-                {item.badge}
+                {badgeValue}
               </span>
             )}
           </Link>

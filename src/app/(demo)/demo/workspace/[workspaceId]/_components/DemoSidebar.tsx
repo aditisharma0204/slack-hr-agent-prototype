@@ -334,6 +334,7 @@ export function DemoSidebar() {
           };
           
           if (isPresentationMode && setActiveChatId) {
+            // In presentation mode, use local state navigation ONLY - no URL updates
             return (
               <div
                 key={file.id}
@@ -341,11 +342,7 @@ export function DemoSidebar() {
                 style={style}
                 onClick={() => {
                   setActiveChatId(file.channelId);
-                  const workspaceId = workspace.id;
-                  const newPath = `/demo/workspace/${workspaceId}/channel/${file.channelId}`;
-                  if (typeof window !== "undefined") {
-                    window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
-                  }
+                  // DO NOT update URL in presentation mode - causes 404 errors
                 }}
               >
                 <IconFolder width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
@@ -384,6 +381,7 @@ export function DemoSidebar() {
           };
           
           if (isPresentationMode && setActiveChatId) {
+            // In presentation mode, use local state navigation ONLY - no URL updates
             return (
               <div
                 key={saved.id}
@@ -391,11 +389,7 @@ export function DemoSidebar() {
                 style={style}
                 onClick={() => {
                   setActiveChatId(saved.channelId);
-                  const workspaceId = workspace.id;
-                  const newPath = `/demo/workspace/${workspaceId}/channel/${saved.channelId}`;
-                  if (typeof window !== "undefined") {
-                    window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
-                  }
+                  // DO NOT update URL in presentation mode - causes 404 errors
                 }}
               >
                 <IconBookmark width={16} height={16} className="shrink-0 mt-0.5" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
@@ -437,7 +431,8 @@ export function DemoSidebar() {
           };
           
           if (isPresentationMode && setActiveChatId) {
-            // In presentation mode, use local state navigation
+            // In presentation mode, use local state navigation ONLY - no URL updates
+            // URL updates cause Next.js to try to navigate to routes that don't exist in presentation mode
             return (
               <div
                 key={item.id}
@@ -445,12 +440,8 @@ export function DemoSidebar() {
                 style={style}
                 onClick={() => {
                   setActiveChatId(item.id);
-                  // Update URL without navigation
-                  const workspaceId = workspace.id;
-                  const newPath = `/demo/workspace/${workspaceId}/channel/${item.id}`;
-                  if (typeof window !== "undefined") {
-                    window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
-                  }
+                  // DO NOT update URL in presentation mode - causes 404 errors
+                  // The prototype is rendered in SceneLayout on root "/" route, not on /demo routes
                 }}
               >
               <div className="relative shrink-0 mt-0.5">
@@ -643,6 +634,7 @@ export function DemoSidebar() {
           };
           
           if (isPresentationMode && setActiveChatId) {
+            // In presentation mode, use local state navigation ONLY - no URL updates
             return (
               <div
                 key={item.id}
@@ -650,11 +642,7 @@ export function DemoSidebar() {
                 style={style}
                 onClick={() => {
                   setActiveChatId(item.id);
-                  const workspaceId = workspace.id;
-                  const newPath = `/demo/workspace/${workspaceId}/channel/${item.id}`;
-                  if (typeof window !== "undefined") {
-                    window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
-                  }
+                  // DO NOT update URL in presentation mode - causes 404 errors
                 }}
               >
                 <div className="relative shrink-0 mt-0.5">
@@ -831,21 +819,25 @@ export function DemoSidebar() {
             </Link>
           );
         })}
-        {(activeNav === "home" || activeNav === "activity" || activeNav === "more") && channelAndDmItems.map((item) => (
-          <ActivityListItem
-            key={item.id}
-            item={{
-              id: item.id,
-              name: item.name,
-              type: item.type,
-              avatarUrl: "avatarUrl" in item ? item.avatarUrl : undefined,
-              status: "status" in item ? item.status : undefined,
-              unread: ("unread" in item ? item.unread : false) && !isChannelRead(item.id),
-            }}
-            isActive={effectiveChannelId === item.id}
-            workspaceId={workspace.id}
-          />
-        ))}
+        {(activeNav === "home" || activeNav === "activity" || activeNav === "more") && channelAndDmItems.map((item) => {
+          // Use activeChatId from context if available, otherwise fall back to effectiveChannelId
+          const itemIsActive = activeChatId === item.id || effectiveChannelId === item.id;
+          return (
+            <ActivityListItem
+              key={item.id}
+              item={{
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                avatarUrl: "avatarUrl" in item ? item.avatarUrl : undefined,
+                status: "status" in item ? item.status : undefined,
+                unread: ("unread" in item ? item.unread : false) && !isChannelRead(item.id),
+              }}
+              isActive={itemIsActive}
+              workspaceId={workspace.id}
+            />
+          );
+        })}
       </div>
     </aside>
   );

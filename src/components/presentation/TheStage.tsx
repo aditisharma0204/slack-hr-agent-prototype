@@ -122,17 +122,15 @@ export function TheStage() {
   return (
     <DemoDataProvider>
       <div
-        className="relative w-full min-h-screen overflow-hidden"
+        className="relative w-full flex-1 overflow-hidden"
         style={{
           isolation: "isolate",
-          backgroundColor: "var(--bg, #060608)",
+          backgroundColor: currentView === "hero" ? "#0047FF" : "var(--bg, #060608)",
           color: "var(--text, #ECEBF5)",
-          minHeight: "100vh",
-          height: "100vh",
         }}
       >
         {/* Content area - naturally flows below fixed header */}
-        <div className="relative w-full min-h-full" style={{ height: "100vh", overflow: "hidden" }}>
+        <div className="relative w-full h-full" style={{ overflow: "hidden" }}>
           {currentView === "hero" && (
             <Hero onUnbundlingClick={handleUnbundlingClick} onScenesClick={handleScenesClick} />
           )}

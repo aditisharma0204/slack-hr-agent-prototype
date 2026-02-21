@@ -68,7 +68,7 @@ export function ActivityListItem({
   const finalIsActive = isActive || isActiveFromQuery;
 
   const isUnread = item.unread === true;
-  const className = "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors";
+  const className = "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer";
   const style: React.CSSProperties = finalIsActive
     ? { backgroundColor: "#f0f0f0", border: "2px solid #78317F" }
     : {
@@ -79,25 +79,44 @@ export function ActivityListItem({
       };
 
   if (isPresentationMode) {
-    // Try to get setActiveChatId from context
+    // Try to get activeChatId and setActiveChatId from context
+    let activeChatId: string | undefined;
     let setActiveChatId: ((id: string) => void) | undefined;
     try {
       const chatContext = useActiveChat();
+      activeChatId = chatContext.activeChatId;
       setActiveChatId = chatContext.setActiveChatId;
     } catch {
       // Context not available (component used outside DesktopSlackShell)
     }
     
+    // Use activeChatId from context for isActive check in presentation mode
+    const finalIsActiveInPresentation = isActive || activeChatId === item.id;
+    const finalStyle: React.CSSProperties = finalIsActiveInPresentation
+      ? { backgroundColor: "#f0f0f0", border: "2px solid #78317F" }
+      : {
+          border: "1px solid",
+          borderColor: isUnread ? "#E6E6E6" : "#E0E0E0",
+          ...(isUnread && { borderLeft: "2px solid #78317F" }),
+          backgroundColor: isUnread ? "#ffffff" : "#F7F7F7",
+        };
+    
     return (
       <div
-        className={`${className} cursor-pointer`}
-        style={style}
+        className={className}
+        style={finalStyle}
         onClick={() => {
           if (setActiveChatId) {
             setActiveChatId(item.id);
-            const newPath = `/demo/workspace/${workspaceId}/channel/${item.id}`;
-            if (typeof window !== "undefined") {
-              window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
+            // DO NOT update URL in presentation mode - causes 404 errors
+            // The prototype is rendered in SceneLayout on root "/" route, not on /demo routes
+          } else {
+            // Fallback: try to update URL query param if in activity mode
+            if (activeNav === "activity" && typeof window !== "undefined") {
+              const currentUrl = new URL(window.location.href);
+              currentUrl.searchParams.set("channel", item.id);
+              window.history.pushState({}, "", currentUrl.toString());
+              window.dispatchEvent(new PopStateEvent("popstate"));
             }
           }
         }}

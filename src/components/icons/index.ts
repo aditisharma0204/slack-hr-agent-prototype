@@ -29,3 +29,7 @@ export { IconLayoutGrid } from './IconLayoutGrid';
 export { IconList } from './IconList';
 export { IconCopy } from './IconCopy';
 export { IconLink } from './IconLink';
+export { IconDollar } from './IconDollar';
+export { IconTrend } from './IconTrend';
+export { IconBriefcase } from './IconBriefcase';
+export { IconZap } from './IconZap';

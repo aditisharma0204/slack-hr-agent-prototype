@@ -84,10 +84,10 @@ export function GlobalNavigationHeader() {
     isPrototypeMode ? "prototype" :
     "scenario";
 
-  // Get current arc from scene
-  const currentArc = currentScene > 0 ? (SCENE_TO_ARC[currentScene] || 1) : 1;
+  // Get current arc from scene - when on home (scene 0), no arc should be active
+  const currentArc = currentScene > 0 ? (SCENE_TO_ARC[currentScene] || 1) : null;
   const currentScreen = arcNavigation.arcState.screen || 1;
-  const currentArcName = ARC_NAMES[currentArc] || `Arc ${currentArc}`;
+  const currentArcName = currentArc ? (ARC_NAMES[currentArc] || `Arc ${currentArc}`) : "";
   
   // Get date/time from scene tag
   const currentSceneData = SCENES.find((s) => s.id === currentScene);
@@ -215,7 +215,7 @@ export function GlobalNavigationHeader() {
       <div className="flex items-center gap-4 flex-shrink-0">
         <img src="/slackbot-logo.svg" alt="SlackbotPro" className="w-6 h-6 flex-shrink-0" />
         <span className="text-[10px] tracking-[0.2em] text-gray-500 uppercase font-medium whitespace-nowrap">
-          SlackbotPro <span className="mx-2 text-white/20">|</span> {context === "home" ? "SCENE 0" : `ARC ${currentArc} · ${currentDate}`}
+          SlackbotPro <span className="mx-2 text-white/20">|</span> {context === "home" ? "SCENE 0" : currentArc ? `ARC ${currentArc} · ${currentDate}` : "SCENE 0"}
         </span>
       </div>
 
@@ -242,7 +242,8 @@ export function GlobalNavigationHeader() {
 
         {/* Arc Numbers */}
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((arcNum) => {
-          const isActive = arcNum === currentArc;
+          // Only highlight arc number if we're NOT on home (currentScene !== 0) AND it matches currentArc
+          const isActive = currentScene !== 0 && arcNum === currentArc;
           return (
             <div key={arcNum} className="relative">
               <button

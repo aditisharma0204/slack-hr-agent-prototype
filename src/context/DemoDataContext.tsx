@@ -1,6 +1,21 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { mockDMs, mockChannels, mockActivity } from "@/lib/mock-data";
+
+export interface DemoReaction {
+  emoji: string;
+  count: number;
+  users: string[]; // Array of user names who reacted
+}
+
+export interface DemoThreadReply {
+  id: string;
+  author: string;
+  authorImage?: string | null;
+  body: string;
+  timestamp: string;
+}
 
 export interface DemoMessage {
   id: string;
@@ -9,6 +24,12 @@ export interface DemoMessage {
   timestamp: string;
   body?: string | null;
   blocks?: SlackBlock[] | null;
+  reactions?: DemoReaction[];
+  threadCount?: number;
+  threadReplies?: DemoThreadReply[];
+  threadLastAuthor?: string;
+  threadLastAuthorImage?: string | null;
+  threadLastTimestamp?: string;
 }
 
 export interface SlackBlock {
@@ -137,119 +158,8 @@ const DEMO_SAVED: DemoSavedItem[] = [
   { id: "s3", channelId: "slackbot", preview: "Proactive insights for today — $410K on track", timestamp: "Today" },
 ];
 
-const DEMO_ACTIVITY_POSTS: DemoActivityPost[] = [
-  {
-    id: "ap1",
-    author: "Slackbot",
-    authorImage: "/slackbot-logo.svg",
-    channelId: "general",
-    channelName: "general",
-    content: "Champion departed: Acme Corp — Marcus Lee left last week. $200K deal at risk. New champions identified: Priya Shah (champion) and Daniel Kim (VP Procurement).",
-    timestamp: "10:36 AM",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap2",
-    author: "Rita Patel",
-    authorImage: "https://randomuser.me/api/portraits/med/women/75.jpg",
-    channelId: "general",
-    channelName: "general",
-    content: "What about the Acme situation? Marcus left. Need to reconnect with the new team.",
-    timestamp: "10:35 AM",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap3",
-    author: "Slackbot",
-    authorImage: "/slackbot-logo.svg",
-    channelId: "general",
-    channelName: "general",
-    content: "TechStart QBR prep: Your morning state: $410K on track / $90K needs you / $0 blocked. 2 deals need attention: Runners Club (budget objection) and Sporty Nation (champion silent).",
-    timestamp: "10:33 AM",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap4",
-    author: "Rita Patel",
-    authorImage: "https://randomuser.me/api/portraits/med/women/75.jpg",
-    channelId: "q3-pipeline",
-    channelName: "q3-pipeline",
-    content: "Q4 wrap-up: Hey team — checking in on Q3 pipeline. Vibeface has my daily brief ready. Greentech closed at $60K — celebrating that win!",
-    timestamp: "10:32 AM",
-    read: false,
-    commentCount: 2,
-    type: "post",
-  },
-  {
-    id: "ap5",
-    author: "Sarah Chen",
-    authorImage: "https://randomuser.me/api/portraits/med/women/44.jpg",
-    channelId: "sales",
-    channelName: "sales",
-    content: "Q4 performance: SmartFit replied to the follow-up email. Positive tone. Next steps: schedule demo for Q1. Great work on Greentech close!",
-    timestamp: "Yesterday",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap6",
-    author: "Jordan Hayes",
-    authorImage: "https://randomuser.me/api/portraits/med/men/22.jpg",
-    channelId: "deal-runners",
-    channelName: "deal-runners",
-    content: "Q4 follow-up: 4 PM call confirmed. Budget discussion is top priority. Send the value justification deck when ready.",
-    timestamp: "Today",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap7",
-    author: "Priya Shah",
-    authorImage: "https://randomuser.me/api/portraits/med/women/32.jpg",
-    channelId: "deal-acme",
-    channelName: "deal-acme",
-    content: "Q4 intro: Thanks for the intro via Sarah! Excited to work together. Daniel Kim is reviewing the proposal — should have feedback by end of week.",
-    timestamp: "10:20 AM",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap8",
-    author: "Dana Torres",
-    authorImage: "https://randomuser.me/api/portraits/med/women/28.jpg",
-    channelId: "deal-sporty",
-    channelName: "deal-sporty",
-    content: "Q4 update: Reaching out to Mike Torres. Team might be in flux after Q4 reorg. Champion has been silent since mid-December.",
-    timestamp: "Today",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap9",
-    author: "Lisa Park",
-    authorImage: "https://randomuser.me/api/portraits/med/women/65.jpg",
-    channelId: "deal-techstart",
-    channelName: "deal-techstart",
-    content: "Q4 prep: Reviewed the QBR brief. Ready for the 2 PM call. Pipeline shows $42K opportunity — needs acceleration.",
-    timestamp: "9:30 AM",
-    read: false,
-    type: "post",
-  },
-  {
-    id: "ap10",
-    author: "Sarah Chen",
-    authorImage: "https://randomuser.me/api/portraits/med/women/44.jpg",
-    channelId: "sarah-chen",
-    channelName: "sarah-chen",
-    content: "Q4 wrap-up: Done. Priya should have the intro email. Good luck with Acme — that's a big one for Q1. Great work closing Greentech!",
-    timestamp: "Yesterday",
-    read: true,
-    type: "dm",
-  },
-];
+// Use mock activity data (realistic SaaS sales floor activity)
+const DEMO_ACTIVITY_POSTS: DemoActivityPost[] = mockActivity;
 
 export const DEMO_USER_NAME = "Rita";
 
@@ -393,9 +303,48 @@ export function DemoDataProvider({ children }: { children: React.ReactNode }) {
         return r.json();
       })
       .then((data) => {
-        setBlockKitMessages(data);
-        const channelMessages = (data?.channel_messages as Record<string, DemoMessage[]>) || {};
-        setMessages(channelMessages);
+        try {
+          setBlockKitMessages(data);
+          const channelMessages = (data?.channel_messages as Record<string, DemoMessage[]>) || {};
+          
+          // Merge mock data with existing data (mock data takes precedence for DMs and channels)
+          // This ensures realistic data while preserving Arc1Layout/Slackbot functionality
+          // Note: We preserve slackbot and other Arc1Layout-specific channels from block-kit-messages.json
+          const mergedMessages: Record<string, DemoMessage[]> = {
+            ...channelMessages, // Load existing messages first (includes slackbot, general, etc.)
+            ...mockDMs, // Override with realistic DM conversations
+            ...mockChannels, // Override with realistic channel conversations
+          };
+          
+          // Populate authorImage for all messages using MESSAGE_AVATAR_MAP
+          // Preserve all message properties including reactions and threads
+          const enrichedMessages: Record<string, DemoMessage[]> = {};
+          Object.keys(mergedMessages).forEach((channelId) => {
+            enrichedMessages[channelId] = mergedMessages[channelId].map((msg) => {
+              try {
+                return {
+                  ...msg,
+                  authorImage: msg.authorImage || getMessageAvatarUrl(msg.author || "") || null,
+                  // Preserve reactions and thread data
+                  reactions: msg.reactions || undefined,
+                  threadCount: msg.threadCount || undefined,
+                  threadLastAuthor: msg.threadLastAuthor || undefined,
+                  threadLastAuthorImage: msg.threadLastAuthorImage || undefined,
+                  threadLastTimestamp: msg.threadLastTimestamp || undefined,
+                };
+              } catch (err) {
+                console.error(`Error enriching message ${msg.id}:`, err);
+                return { ...msg, authorImage: null };
+              }
+            });
+          });
+          setMessages(enrichedMessages);
+        } catch (err) {
+          console.error("Error processing messages:", err);
+          // Fallback to unenriched messages if enrichment fails
+          const channelMessages = (data?.channel_messages as Record<string, DemoMessage[]>) || {};
+          setMessages(channelMessages);
+        }
       })
       .catch((err) => {
         console.error("Failed to load block-kit-messages.json:", err);
@@ -476,7 +425,9 @@ export function useDemoData() {
   return ctx;
 }
 
+const EMPTY_MESSAGES: DemoMessage[] = [];
+
 export function useDemoMessages(channelId: string): DemoMessage[] {
   const { messages } = useDemoData();
-  return messages[channelId] || [];
+  return messages[channelId] || EMPTY_MESSAGES;
 }

@@ -42,7 +42,7 @@ export default function DemoChannelPage() {
         <DemoChannelHeader channelId={channelId} />
       </div>
       <div className="flex-1 overflow-y-auto min-h-0">
-        <DemoMessageList messages={messages} />
+        <DemoMessageList messages={messages} channelId={channelId} />
       </div>
       <div className="shrink-0 px-3 py-2">
         <DemoMessageInput channelId={channelId} placeholder={placeholder} />

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-// DemoChannelHeader removed - on-hover header comes on top
+import { useState, useEffect, useRef, useMemo } from "react";
 import { DemoMessageList } from "@/app/(demo)/demo/workspace/[workspaceId]/channel/[channelId]/_components/DemoMessageList";
 import { useDemoMessages, useDemoData, type DemoMessage } from "@/context/DemoDataContext";
 import { MessageInput } from "@/components/shared/MessageInput";
+import { SLACK_TOKENS } from "@/design/slack-tokens";
+
+const T = SLACK_TOKENS;
 
 interface ChatEngineProps {
   channelId: string;
@@ -33,23 +35,82 @@ const AI_RESPONSES: Record<string, string[]> = {
 };
 
 export function ChatEngine({ channelId }: ChatEngineProps) {
-  const initialMessages = useDemoMessages(channelId);
-  const [chatMessages, setChatMessages] = useState<DemoMessage[]>(initialMessages);
+  const currentMessages = useDemoMessages(channelId);
+  const [chatMessages, setChatMessages] = useState<DemoMessage[]>(currentMessages);
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const { markChannelAsRead } = useDemoData();
-  const currentMessages = useDemoMessages(channelId);
+  const prevMessagesLengthRef = useRef<number>(currentMessages.length);
+  const prevChannelIdRef = useRef<string>("");
+  const isNearBottomRef = useRef<boolean>(true);
+  const { markChannelAsRead, channels, dms } = useDemoData();
+  
+  // Get channel/DM name for header
+  const channel = channels.find((c) => c.id === channelId) ?? dms.find((d) => d.id === channelId);
+  const name = channel?.name ?? channelId;
+  const isChannel = !!channels.find((c) => c.id === channelId);
+  const displayName = isChannel ? `#${name}` : name;
 
-  // Update messages when channelId changes
-  useEffect(() => {
-    setChatMessages(currentMessages);
-    markChannelAsRead(channelId);
-  }, [channelId, markChannelAsRead, currentMessages]);
+  // Track scroll position to detect if user is near bottom
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      isNearBottomRef.current = isNearBottom;
+    }
+  };
 
-  // Auto-scroll to bottom when new messages arrive
+  // Handle channel changes - scroll to bottom when channel changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const channelChanged = prevChannelIdRef.current !== channelId;
+    prevChannelIdRef.current = channelId;
+    
+    if (channelChanged && messagesContainerRef.current) {
+      // Channel changed - scroll to bottom immediately
+      isNearBottomRef.current = true;
+      requestAnimationFrame(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      });
+    }
+    
+    if (channelId) {
+      markChannelAsRead(channelId);
+    }
+  }, [channelId, markChannelAsRead]);
+
+  // Update messages when messages actually change (based on IDs)
+  useEffect(() => {
+    const messagesKey = currentMessages.map(m => m.id).join(',');
+    const prevKey = chatMessages.map(m => m.id).join(',');
+    
+    // Only update if messages actually changed
+    if (messagesKey !== prevKey) {
+      setChatMessages(currentMessages);
+    }
+  }, [currentMessages, chatMessages]);
+
+  // Auto-scroll to bottom only when new messages are added AND user is at bottom (no animation)
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const currentLength = chatMessages.length;
+    const prevLength = prevMessagesLengthRef.current;
+    const hasNewMessages = currentLength > prevLength;
+
+    if (hasNewMessages && isNearBottomRef.current) {
+      // New messages added and user was at bottom - auto-scroll to show new content
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    }
+    // Otherwise, preserve scroll position - don't touch it
+    
+    prevMessagesLengthRef.current = currentLength;
   }, [chatMessages]);
 
   const handleSendMessage = (messageText: string) => {
@@ -86,9 +147,22 @@ export function ChatEngine({ channelId }: ChatEngineProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header removed - on-hover header comes on top */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto min-h-0">
-        <DemoMessageList messages={chatMessages} />
+      {/* Channel/DM Header */}
+      <header
+        className="flex items-center shrink-0 border-b bg-white px-4 h-[49px]"
+        style={{ borderColor: T.colors.border }}
+      >
+        <span className="text-[18px] font-semibold" style={{ color: T.colors.text }}>
+          {displayName}
+        </span>
+      </header>
+      <div 
+        ref={messagesContainerRef} 
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto min-h-0"
+        style={{ scrollBehavior: 'auto' }}
+      >
+        <DemoMessageList messages={chatMessages} channelId={channelId} />
         <div ref={messagesEndRef} />
       </div>
       <div className="shrink-0 px-3 py-2">

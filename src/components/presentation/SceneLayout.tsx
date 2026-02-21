@@ -9,6 +9,11 @@ import { Scene1 } from "./scenes/Scene1";
 import { Scene2 } from "./scenes/Scene2";
 import { QuotaTracker, resetQuotaTrackerMemory } from "./QuotaTracker";
 import { resetAnimatedCounterMemory } from "./AnimatedCounter";
+import { resetPulseDataCardMemory } from "./scenes/PulseDataCard";
+import { resetDealVelocityCardMemory } from "./scenes/DealVelocityCard";
+import { resetPipelineHealthCardMemory } from "./scenes/PipelineHealthCard";
+import { resetWinRateCardMemory } from "./scenes/WinRateCard";
+import { resetConfirmationMemory } from "./scenes/Arc1AgentforcePanel";
 import { usePrototypeMode } from "@/context/PrototypeModeContext";
 import { usePresentationScene } from "@/context/PresentationSceneContext";
 import { useArcNavigation } from "@/context/ArcNavigationContext";
@@ -139,13 +144,18 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
     }
   }, [showProto, setIsPrototypeMode]);
   
-  // Reset memory vaults when starting scenarios (Scene 1) - run once on mount
+  // Reset memory vaults when starting scenarios (Scene 1) - run when Scene 1 becomes active
   useEffect(() => {
     if (scene.id === 1) {
       resetQuotaTrackerMemory();
       resetAnimatedCounterMemory();
+      resetPulseDataCardMemory();
+      resetDealVelocityCardMemory();
+      resetPipelineHealthCardMemory();
+      resetWinRateCardMemory();
+      resetConfirmationMemory();
     }
-  }, []); // Empty deps - only run once when component mounts
+  }, [scene.id]); // Reset whenever Scene 1 becomes active
 
   // Prototype component mapping
   const PROTOTYPE_MAP: Record<number, React.ComponentType<any>> = {

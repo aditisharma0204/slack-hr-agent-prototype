@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Avant Garde for Salesforce Font - ITC Avant Garde Gothic */
-@import url('https://fonts.cdnfonts.com/css/itc-avant-garde-gothic');
-
+/* Removed broken font CDN - using fallback fonts (Montserrat, Lato, system fonts) */
 /* Fallback: Using a similar geometric sans-serif */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
