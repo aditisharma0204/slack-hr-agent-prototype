@@ -10,7 +10,9 @@ import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
 import { PresentationSceneProvider } from "@/context/PresentationSceneContext";
-import { PresenterDockWrapper } from "@/components/presentation/PresenterDockWrapper";
+import { PrototypeModeProvider } from "@/context/PrototypeModeContext";
+import { ArcNavigationProvider } from "@/context/ArcNavigationContext";
+import { GlobalNavigationHeader } from "@/components/presentation/GlobalNavigationHeader";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -34,11 +36,15 @@ export default function RootLayout({
     <ConvexClientProvider>
       <JotaiProvider>
         <PresentationSceneProvider>
-          <Toaster />
-          {hasConvex && <Modals />}
-          <NuqsAdapter>{children}</NuqsAdapter>
-          {/* PresenterDock - globally mounted, persists across all routes */}
-          <PresenterDockWrapper />
+          <PrototypeModeProvider>
+            <ArcNavigationProvider>
+              <Toaster />
+              {hasConvex && <Modals />}
+              {/* Global Navigation Header - rendered once at root level */}
+              <GlobalNavigationHeader />
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </ArcNavigationProvider>
+          </PrototypeModeProvider>
         </PresentationSceneProvider>
       </JotaiProvider>
     </ConvexClientProvider>

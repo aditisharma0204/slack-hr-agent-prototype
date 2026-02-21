@@ -28,20 +28,25 @@ export default function DemoChannelPage() {
   useLayoutEffect(() => {
     if (fromActivity) {
       setActiveNav("activity");
-    } else if (isSlackbot) {
-      setActiveNav("agentforce");
     } else if (isDM) {
+      // Treat all DMs (including Slackbot) as regular DMs
       setActiveNav("dms");
     } else {
       setActiveNav("activity");
     }
-  }, [isDM, isSlackbot, fromActivity, setActiveNav]);
+  }, [isDM, fromActivity, setActiveNav]);
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <DemoChannelHeader channelId={channelId} />
-      <DemoMessageList messages={messages} />
-      <DemoMessageInput channelId={channelId} placeholder={placeholder} />
+    <div className="flex flex-col h-full min-h-0 bg-white">
+      <div className="shrink-0">
+        <DemoChannelHeader channelId={channelId} />
+      </div>
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <DemoMessageList messages={messages} />
+      </div>
+      <div className="shrink-0 px-3 py-2">
+        <DemoMessageInput channelId={channelId} placeholder={placeholder} />
+      </div>
     </div>
   );
 }

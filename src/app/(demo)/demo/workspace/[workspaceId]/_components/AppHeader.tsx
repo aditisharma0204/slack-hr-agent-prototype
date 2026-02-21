@@ -12,14 +12,14 @@ export function AppHeader() {
 
   return (
     <header
-      className="h-12 shrink-0 flex items-center w-full"
-      style={{ backgroundColor: T.colors.globalBg }}
+      className="h-12 shrink-0 flex items-center w-full relative"
+      style={{ zIndex: 100, backgroundColor: T.colors.globalBg }}
     >
       {/* Spacer: align with list pillar (72px icon bar) - arrows start after */}
       <div className="w-[72px] shrink-0" aria-hidden />
 
       {/* Left: Nav arrows (after list pillar) */}
-      <div className="flex items-center gap-1 pl-2 pr-4 shrink-0">
+      <div className="flex items-center gap-1 pl-2 pr-4 shrink-0" style={{ marginLeft: '270px' }}>
         <button className="p-1.5 rounded hover:bg-white/10 text-white/80 transition-colors" title="Back">
           <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -32,9 +32,10 @@ export function AppHeader() {
         </button>
       </div>
 
-      {/* Center: Search bar - aligned with chat surface (72px icon bar + 340px sidebar = 412px) */}
-      <div className="flex-1 flex items-center justify-center min-w-0 max-w-xl mx-4" style={{ marginLeft: '412px' }}>
-        <div className="w-full flex items-center gap-2 px-3 py-2 rounded-md bg-white/10">
+      {/* Center: Search bar + Slackbot icon grouped together */}
+      <div className="flex-1 flex items-center justify-center min-w-0 max-w-xl mx-4" style={{ marginLeft: '-8px' }}>
+        {/* Search bar */}
+        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-white/10 min-w-0">
           <IconSearch width={18} height={18} className="text-white/70 shrink-0" stroke="currentColor" />
           <input
             type="text"
@@ -42,20 +43,20 @@ export function AppHeader() {
             className="flex-1 min-w-0 bg-transparent border-none outline-none text-white placeholder:text-white/60 text-sm"
           />
         </div>
-      </div>
-
-      {/* Right: Slackbot + Call + Bell + Help + Give Feedback + User (right-aligned) */}
-      <div className="flex items-center gap-1 pl-4 pr-4 shrink-0 ml-auto">
-        {/* Slackbot Toggle - next to search */}
+        {/* Slackbot Toggle - grouped with search bar, on the right */}
         <button
           type="button"
           onClick={toggle}
-          className={`p-2 rounded hover:bg-white/10 transition-colors ${isOpen ? "bg-white/15" : ""}`}
+          className={`p-2 rounded hover:bg-white/10 transition-colors shrink-0 ${isOpen ? "bg-white/15" : ""}`}
           title={isOpen ? "Close Slackbot" : "Open Slackbot"}
+          style={{ marginLeft: '16px' }}
         >
-          <Image src="/slackbot-logo.svg" alt="Slackbot" width={22} height={22} />
+          <Image src="/slackbot-logo.svg" alt="Slackbot" width={33} height={33} />
         </button>
+      </div>
 
+      {/* Right: Call + Bell + Help + Give Feedback + User (right-aligned) */}
+      <div className="flex items-center gap-1 pl-4 pr-4 shrink-0 ml-auto">
         {/* Call */}
         <button className="p-2 rounded hover:bg-white/10 text-white/90 transition-colors" title="Calls">
           <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

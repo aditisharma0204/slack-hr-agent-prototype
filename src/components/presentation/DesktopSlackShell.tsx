@@ -16,6 +16,8 @@ import {
   type NavView,
 } from "@/app/(demo)/demo/workspace/[workspaceId]/_context/demo-layout-context";
 import { ChatEngine } from "./ChatEngine";
+import { AnimatePresence, motion } from "framer-motion";
+import { useDemoData } from "@/context/DemoDataContext";
 
 const T = SLACK_TOKENS;
 
@@ -35,7 +37,10 @@ interface DesktopSlackShellProps {
   defaultNav?: NavView;
   defaultChannelId?: string;
   onSlackbotOpen?: () => void;
-  hideHeader?: boolean;
+  hideHeader?: boolean; // Deprecated - ignored, AppHeader always renders
+  customChatContent?: ReactNode;
+  customSlackbotPanel?: ReactNode;
+  forceSlackbotOpen?: boolean;
 }
 
 export function DesktopSlackShell({ 
@@ -43,20 +48,34 @@ export function DesktopSlackShell({
   defaultNav = "activity",
   defaultChannelId = "slackbot",
   onSlackbotOpen,
-  hideHeader = false
+  hideHeader = false,
+  customChatContent,
+  customSlackbotPanel,
+  forceSlackbotOpen = false,
 }: DesktopSlackShellProps) {
-  const [isSlackbotOpen, setIsSlackbotOpen] = useState(false);
+  const [isSlackbotOpen, setIsSlackbotOpen] = useState(forceSlackbotOpen);
   const [activeNav, setActiveNav] = useState<NavView>(defaultNav);
   const [activeChatId, setActiveChatId] = useState<string>(defaultChannelId);
+  const { channels, dms } = useDemoData();
+
+  // Update Slackbot open state when forceSlackbotOpen changes
+  useEffect(() => {
+    if (forceSlackbotOpen) {
+      setIsSlackbotOpen(true);
+    }
+  }, [forceSlackbotOpen]);
 
   useEffect(() => {
     if (defaultChannelId) {
       setActiveChatId(defaultChannelId);
-      // Set the URL to the default channel without navigation
-      const workspaceId = "demo-1";
-      const newPath = `/demo/workspace/${workspaceId}/channel/${defaultChannelId}`;
-      if (typeof window !== "undefined" && window.location.pathname !== newPath) {
-        window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
+      // Don't redirect in presentation mode (when on root "/" route) - we're already rendering in SceneLayout's prototype zone
+      // Only redirect when actually navigating to demo routes
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/demo")) {
+        const workspaceId = "demo-1";
+        const newPath = `/demo/workspace/${workspaceId}/channel/${defaultChannelId}`;
+        if (window.location.pathname !== newPath) {
+          window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
+        }
       }
     }
   }, [defaultChannelId]);
@@ -66,13 +85,26 @@ export function DesktopSlackShell({
     onSlackbotOpen?.();
   };
 
-  // Always render ChatEngine when activeChatId exists (ignore children prop in presentation mode)
-  // This ensures the chat feed is always functional
-  const chatContent = activeChatId ? <ChatEngine channelId={activeChatId} /> : (
+  // Update activeChatId when activeNav changes to activity - select first available item
+  useEffect(() => {
+    if (activeNav === "activity") {
+      const channelAndDmItems = [
+        ...(channels || []).map((ch) => ({ ...ch, type: "channel" as const })),
+        ...(dms || []).map((dm) => ({ ...dm, type: "dm" as const }))
+      ];
+      const firstItemId = channelAndDmItems[0]?.id;
+      if (firstItemId && firstItemId !== activeChatId) {
+        setActiveChatId(firstItemId);
+      }
+    }
+  }, [activeNav, channels, dms, activeChatId]);
+
+  // Use custom chat content if provided (for Scene 1), otherwise use default ChatEngine
+  const chatContent = customChatContent || (activeChatId ? <ChatEngine channelId={activeChatId} /> : (
     <div className="flex flex-col h-full bg-white items-center justify-center p-8">
       <p className="text-[#616061] text-sm">Select a DM from the sidebar to start a conversation.</p>
     </div>
-  );
+  ));
 
   return (
     <ActiveChatContext.Provider value={{ activeChatId, setActiveChatId }}>
@@ -84,14 +116,17 @@ export function DesktopSlackShell({
         isPresentationMode={true}
       >
         <div
-          className="h-full flex flex-col min-h-0 overflow-hidden"
+          className="slack-shell h-full w-full flex flex-col min-h-0 overflow-hidden relative"
           style={{
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Lato", sans-serif',
             backgroundColor: T.colors.globalBg,
           }}
         >
-          {!hideHeader && <AppHeader />}
-          <div className="flex-1 flex min-h-0 min-w-0" style={{ gap: 2 }}>
+          {/* Slack App Header - Always rendered, never conditionally hidden */}
+          <div className="slack-app-header relative shrink-0 w-full z-[100]">
+            <AppHeader />
+          </div>
+          <div className="slack-body flex-1 flex min-h-0 min-w-0 overflow-hidden" style={{ gap: 2 }}>
             {/* Left nav: icon bar only - no roundness */}
             <DemoIconBar />
             {/* List + chat together: one rounded container - shadow casts left onto nav */}
@@ -99,8 +134,13 @@ export function DesktopSlackShell({
               direction="horizontal"
               autoSaveId="demo-workspace-layout"
               className="flex-1 min-w-0"
+              key={isSlackbotOpen ? 'with-panel' : 'without-panel'}
             >
-              <ResizablePanel minSize={20} defaultSize={isSlackbotOpen ? 55 : 75} className="overflow-visible">
+              <ResizablePanel 
+                minSize={20} 
+                defaultSize={isSlackbotOpen ? 55 : 75} 
+                className="overflow-visible"
+              >
                 <div
                   className="h-full flex overflow-hidden"
                   style={{
@@ -109,22 +149,32 @@ export function DesktopSlackShell({
                   }}
                 >
                   <DemoSidebar />
-                  <div className="flex-1 min-w-0 bg-white overflow-y-auto pointer-events-auto" style={{ pointerEvents: "auto" }}>{chatContent}</div>
+                  <div className="flex-1 min-w-0 bg-white overflow-hidden pointer-events-auto" style={{ pointerEvents: "auto" }}>{chatContent}</div>
                 </div>
               </ResizablePanel>
               {isSlackbotOpen && (
                 <>
-                  <ResizableHandle withHandle={false} className="!w-[6px] shrink-0 !bg-transparent border-0 cursor-col-resize focus-visible:ring-0" />
-                  <ResizablePanel minSize={22} defaultSize={25} className="overflow-visible">
-                    <div
+                  <ResizableHandle 
+                    withHandle={false} 
+                    className="!w-[6px] shrink-0 !bg-transparent border-0 cursor-col-resize focus-visible:ring-0"
+                  />
+                  <ResizablePanel 
+                    minSize={22} 
+                    defaultSize={25} 
+                    className="overflow-visible"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                       className="h-full overflow-hidden"
                       style={{
                         borderRadius: 24,
                         boxShadow: "-6px 0 24px -4px rgba(0, 0, 0, 0.18), -2px 0 10px -2px rgba(0, 0, 0, 0.12)",
                       }}
                     >
-                      <SlackbotPanel onClose={() => setIsSlackbotOpen(false)} />
-                    </div>
+                      {customSlackbotPanel || <SlackbotPanel onClose={() => setIsSlackbotOpen(false)} />}
+                    </motion.div>
                   </ResizablePanel>
                 </>
               )}

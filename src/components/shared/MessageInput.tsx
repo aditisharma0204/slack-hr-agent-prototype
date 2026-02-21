@@ -53,7 +53,7 @@ export function MessageInput({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="shrink-0 px-2 pb-2 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+    <form onSubmit={handleSubmit} className="shrink-0 w-full pointer-events-auto" style={{ paddingBottom: "2px" }} onClick={(e) => e.stopPropagation()}>
       <div
         className="bg-white border border-solid rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] overflow-hidden w-full pointer-events-auto"
         style={{ borderColor: "rgba(94,93,96,0.45)", pointerEvents: "auto" }}
@@ -118,7 +118,7 @@ export function MessageInput({
         </div>
 
         {/* Input Field */}
-        <div className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+        <div className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
           <textarea
             ref={textareaRef}
             value={input}
@@ -176,10 +176,10 @@ export function MessageInput({
           />
         </div>
 
-        {/* Bottom Action Bar */}
-        <div className="flex items-center justify-between px-3 py-2">
-          {/* Left actions */}
-          <div className="flex items-center gap-1">
+        {/* Bottom Action Bar — right actions shrink-0 so send button is never clipped in narrow panels */}
+        <div className="flex items-center justify-between gap-2 px-3 py-2 min-w-0">
+          {/* Left actions — can shrink in narrow panels */}
+          <div className="flex items-center gap-1 min-w-0 shrink">
             <button type="button" className="p-1 rounded hover:bg-[#f8f8f8]" style={{ color: "#616061" }} title="Add">
               <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M10 5v10M5 10h10" />
@@ -205,8 +205,8 @@ export function MessageInput({
             </button>
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-0.5">
+          {/* Right actions — never shrink so send + more are always visible */}
+          <div className="flex items-center gap-0.5 shrink-0">
             <button type="submit" className="p-1 rounded hover:bg-[#f8f8f8]" style={{ color: "#616061" }} title="Send">
               <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 2L9 11M18 2l-7 16-2-7-7-2 16-7z" />

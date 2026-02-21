@@ -109,6 +109,7 @@ export function getMessageAvatarUrl(author: string): string | null {
 }
 
 // Real human photos from RandomUser.me (portraits 0-99 for men/women)
+// All DMs must have meaningful preview data - see DM_PREVIEWS above
 const DEMO_DMS: DemoDM[] = [
   { id: "slackbot", name: "Slackbot", isSlackbot: true, unread: true },
   { id: "sarah-chen", name: "Sarah Chen", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/women/44.jpg", unread: true },
@@ -117,6 +118,9 @@ const DEMO_DMS: DemoDM[] = [
   { id: "dana-torres", name: "Dana Torres", status: "dnd", avatarUrl: "https://randomuser.me/api/portraits/med/women/28.jpg" },
   { id: "marcus-lee", name: "Marcus Lee", status: "call", avatarUrl: "https://randomuser.me/api/portraits/med/men/8.jpg", unread: true },
   { id: "lisa-park", name: "Lisa Park", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/women/65.jpg" },
+  // Additional contacts from fictional universe
+  { id: "daniel-kim", name: "Daniel Kim", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/men/33.jpg" },
+  { id: "mike-torres", name: "Mike Torres", status: "away", avatarUrl: "https://randomuser.me/api/portraits/med/men/45.jpg" },
 ];
 
 const DEMO_FILES: DemoFile[] = [
@@ -193,6 +197,30 @@ const DEMO_ACTIVITY_POSTS: DemoActivityPost[] = [
 ];
 
 export const DEMO_USER_NAME = "Rita";
+
+// Fictional preview data for channels and DMs - ensures all cards have meaningful content
+const CHANNEL_PREVIEWS: Record<string, { preview: string; timestamp: string }> = {
+  "general": { preview: "Company-wide updates and announcements", timestamp: "Today" },
+  "sales": { preview: "SmartFit replied to the follow-up — positive tone. Vibeface prepping demo deck.", timestamp: "9:45 AM" },
+  "q3-pipeline": { preview: "Plan status: *$430K on track* after Greentech SO...", timestamp: "Yesterday" },
+  "deal-acme": { preview: "Sent intro to Priya via Sarah. Daniel Kim — can we pull the...", timestamp: "Today" },
+  "deal-runners": { preview: "30-min call with Jordan set for 4 PM. Vibeface prepping...", timestamp: "10:15 AM" },
+  "deal-greentech": { preview: "Following up with Priya on SOW. She's been responsive.", timestamp: "Today" },
+  "deal-sporty": { preview: "Reaching out to Mike Torres. Dana's team might be in flux.", timestamp: "Today" },
+  "deal-techstart": { preview: "Reviewed the brief. Ready for the call.", timestamp: "9:30 AM" },
+};
+
+const DM_PREVIEWS: Record<string, { preview: string; timestamp: string }> = {
+  "slackbot": { preview: "Proactive insights for today — $410K on track", timestamp: "Today" },
+  "sarah-chen": { preview: "Done. Priya should have it. Good luck...", timestamp: "Yesterday" },
+  "priya-shah": { preview: "Thanks Priya! Let me know if legal has any...", timestamp: "10:20 AM" },
+  "jordan-hayes": { preview: "4 PM works. Send the deck when you have...", timestamp: "Today" },
+  "dana-torres": { preview: "Following up. Let me know if there's a...", timestamp: "3 days ago" },
+  "marcus-lee": { preview: "Thanks Marcus! Appreciate your...", timestamp: "1 week ago" },
+  "lisa-park": { preview: "Sounds good. He's detail-oriented but...", timestamp: "Today" },
+  "daniel-kim": { preview: "Sent intro to Priya via Sarah. Daniel Kim — can we pull the...", timestamp: "Today" },
+  "mike-torres": { preview: "Reaching out to Mike Torres. Dana's team might be in flux.", timestamp: "Today" },
+};
 
 function getLastMessagePreview(messages: DemoMessage[]): string {
   if (!messages?.length) return "";
@@ -274,9 +302,42 @@ export function DemoDataProvider({ children }: { children: React.ReactNode }) {
   const getChannelPreview = (channelId: string) => {
     const msgs = messages[channelId] || [];
     const last = msgs[msgs.length - 1];
+    const realPreview = getLastMessagePreview(msgs);
+    
+    // If we have real messages with content, use them
+    if (msgs.length > 0 && realPreview) {
+      return {
+        preview: realPreview,
+        timestamp: last?.timestamp ?? "",
+      };
+    }
+    
+    // Fallback to fictional data - ensure every card has meaningful content
+    // Check if it's a channel or DM
+    const channelMatch = DEMO_CHANNELS.find(c => c.id === channelId);
+    const dmMatch = DEMO_DMS.find(d => d.id === channelId);
+    
+    if (channelMatch && CHANNEL_PREVIEWS[channelId]) {
+      return CHANNEL_PREVIEWS[channelId];
+    }
+    
+    if (dmMatch && DM_PREVIEWS[channelId]) {
+      return DM_PREVIEWS[channelId];
+    }
+    
+    // Final fallback - ensure we always return meaningful content
+    // Match channel name pattern to provide contextual preview
+    if (channelId.startsWith("deal-")) {
+      const dealName = channelId.replace("deal-", "");
+      return {
+        preview: `Active deal discussion for ${dealName}. Reviewing next steps...`,
+        timestamp: "Today",
+      };
+    }
+    
     return {
-      preview: getLastMessagePreview(msgs),
-      timestamp: last?.timestamp ?? "",
+      preview: "Recent activity and updates",
+      timestamp: "Today",
     };
   };
 

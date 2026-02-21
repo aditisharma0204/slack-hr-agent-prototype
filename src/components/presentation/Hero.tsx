@@ -152,19 +152,21 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
   ];
 
   return (
-    <div className="w-full h-screen bg-[#0059FF] overflow-hidden flex text-white relative">
+    <div className="w-full bg-[#0059FF] overflow-hidden flex text-white relative" style={{ height: "calc(100vh - 40px)", marginTop: "40px" }}>
       {/* Fixed Image (Left) - No Parallax */}
       <div
-        className="fixed top-0 left-0 w-[65%] h-screen z-[5] pointer-events-none opacity-100"
+        className="fixed left-0 w-[65%] z-[5] pointer-events-none opacity-100"
         style={{
+          top: "40px",
+          height: "calc(100vh - 40px)",
           WebkitMaskImage: 'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
-          maskImage: 'linear-gradient(to right, black 0%, black 50%, transparent 100%)'
+          maskImage: 'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
         }}
       >
         <img
           src="/Rita_Intro.png"
           alt="Rita"
-          className="w-full h-screen object-cover object-top scale-110"
+          className="w-full object-cover object-top scale-110" style={{ height: "calc(100vh - 40px)" }}
           onError={(e) => {
             (e.target as HTMLImageElement).parentElement!.style.background = "var(--bg-1)";
           }}
@@ -174,7 +176,7 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
       {/* Master Scroll Column (Right) */}
       <div
         onScroll={(e) => setScrollY(e.currentTarget.scrollTop)}
-        className="ml-[35%] w-[65%] h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth relative z-10 pb-32 bg-transparent"
+        className="ml-[35%] w-[65%] overflow-y-auto snap-y snap-mandatory scroll-smooth relative z-10 pb-32 bg-transparent" style={{ height: "calc(100vh - 40px)" }}
       >
         {/* Section 1: Brand */}
         <div className="min-h-screen flex flex-col justify-center snap-start">
@@ -185,15 +187,19 @@ export function Hero({ onUnbundlingClick, onScenesClick }: HeroProps) {
                 <img src="/slackbot-logo.svg" alt="Slackbot" className="w-8 h-8" />
                 <span className="text-xl font-bold tracking-wide text-white whitespace-nowrap">SlackbotPro</span>
               </div>
-              <span className="text-sm text-gray-200 font-light tracking-wide whitespace-nowrap">Sales Cloud UX | feb 2026</span>
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-200 font-light tracking-wide whitespace-nowrap">Sales Cloud UX | Feb 2026</span>
+              </div>
             </div>
             {/* Main Hero Title */}
             <h1 className="text-6xl md:text-8xl text-white leading-tight mb-3" style={{ fontFamily: "'Avant Garde for Salesforce', 'ITC Avant Garde Gothic', Montserrat, sans-serif", fontWeight: 700 }}>
               Future of Selling
             </h1>
-            <p className="text-xl font-light" style={{ color: '#B3D9FF' }}>
+            <p className="text-xl font-light mb-8" style={{ color: '#B3D9FF' }}>
               Evolving the CRM into an invisible, omnipresent layer that moves at the speed of a seller's life.
             </p>
+            {/* Design Credit */}
+            <span className="text-[11px] text-gray-200 font-light tracking-wide whitespace-nowrap">Design explorations by Prantik Banerjee</span>
           </div>
         </div>
 

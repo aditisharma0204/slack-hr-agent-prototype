@@ -149,46 +149,12 @@
     ],
     "slackbot": [
       {
-        "id": "dm_1",
+        "id": "slackbot_welcome",
         "author": "Slackbot",
         "authorImage": null,
         "timestamp": "Today",
-        "body": null,
-        "blocks": [
-          {
-            "type": "header",
-            "text": { "type": "plain_text", "text": "Proactive insights for today", "emoji": true }
-          },
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "Hi Rita! Here's where you stand:"
-            }
-          },
-          {
-            "type": "section",
-            "fields": [
-              { "type": "mrkdwn", "text": "*On track*\n$410K" },
-              { "type": "mrkdwn", "text": "*Needs you*\n$90K (2 deals)" },
-              { "type": "mrkdwn", "text": "*Blocked*\n$0" },
-              { "type": "mrkdwn", "text": "*Overnight*\n4 follow-ups sent, 12 CRM updates" }
-            ]
-          },
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "Focus: Runners Club (budget objection) and Sporty Nation (champion silent). Vibeface has drafts ready."
-            }
-          },
-          {
-            "type": "actions",
-            "elements": [
-              { "type": "button", "text": { "type": "plain_text", "text": "View Seller Edge", "emoji": true }, "action_id": "view_seller_edge", "style": "primary" }
-            ]
-          }
-        ]
+        "body": "Hi Rita! I'm here to help with your sales pipeline. Ask me anything about your deals, meetings, or follow-ups.",
+        "blocks": null
       }
     ],
     "deal-acme": [

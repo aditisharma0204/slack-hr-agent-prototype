@@ -379,7 +379,7 @@ export function Scene2({ onNext }: Scene2Props) {
                 </motion.div>
               )}
 
-              {/* View 4: Agentforce Actions / Details */}
+              {/* View 4: Slackbot Actions / Details */}
               {step === 'details' && (
                 <motion.div
                   key="details"
@@ -399,7 +399,7 @@ export function Scene2({ onNext }: Scene2Props) {
                   >
                   {/* Header */}
                   <div className="text-xs font-bold text-white mb-2">
-                    Agentforce actions
+                    Slackbot actions
                   </div>
 
                   {/* Timeline list */}

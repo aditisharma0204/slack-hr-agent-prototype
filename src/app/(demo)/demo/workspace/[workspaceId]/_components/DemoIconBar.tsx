@@ -13,7 +13,7 @@ import {
   IconPlus,
   IconHashtag,
 } from "@/components/icons";
-import { useNav } from "../_context/demo-layout-context";
+import { useNav, usePresentationMode } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -32,9 +32,11 @@ const navItems = [
 export function DemoIconBar() {
   const params = useParams();
   const pathname = usePathname();
-  const workspaceId = params.workspaceId as string;
+  // Fallback to "demo-1" in presentation mode where workspaceId param doesn't exist
+  const workspaceId = (params.workspaceId as string) || "demo-1";
   const base = `/demo/workspace/${workspaceId}`;
   const { activeNav, setActiveNav } = useNav();
+  const { isPresentationMode } = usePresentationMode();
 
   return (
     <aside
@@ -47,12 +49,19 @@ export function DemoIconBar() {
       {navItems.map((item) => {
         const Icon = item.icon;
         const href = base + item.href;
-        const isActive = activeNav === item.id || pathname === href;
+        // Single source of truth: only activeNav determines active state
+        const isActive = activeNav === item.id;
         return (
           <Link
             key={item.label}
             href={href}
-            onClick={() => setActiveNav(item.id)}
+            onClick={(e) => {
+              setActiveNav(item.id);
+              // In presentation mode, prevent navigation - only update state
+              if (isPresentationMode) {
+                e.preventDefault();
+              }
+            }}
             className={cn(
               "relative flex flex-col items-center justify-center w-full py-2 px-1 rounded transition-colors",
               !isActive && "hover:bg-[#5a2b5e]"

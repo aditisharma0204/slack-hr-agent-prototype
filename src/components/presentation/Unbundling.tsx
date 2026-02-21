@@ -24,7 +24,7 @@ export function Unbundling({ onScenesClick, onBack }: UnbundlingProps) {
     if (currentStep.dissolve) {
       currentStep.dissolve.forEach((id, i) => {
         setTimeout(() => {
-          setDissolvedIds((prev) => new Set([...prev, id]));
+          setDissolvedIds((prev) => new Set([...Array.from(prev), id]));
         }, i * 160);
       });
     }
@@ -33,7 +33,7 @@ export function Unbundling({ onScenesClick, onBack }: UnbundlingProps) {
     if (currentStep.crystallize) {
       UB_ESSENTIAL.forEach((task, i) => {
         setTimeout(() => {
-          setCrystallizedIds((prev) => new Set([...prev, task.id]));
+          setCrystallizedIds((prev) => new Set([...Array.from(prev), task.id]));
         }, i * 100);
       });
     }
@@ -80,8 +80,13 @@ export function Unbundling({ onScenesClick, onBack }: UnbundlingProps) {
   return (
     <div
       id="sp-unbundling"
-      className="fixed inset-0 z-[200] flex flex-col overflow-hidden"
+      className="fixed z-[200] flex flex-col overflow-hidden"
       style={{
+        top: "40px",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: "calc(100vh - 40px)",
         backgroundColor: "#040A14",
         display: "flex",
         animation: "pageIn 0.4s ease both",

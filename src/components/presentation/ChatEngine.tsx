@@ -91,7 +91,7 @@ export function ChatEngine({ channelId }: ChatEngineProps) {
         <DemoMessageList messages={chatMessages} />
         <div ref={messagesEndRef} />
       </div>
-      <div className="shrink-0">
+      <div className="shrink-0 px-3 py-2">
         <MessageInput
           placeholder="Reply..."
           onSubmit={handleSendMessage}

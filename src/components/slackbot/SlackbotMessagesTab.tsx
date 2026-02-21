@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import {
-  IconStar,
+  IconHome,
   IconPencil,
   IconSearch,
   IconLightbulb,
@@ -19,7 +19,7 @@ import { MessageInput } from "@/components/shared/MessageInput";
 const T = SLACK_TOKENS;
 
 const PILL_ACTIONS = [
-  { id: "discover", label: "Discover", icon: IconStar, query: "What would it take to close the gap?" },
+  { id: "discover", label: "Discover", icon: IconHome, query: "What would it take to close the gap?" },
   { id: "create", label: "Create", icon: IconPencil, query: "Prep me for my TechStart meeting" },
   { id: "find", label: "Find", icon: IconSearch, query: "Tell me about Acme Corp" },
   { id: "brainstorm", label: "Brainstorm", icon: IconLightbulb, query: "What's my risk today?" },
@@ -301,12 +301,14 @@ export function SlackbotMessagesTab() {
         )}
       </div>
 
-      <MessageInput 
-        placeholder="Reply..." 
-        onSubmit={sendMessage}
-        value={input}
-        onChange={setInput}
-      />
+      <div className="shrink-0 px-3 py-2">
+        <MessageInput
+          placeholder="Reply..."
+          onSubmit={sendMessage}
+          value={input}
+          onChange={setInput}
+        />
+      </div>
     </div>
   );
 }

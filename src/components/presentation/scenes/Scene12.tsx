@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScenarioNarrative } from "../ScenarioNarrative";
-import { iPadShell } from "../iPadShell";
+import { iPadShell as TabletShell } from "@/components/presentation/iPadShell";
 
 interface Scene12Props {
   onNext: () => void;
@@ -39,10 +39,10 @@ export function Scene12({ onNext }: Scene12Props) {
         transition={{ duration: 0.3 }}
         className="h-full w-full"
       >
-        <iPadShell>
+        <TabletShell>
           <div className="h-full w-full flex flex-col items-center justify-center p-8">
           </div>
-        </iPadShell>
+        </TabletShell>
       </motion.div>
     </AnimatePresence>
   );

@@ -121,21 +121,33 @@ export function TheStage() {
 
   return (
     <DemoDataProvider>
-      <div className="relative w-full h-screen overflow-hidden" style={{ isolation: "isolate", backgroundColor: "var(--bg)", color: "var(--text)" }}>
-        {currentView === "hero" && (
-          <Hero onUnbundlingClick={handleUnbundlingClick} onScenesClick={handleScenesClick} />
-        )}
-        {currentView === "unbundling" && (
-          <Unbundling onScenesClick={handleScenesClick} onBack={handleBack} />
-        )}
-        {typeof currentView === "number" && currentSceneData && (
-          <SceneLayout
-            scene={currentSceneData}
-            onBack={handleBack}
-            onPrev={currentIdx > 0 ? handleScenePrev : undefined}
-            onNext={currentIdx < enabledScenes.length - 1 ? handleSceneNext : undefined}
-          />
-        )}
+      <div
+        className="relative w-full min-h-screen overflow-hidden"
+        style={{
+          isolation: "isolate",
+          backgroundColor: "var(--bg, #060608)",
+          color: "var(--text, #ECEBF5)",
+          minHeight: "100vh",
+          height: "100vh",
+        }}
+      >
+        {/* Content area - naturally flows below fixed header */}
+        <div className="relative w-full min-h-full" style={{ height: "100vh", overflow: "hidden" }}>
+          {currentView === "hero" && (
+            <Hero onUnbundlingClick={handleUnbundlingClick} onScenesClick={handleScenesClick} />
+          )}
+          {currentView === "unbundling" && (
+            <Unbundling onScenesClick={handleScenesClick} onBack={handleBack} />
+          )}
+          {typeof currentView === "number" && currentSceneData && (
+            <SceneLayout
+              scene={currentSceneData}
+              onBack={handleBack}
+              onPrev={currentIdx > 0 ? handleScenePrev : undefined}
+              onNext={currentIdx < enabledScenes.length - 1 ? handleSceneNext : undefined}
+            />
+          )}
+        </div>
       </div>
     </DemoDataProvider>
   );

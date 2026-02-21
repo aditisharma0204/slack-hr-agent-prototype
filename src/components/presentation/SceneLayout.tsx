@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import React from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { SceneData, SCENES } from "@/lib/presentation-data";
 import { DesktopSlackShell } from "./DesktopSlackShell";
+import { Scene1 } from "./scenes/Scene1";
 import { Scene2 } from "./scenes/Scene2";
 import { QuotaTracker, resetQuotaTrackerMemory } from "./QuotaTracker";
 import { resetAnimatedCounterMemory } from "./AnimatedCounter";
+import { usePrototypeMode } from "@/context/PrototypeModeContext";
+import { usePresentationScene } from "@/context/PresentationSceneContext";
+import { useArcNavigation } from "@/context/ArcNavigationContext";
 
 interface SceneLayoutProps {
   scene: SceneData;
@@ -15,13 +20,124 @@ interface SceneLayoutProps {
   onNext?: () => void;
 }
 
+// Map scene IDs to arc numbers (scenes 1-10 map to arcs 1-10)
+const SCENE_TO_ARC: Record<number, number> = {
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  10: 10,
+  11: 10, // Multiple scenes can map to same arc
+  12: 10,
+  13: 10,
+};
+
+// Map arc numbers to first scene ID in that arc
+const ARC_TO_SCENE: Record<number, number> = {
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  10: 10,
+};
+
 export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps) {
   const [showProto, setShowProto] = useState(false);
+  const [protoMountReady, setProtoMountReady] = useState(false);
+  const [contentOpacity, setContentOpacity] = useState(1);
+  const { setIsPrototypeMode } = usePrototypeMode();
+
+  // Defer prototype content until after browser has laid out the fixed prototype zone — fixes wrong layout on first "Enter scenario" click
+  useLayoutEffect(() => {
+    if (showProto) {
+      // Double RAF ensures the fixed prototype zone container has been positioned and sized by the browser before mounting DesktopSlackShell
+      let rafId2: number;
+      const rafId1 = requestAnimationFrame(() => {
+        rafId2 = requestAnimationFrame(() => {
+          setProtoMountReady(true);
+        });
+      });
+      // Fallback: ensure content mounts even if RAF is delayed
+      const timeoutId = setTimeout(() => {
+        setProtoMountReady(true);
+      }, 200);
+      return () => {
+        cancelAnimationFrame(rafId1);
+        if (rafId2) cancelAnimationFrame(rafId2);
+        clearTimeout(timeoutId);
+      };
+    } else {
+      setProtoMountReady(false);
+    }
+  }, [showProto]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { currentScene, setCurrentScene } = usePresentationScene();
+  const arcNavigation = useArcNavigation();
+
+  // Get current arc from scene
+  const currentArc = SCENE_TO_ARC[scene.id] || 1;
+
+  const handleSceneChange = (scene: number) => {
+    setCurrentScene(scene);
+    // Navigate to root page if not already there, so TheStage can render the scene
+    if (pathname !== "/") {
+      router.replace("/");
+    }
+  };
+
+  const handleArcChange = (arc: number, screen?: number) => {
+    // Fade out
+    setContentOpacity(0);
+    setTimeout(() => {
+      // Change to the first scene of the target arc
+      const targetScene = ARC_TO_SCENE[arc] || arc;
+      setCurrentScene(targetScene);
+      arcNavigation.setArc(arc, screen || 1);
+      // Fade in
+      setTimeout(() => {
+        setContentOpacity(1);
+      }, 50);
+    }, 150);
+  };
+
+  const handleRestartArc = () => {
+    // Trigger fade animation first
+    setContentOpacity(0.6);
+    setTimeout(() => {
+      arcNavigation.restartArc();
+      setContentOpacity(1);
+    }, 200);
+  };
+
+  const handleNextScreen = () => {
+    arcNavigation.nextScreen();
+  };
 
   useEffect(() => {
     // Reset prototype visibility when scene changes
     setShowProto(false);
-  }, [scene.id]);
+    setIsPrototypeMode(false);
+  }, [scene.id, setIsPrototypeMode]);
+
+  useEffect(() => {
+    // Update prototype mode context when showProto changes
+    setIsPrototypeMode(showProto);
+    // Reset opacity when entering prototype mode to ensure content is visible
+    if (showProto) {
+      setContentOpacity(1);
+    }
+  }, [showProto, setIsPrototypeMode]);
   
   // Reset memory vaults when starting scenarios (Scene 1) - run once on mount
   useEffect(() => {
@@ -33,7 +149,7 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
 
   // Prototype component mapping
   const PROTOTYPE_MAP: Record<number, React.ComponentType<any>> = {
-    1: DesktopSlackShell,
+    1: Scene1,
     2: DesktopSlackShell,
     3: Scene2,
     4: Scene2,
@@ -44,11 +160,15 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
   const renderProtoZone = () => {
     const ProtoComponent = PROTOTYPE_MAP[scene.id];
     
-    if (ProtoComponent) {
-      // Scenes 1, 2, 6: Slack with specific props (hide internal header)
-      if ([1, 2, 6].includes(scene.id)) {
-        return <DesktopSlackShell defaultNav="dms" defaultChannelId="slackbot" hideHeader={true} />;
-      }
+      if (ProtoComponent) {
+        // Scene 1: Custom Scene1 component with Agentforce dashboard
+        if (scene.id === 1) {
+          return <Scene1 onNext={() => {}} skipNarrative={true} />;
+        }
+        // Scenes 2, 6: Slack with specific props
+        if ([2, 6].includes(scene.id)) {
+          return <DesktopSlackShell defaultNav="dms" defaultChannelId="slackbot" hideHeader={false} />;
+        }
       // Scenes 3, 4: Apple Watch
       if ([3, 4].includes(scene.id)) {
         return <Scene2 onNext={() => {}} />;
@@ -68,12 +188,12 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
   };
 
   return (
-    <div className="sp fixed inset-0 z-[200] overflow-hidden" style={{ background: "var(--bg)", animation: "pageIn 0.4s ease both" }}>
+    <div className="sp fixed z-[200] overflow-hidden" style={{ background: "var(--bg)", animation: "pageIn 0.4s ease both", top: "var(--header-height, 40px)", left: 0, right: 0, width: "100vw", minWidth: "100%", height: "calc(100vh - var(--header-height, 40px))", pointerEvents: showProto ? 'none' : 'auto' }}>
       {/* Split layout - overlapping editorial feel */}
       {!showProto && (
-        <div className="relative w-full h-screen bg-[#E5EEFB] flex overflow-hidden gap-0">
+        <div className="relative w-full h-full bg-[#E5EEFB] flex overflow-hidden gap-0 min-w-0" style={{ width: '100%', minWidth: '100%', zIndex: 1 }}>
           {/* Left image - fill container, no black bars */}
-          <div className="w-[65%] h-screen relative shrink-0 [mask-image:linear-gradient(to_right,white_80%,transparent_100%)]">
+          <div className="w-[65%] h-full relative shrink-0 [mask-image:linear-gradient(to_right,white_80%,transparent_100%)]" style={{ minWidth: '65%' }}>
             <img
               key={scene.image}
               src={scene.image ? scene.image.replace(/ /g, '%20') : '/New%20Scene_01.png'}
@@ -93,9 +213,9 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
           </div>
 
           {/* Right content - overlapping panel */}
-          <div className="flex-1 h-full bg-transparent relative z-10 -ml-32 flex items-center justify-center">
+          <div className="flex-1 h-full bg-transparent relative z-10 -ml-32 flex items-center justify-center min-w-0" style={{ minWidth: 0, flexGrow: 1 }}>
             {/* Fixed-width, centered inner container */}
-            <div key={scene.id} className="w-full max-w-[940px] px-16 flex flex-col">
+            <div key={scene.id} className="w-full max-w-[940px] px-16 flex flex-col min-w-0" style={{ width: '100%' }}>
               {/* 1. Animated Header Block */}
               <div className="h-[180px] shrink-0 flex flex-col justify-end pb-0">
                 <div key={`header-${scene.id}`} className="animate-reveal opacity-0" style={{ animationDelay: '100ms' }}>
@@ -251,27 +371,29 @@ export function SceneLayout({ scene, onBack, onPrev, onNext }: SceneLayoutProps)
         </div>
       )}
 
-      {/* Proto zone - full screen takeover */}
+      {/* Proto zone - positioned independently below global header, same as "sp" div, so layout is stable from first frame */}
       {showProto && (
-        <div className="fixed inset-0 z-[9999] flex flex-col w-screen h-screen overflow-hidden">
-          {/* Prototype Back Header */}
-          <div className="w-full h-12 bg-[#E5EEFB] border-b flex items-center px-6 shrink-0 z-[10000]" style={{ borderColor: 'rgba(0, 89, 255, 0.2)' }}>
-            <button 
-              onClick={() => setShowProto(false)} 
-              className="text-sm font-medium flex items-center gap-2 transition-colors"
-              style={{ color: '#0059FF' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#0066FF'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#0059FF'; }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              Back to Scenario
-            </button>
-          </div>
-          {/* Prototype Content - fills remaining space */}
-          <div className="flex-1 relative overflow-hidden w-full h-full">
-            {renderProtoZone()}
+        <div
+          data-prototype-content
+          className="prototype-screen fixed flex flex-col overflow-hidden transition-opacity duration-300"
+          style={{
+            opacity: contentOpacity,
+            zIndex: 9999,
+            top: 'var(--header-height, 40px)',
+            left: 0,
+            right: 0,
+            height: 'calc(100vh - var(--header-height, 40px))',
+            width: '100%',
+            backgroundColor: 'var(--bg, #060608)',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div className="w-full h-full flex flex-col min-h-0" style={{ height: '100%', opacity: protoMountReady ? 1 : 0.5 }}>
+            {protoMountReady ? renderProtoZone() : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg, #060608)' }}>
+                <p className="text-white text-lg">Loading prototype...</p>
+              </div>
+            )}
           </div>
         </div>
       )}

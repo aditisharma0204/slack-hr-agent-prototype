@@ -12,6 +12,103 @@ html,
 body,
 :root {
   height: 100%;
+  min-height: 100vh;
+}
+
+body {
+  background-color: var(--bg, #060608);
+}
+
+/* Global Navigation Header - CSS-only visibility control */
+:root {
+  --header-height: 40px;
+}
+
+.global-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: var(--header-height);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* Hover reveal — Landing + Scenario only */
+body:not(.prototype-mode):hover .global-header {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* Prototype mode — always visible, no hover needed */
+body.prototype-mode .global-header {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  transform: translateY(0) !important;
+  transition: none !important;
+}
+
+/* Arc number tooltip - polished with triangular nub */
+.arc-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  
+  background: #111111;
+  color: #4ADE80;
+  border-radius: 6px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 150ms ease;
+  z-index: 10001;
+}
+
+/* The triangular nub pointing down to the arc number */
+.arc-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #111111;
+}
+
+/* Hide tooltip in prototype mode */
+body.prototype-mode .arc-tooltip {
+  display: none !important;
+}
+
+/* Ensure Slack App Header is always visible */
+.slack-app-header {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Ensure AppHeader component is never hidden */
+.slack-app-header header {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 @layer base {
@@ -295,6 +392,10 @@ body,
 
 .animate-subtle {
   animation: subtleFade 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 /* Noise overlay */

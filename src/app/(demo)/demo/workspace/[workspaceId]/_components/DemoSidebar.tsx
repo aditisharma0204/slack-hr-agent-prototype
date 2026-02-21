@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   IconSearch,
   IconSquare,
@@ -76,6 +76,13 @@ export function DemoSidebar() {
   const { activeNav } = useNav();
   const { isPresentationMode } = usePresentationMode();
   const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead } = useDemoData();
+  const searchParams = useSearchParams();
+  
+  // For activity page, check query param for selected channel
+  const activityChannelId = activeNav === "activity" ? searchParams.get("channel") : null;
+  
+  // Calculate effective channel ID - prioritize URL params, then activity query, then first item
+  const effectiveChannelId = channelId || activityChannelId;
   
   // Try to get activeChatId from context (for local state navigation)
   let activeChatId: string | undefined;
@@ -133,8 +140,9 @@ export function DemoSidebar() {
   const title = NAV_TITLES[activeNav] ?? "Activity";
 
   return (
+    // Activity view swaps list content only — never changes outer shell
     <aside
-      className="w-[340px] flex-shrink-0 flex flex-col border-r"
+      className="w-[340px] flex-shrink-0 flex flex-col h-full border-r"
       style={{
         background: useDarkTheme ? T.colors.dmSidebarBg : "#ffffff",
         borderColor: useDarkTheme ? "transparent" : T.colors.border,
@@ -143,10 +151,11 @@ export function DemoSidebar() {
         }),
       }}
     >
-      {/* DM header: Direct messages + dropdown, Unreads toggle, Edit icon, then search bar */}
+      {/* PERMANENT SIDEBAR HEADER - Never disappears, always visible */}
       {isDmView ? (
         <>
-          <div className="px-4 py-4 flex items-center justify-between gap-3">
+          {/* DM Header - Direct messages title row */}
+          <div className="px-4 py-4 flex items-center justify-between gap-3 shrink-0">
             <button type="button" className="flex items-center gap-1.5 hover:opacity-90 shrink-0">
               <span className="font-bold text-white whitespace-nowrap" style={{ fontSize: T.typography.header }}>Direct messages</span>
               <IconChevronDown width={14} height={14} className="text-white shrink-0" stroke="currentColor" />
@@ -174,7 +183,8 @@ export function DemoSidebar() {
               </button>
             </div>
           </div>
-          <div className="px-4 pb-4">
+          {/* DM Search Bar */}
+          <div className="px-4 pb-4 shrink-0">
             <div
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-150 focus-within:border-white focus-within:shadow-[0_0_0_1px_#fff,0_0_0_2px_#a189b2,0_0_12px_rgba(161,137,178,0.35)]"
               style={{
@@ -196,7 +206,8 @@ export function DemoSidebar() {
         </>
       ) : (
         <>
-          <div className="px-3 py-3 border-b flex items-center justify-between gap-2" style={{ borderColor: T.colors.border }}>
+          {/* Non-DM Header - Title row (Home, Activity, etc.) */}
+          <div className="px-3 py-3 border-b flex items-center justify-between gap-2 shrink-0" style={{ borderColor: T.colors.border }}>
             <div className="flex items-center gap-2">
               <span className="font-bold" style={{ fontSize: T.typography.header, color: T.colors.text }}>{title}</span>
               {(activeNav === "activity" || activeNav === "home") && (
@@ -208,102 +219,105 @@ export function DemoSidebar() {
             </button>
           </div>
 
+          {/* All/DMs Tabs - Only for Home, Activity, More views */}
           {showAllDmsTabs && (
-      <div className="flex items-center gap-1 px-2 py-2 border-b" style={{ borderColor: T.colors.border }}>
-        <button
-          type="button"
-          className={cn(
-            "relative px-3 py-1.5 font-medium rounded flex items-center gap-1.5",
-            filter === "all" ? "" : "hover:bg-[#f8f8f8]"
+            <div className="flex items-center gap-1 px-2 py-2 border-b shrink-0" style={{ borderColor: T.colors.border }}>
+              <button
+                type="button"
+                className={cn(
+                  "relative px-3 py-1.5 font-medium rounded flex items-center gap-1.5",
+                  filter === "all" ? "" : "hover:bg-[#f8f8f8]"
+                )}
+                style={filter === "all" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
+                onClick={() => setFilter("all")}
+              >
+                All
+                <span className="min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full text-[11px] font-medium text-white" style={{ backgroundColor: T.colors.avatarBg }}>{channelAndDmItems.length}</span>
+                {filter === "all" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "relative px-3 py-1.5 font-medium rounded",
+                  filter === "dms" ? "" : "hover:bg-[#f8f8f8]"
+                )}
+                style={filter === "dms" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
+                onClick={() => setFilter("dms")}
+              >
+                DMs
+                {filter === "dms" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
+              </button>
+              <button
+                type="button"
+                className="p-1.5 rounded hover:bg-[#f8f8f8]"
+                style={{ color: T.colors.textSecondary }}
+                title="Add"
+              >
+                <IconPlus width={T.iconSizes.channelHeader} height={T.iconSizes.channelHeader} stroke="currentColor" />
+              </button>
+            </div>
           )}
-          style={filter === "all" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
-          onClick={() => setFilter("all")}
-        >
-          All
-          <span className="min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full text-[11px] font-medium text-white" style={{ backgroundColor: T.colors.avatarBg }}>{channelAndDmItems.length}</span>
-          {filter === "all" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
-        </button>
-        <button
-          type="button"
-          className={cn(
-            "relative px-3 py-1.5 font-medium rounded",
-            filter === "dms" ? "" : "hover:bg-[#f8f8f8]"
+
+          {/* Search and Filters Bar - Only for non-Files/Later views */}
+          {showSearchAndFilters && (
+            <div className="flex items-center gap-1 px-2 py-1.5 border-b shrink-0" style={{ borderColor: T.colors.border }}>
+              <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Select">
+                <IconSquare width={14} height={14} stroke="currentColor" strokeWidth={2} />
+                <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
+                <IconChevronDown width={12} height={12} stroke="currentColor" />
+              </button>
+              <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Capture">
+                <IconLayoutGrid width={14} height={14} stroke="currentColor" />
+              </button>
+              <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Filter">
+                <IconFilter width={14} height={14} stroke="currentColor" />
+                <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
+                <IconChevronDown width={12} height={12} stroke="currentColor" />
+              </button>
+              <div className="flex-1" />
+              <div className="flex rounded overflow-hidden border" style={{ borderColor: T.colors.border }}>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn("p-1.5", viewMode === "list" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
+                  style={{ color: T.colors.textSecondary }}
+                  title="List view"
+                >
+                  <IconList width={14} height={14} stroke="currentColor" strokeWidth={viewMode === "list" ? 2.5 : 2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("compact")}
+                  className={cn("p-1.5 border-l", viewMode === "compact" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
+                  style={{ borderColor: T.colors.border, color: T.colors.textSecondary }}
+                  title="Compact view"
+                >
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           )}
-          style={filter === "dms" ? { color: T.colors.text, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
-          onClick={() => setFilter("dms")}
-        >
-          DMs
-          {filter === "dms" && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: T.colors.avatarBg }} />}
-        </button>
-        <button
-          type="button"
-          className="p-1.5 rounded hover:bg-[#f8f8f8]"
-          style={{ color: T.colors.textSecondary }}
-          title="Add"
-        >
-          <IconPlus width={T.iconSizes.channelHeader} height={T.iconSizes.channelHeader} stroke="currentColor" />
-        </button>
-      </div>
-      )}
 
-      {showSearchAndFilters && (
-      <div className="flex items-center gap-1 px-2 py-1.5 border-b" style={{ borderColor: T.colors.border }}>
-        <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Select">
-          <IconSquare width={14} height={14} stroke="currentColor" strokeWidth={2} />
-          <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
-          <IconChevronDown width={12} height={12} stroke="currentColor" />
-        </button>
-        <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Capture">
-          <IconLayoutGrid width={14} height={14} stroke="currentColor" />
-        </button>
-        <button type="button" className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Filter">
-          <IconFilter width={14} height={14} stroke="currentColor" />
-          <span className="w-px h-4" style={{ backgroundColor: T.colors.border }} />
-          <IconChevronDown width={12} height={12} stroke="currentColor" />
-        </button>
-        <div className="flex-1" />
-        <div className="flex rounded overflow-hidden border" style={{ borderColor: T.colors.border }}>
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            className={cn("p-1.5", viewMode === "list" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
-            style={{ color: T.colors.textSecondary }}
-            title="List view"
-          >
-            <IconList width={14} height={14} stroke="currentColor" strokeWidth={viewMode === "list" ? 2.5 : 2} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("compact")}
-            className={cn("p-1.5 border-l", viewMode === "compact" ? "bg-[#f0f0f0]" : "hover:bg-[#f8f8f8]")}
-            style={{ borderColor: T.colors.border, color: T.colors.textSecondary }}
-            title="Compact view"
-          >
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      )}
-
-      {(activeNav === "files" || activeNav === "later") && (
-        <div className="px-2 py-1.5 border-b" style={{ borderColor: T.colors.border }}>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: T.colors.backgroundAlt }}>
-            <IconSearch width={14} height={14} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 min-w-0 bg-transparent focus:outline-none"
-              style={{ color: T.colors.text, fontSize: T.typography.small }}
-            />
-          </div>
-        </div>
-      )}
+          {/* Files/Later Search Bar */}
+          {(activeNav === "files" || activeNav === "later") && (
+            <div className="px-2 py-1.5 border-b shrink-0" style={{ borderColor: T.colors.border }}>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: T.colors.backgroundAlt }}>
+                <IconSearch width={14} height={14} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="flex-1 min-w-0 bg-transparent focus:outline-none"
+                  style={{ color: T.colors.text, fontSize: T.typography.small }}
+                />
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -408,10 +422,11 @@ export function DemoSidebar() {
             </Link>
           );
         })}
-        {activeNav === "dms" && dmsOnly.map((item) => {
-          const isActive = activeChatId === item.id || channelId === item.id;
+        {activeNav === "dms" && dmsOnly.map((item, index) => {
+          // Check if this is the active item: URL match, context match, or first item if nothing selected
+          const isActive = activeChatId === item.id || effectiveChannelId === item.id || (!effectiveChannelId && !activeChatId && index === 0);
           const { preview, timestamp } = getChannelPreview(item.id);
-          const avatarSrc = item.avatarUrl || getAvatarUrl(item.name, 64);
+          const avatarSrc = item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64));
           const className = cn(
             "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer",
             isActive ? "" : "hover:bg-[#52215A]"
@@ -439,7 +454,7 @@ export function DemoSidebar() {
                 }}
               >
               <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
+                <img src={avatarSrc} alt="" className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`} />
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
@@ -531,7 +546,7 @@ export function DemoSidebar() {
               style={style}
             >
               <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
+                <img src={avatarSrc} alt="" className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`} />
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
@@ -617,7 +632,7 @@ export function DemoSidebar() {
         {activeNav === "agentforce" && agentforceItems.map((item) => {
           const isActive = activeChatId === item.id || channelId === item.id;
           const { preview, timestamp } = getChannelPreview(item.id);
-          const avatarSrc = item.avatarUrl || getAvatarUrl(item.name, 64);
+          const avatarSrc = item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64));
           const className = cn(
             "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer",
             isActive ? "" : "hover:bg-[#52215A]"
@@ -643,7 +658,7 @@ export function DemoSidebar() {
                 }}
               >
                 <div className="relative shrink-0 mt-0.5">
-                  <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
+                  <img src={avatarSrc} alt="" className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`} />
                   <StatusDot status={item.status} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -734,7 +749,7 @@ export function DemoSidebar() {
               style={style}
             >
               <div className="relative shrink-0 mt-0.5">
-                <img src={avatarSrc} alt="" className="w-8 h-8 rounded-md object-cover" />
+                <img src={avatarSrc} alt="" className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`} />
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
@@ -827,7 +842,7 @@ export function DemoSidebar() {
               status: "status" in item ? item.status : undefined,
               unread: ("unread" in item ? item.unread : false) && !isChannelRead(item.id),
             }}
-            isActive={channelId === item.id}
+            isActive={effectiveChannelId === item.id}
             workspaceId={workspace.id}
           />
         ))}

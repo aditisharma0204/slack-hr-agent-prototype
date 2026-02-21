@@ -4,31 +4,35 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScenarioNarrative } from "../ScenarioNarrative";
 import { DesktopSlackShell } from "../DesktopSlackShell";
-import { DemoMessageList } from "@/app/(demo)/demo/workspace/[workspaceId]/channel/[channelId]/_components/DemoMessageList";
-import { DemoMessageInput } from "@/app/(demo)/demo/workspace/[workspaceId]/channel/[channelId]/_components/DemoMessageInput";
-import { useDemoMessages, useDemoData } from "@/context/DemoDataContext";
+import { Arc1Layout } from "./Arc1Layout";
+import { useDemoData } from "@/context/DemoDataContext";
 
 interface Scene1Props {
   onNext: () => void;
+  skipNarrative?: boolean; // When called from SceneLayout prototype zone, skip narrative
 }
 
-export function Scene1({ onNext }: Scene1Props) {
-  const [showPrototype, setShowPrototype] = useState(false);
+type ScenarioType = "conservative" | "quota" | "stretch";
+
+export function Scene1({ onNext, skipNarrative = false }: Scene1Props) {
+  const [showPrototype, setShowPrototype] = useState(skipNarrative);
   const channelId = "slackbot";
-  const messages = useDemoMessages(channelId);
-  const { dms, markChannelAsRead } = useDemoData();
+  const { markChannelAsRead } = useDemoData();
 
   useEffect(() => {
     if (showPrototype) {
       markChannelAsRead(channelId);
-      // Ensure URL is set so sidebar can detect active channel
-      const workspaceId = "demo-1";
-      const newPath = `/demo/workspace/${workspaceId}/channel/${channelId}`;
-      if (typeof window !== "undefined" && window.location.pathname !== newPath) {
-        window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
+      // Only redirect if NOT in presentation mode (i.e., not on root "/" route)
+      // When skipNarrative=true, we're rendering in SceneLayout's prototype zone, so don't redirect
+      if (!skipNarrative && typeof window !== "undefined") {
+        const workspaceId = "demo-1";
+        const newPath = `/demo/workspace/${workspaceId}/channel/${channelId}`;
+        if (window.location.pathname !== newPath) {
+          window.history.replaceState({ ...window.history.state, as: newPath, url: newPath }, "", newPath);
+        }
       }
     }
-  }, [showPrototype, channelId, markChannelAsRead]);
+  }, [showPrototype, channelId, markChannelAsRead, skipNarrative]);
 
   if (!showPrototype) {
     return (
@@ -57,13 +61,7 @@ export function Scene1({ onNext }: Scene1Props) {
         transition={{ duration: 0.3 }}
         className="h-full w-full"
       >
-        <DesktopSlackShell defaultNav="dms" defaultChannelId="slackbot" hideHeader={true}>
-          <div className="flex flex-col h-full bg-white">
-            {/* Header removed - on-hover header comes on top */}
-            <DemoMessageList messages={messages} />
-            <DemoMessageInput channelId={channelId} placeholder="Reply..." />
-          </div>
-        </DesktopSlackShell>
+        <Arc1Layout />
       </motion.div>
     </AnimatePresence>
   );

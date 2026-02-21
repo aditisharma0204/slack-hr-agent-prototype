@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useLayoutEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 import {
   ResizableHandle,
@@ -18,30 +19,59 @@ import {
 
 const T = SLACK_TOKENS;
 
+const NAV_VIEWS: NavView[] = ["home", "dms", "activity", "files", "later", "agentforce", "more"];
+
+function getNavFromPathname(pathname: string | null): NavView {
+  if (!pathname) return "activity";
+  const segments = pathname.split("/");
+  const i = segments.indexOf("workspace");
+  const segment = i >= 0 ? segments[i + 2] : undefined; // [ '', 'demo', 'workspace', workspaceId, segment ]
+  if (segment && NAV_VIEWS.includes(segment as NavView)) return segment as NavView;
+  if (segment === "channel") return "activity";
+  return "activity";
+}
+
 export default function DemoWorkspaceLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const navFromPath = useMemo(() => getNavFromPathname(pathname), [pathname]);
   const [isSlackbotOpen, setIsSlackbotOpen] = useState(true);
-  const [activeNav, setActiveNav] = useState<NavView>("activity");
+  const [activeNav, setActiveNav] = useState<NavView>(() => navFromPath);
+
+  useLayoutEffect(() => {
+    setActiveNav(navFromPath);
+  }, [navFromPath]);
 
   return (
     <DemoLayoutProviders
-      isSlackbotOpen={isSlackbotOpen}
-      setIsSlackbotOpen={setIsSlackbotOpen}
-      activeNav={activeNav}
-      setActiveNav={setActiveNav}
+        isSlackbotOpen={isSlackbotOpen}
+        setIsSlackbotOpen={setIsSlackbotOpen}
+        activeNav={activeNav}
+        setActiveNav={setActiveNav}
     >
+      {/* Single canonical slot: below global header, same height as prototype zone so layout is identical on first frame and after navigation */}
       <div
-        className="h-full flex flex-col min-h-0 overflow-hidden"
+        className="flex flex-col w-full overflow-hidden"
         style={{
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Lato", sans-serif',
-          backgroundColor: T.colors.globalBg,
+          marginTop: "var(--header-height, 40px)",
+          height: "calc(100vh - var(--header-height, 40px))",
         }}
       >
-        <AppHeader />
-        <div className="flex-1 flex min-h-0 min-w-0" style={{ gap: 2 }}>
+        <div
+          className="slack-shell h-full flex flex-col min-h-0 overflow-hidden flex-1"
+          style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Lato", sans-serif',
+            backgroundColor: T.colors.globalBg,
+          }}
+        >
+        {/* Slack App Header - Always rendered, never conditionally hidden */}
+        <div className="slack-app-header relative shrink-0 w-full z-[100]">
+          <AppHeader />
+        </div>
+        <div className="slack-body flex-1 flex min-h-0 min-w-0 overflow-hidden" style={{ gap: 2 }}>
           {/* Left nav: icon bar only - no roundness */}
           <DemoIconBar />
           {/* List + chat together: one rounded container - shadow casts left onto nav */}
@@ -79,6 +109,7 @@ export default function DemoWorkspaceLayout({
               </>
             )}
           </ResizablePanelGroup>
+        </div>
         </div>
       </div>
     </DemoLayoutProviders>

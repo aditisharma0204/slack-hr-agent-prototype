@@ -11,6 +11,7 @@ import {
 } from "@/components/icons";
 import { SlackbotProactiveTab } from "./SlackbotProactiveTab";
 import { SlackbotMessagesTab } from "./SlackbotMessagesTab";
+import { MessageInput } from "@/components/shared/MessageInput";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -24,6 +25,13 @@ interface SlackbotPanelProps {
 
 export function SlackbotPanel({ onClose }: SlackbotPanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>("seller-edge");
+  const [chatInput, setChatInput] = useState("");
+
+  const handleChatSubmit = (message: string) => {
+    // Handle chat message submission
+    console.log("Chat message:", message);
+    setChatInput("");
+  };
 
   return (
     <div
@@ -37,7 +45,7 @@ export function SlackbotPanel({ onClose }: SlackbotPanelProps) {
       <div className="border-b shrink-0" style={{ borderColor: T.colors.border }}>
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Star">
+            <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Favorite">
               <IconStar width={T.iconSizes.slackbotHeader} height={T.iconSizes.slackbotHeader} stroke="currentColor" />
             </button>
             <Image src="/slackbot-logo.svg" alt="Slackbot" width={20} height={20} />
@@ -88,6 +96,38 @@ export function SlackbotPanel({ onClose }: SlackbotPanelProps) {
         {(activeTab === "history" || activeTab === "files") && (
           <div className="p-4" style={{ fontSize: T.typography.small, color: T.colors.textSecondary }}>Coming soon.</div>
         )}
+      </div>
+
+      {/* Chat component at bottom with prompts — same px-3 as ChatEngine for consistent message input alignment */}
+      <div className="shrink-0 border-t" style={{ borderColor: T.colors.border }}>
+        <div className="p-3">
+          <div className="flex flex-wrap gap-2 mb-2">
+            {[
+              "What's my pipeline status?",
+              "Show me at-risk deals",
+              "What should I focus on today?",
+            ].map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => handleChatSubmit(prompt)}
+                className="px-3 py-1.5 text-xs rounded-md border hover:bg-[#f8f8f8] transition-colors"
+                style={{
+                  borderColor: T.colors.border,
+                  color: T.colors.textSecondary,
+                }}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <MessageInput
+            placeholder="Message Slackbot..."
+            onSubmit={handleChatSubmit}
+            value={chatInput}
+            onChange={setChatInput}
+          />
+        </div>
       </div>
     </div>
   );

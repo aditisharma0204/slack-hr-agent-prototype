@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScenarioNarrative } from "../ScenarioNarrative";
-import { iPhoneShell } from "../iPhoneShell";
+import { iPhoneShell as PhoneShell } from "../iPhoneShell";
 
 interface Scene10Props {
   onNext: () => void;
@@ -39,10 +39,10 @@ export function Scene10({ onNext }: Scene10Props) {
         transition={{ duration: 0.3 }}
         className="h-full w-full"
       >
-        <iPhoneShell>
+        <PhoneShell>
           <div className="h-full w-full flex flex-col items-center justify-center p-4">
           </div>
-        </iPhoneShell>
+        </PhoneShell>
       </motion.div>
     </AnimatePresence>
   );

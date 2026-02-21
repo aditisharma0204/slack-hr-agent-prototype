@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { IconStar, IconPencil, IconSearch, IconLightbulb } from "@/components/icons";
+import { IconHome, IconPencil, IconSearch, IconLightbulb } from "@/components/icons";
 import { DEMO_USER_NAME, useDemoData } from "@/context/DemoDataContext";
 
 function formatCurrency(n: number) {
@@ -111,7 +111,7 @@ export function SlackbotProactiveTab() {
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2 w-full">
           <button className="flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-[#e8e8e8] text-sm font-medium hover:bg-[#f8f8f8] bg-white">
-            <IconStar width={16} height={16} style={{ color: "#616061" }} stroke="currentColor" />
+            <IconHome width={16} height={16} style={{ color: "#616061" }} stroke="currentColor" />
             <span>Discover</span>
           </button>
           <button className="flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-[#e8e8e8] text-sm font-medium hover:bg-[#f8f8f8] bg-white">

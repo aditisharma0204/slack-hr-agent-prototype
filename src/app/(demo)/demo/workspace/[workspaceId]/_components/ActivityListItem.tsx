@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { IconHashtag, IconHeadphones } from "@/components/icons";
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
-import { usePresentationMode } from "../_context/demo-layout-context";
+import { usePresentationMode, useNav } from "../_context/demo-layout-context";
 import { useActiveChat } from "@/components/presentation/DesktopSlackShell";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -55,13 +56,20 @@ export function ActivityListItem({
 }) {
   const { getChannelPreview } = useDemoData();
   const { isPresentationMode } = usePresentationMode();
+  const { activeNav } = useNav();
+  const searchParams = useSearchParams();
   const { preview, timestamp } = getChannelPreview(item.id);
   const displayName = item.type === "channel" ? `#${item.name}` : item.name;
   const avatarSrc = item.type === "dm" ? (item.avatarUrl || getAvatarUrl(item.name, 64)) : null;
+  
+  // Check if this item is active based on URL query param (for activity page)
+  const activeChannelId = searchParams.get("channel");
+  const isActiveFromQuery = activeNav === "activity" && activeChannelId === item.id;
+  const finalIsActive = isActive || isActiveFromQuery;
 
   const isUnread = item.unread === true;
   const className = "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors";
-  const style: React.CSSProperties = isActive
+  const style: React.CSSProperties = finalIsActive
     ? { backgroundColor: "#f0f0f0", border: "2px solid #78317F" }
     : {
         border: "1px solid",
@@ -134,9 +142,19 @@ export function ActivityListItem({
     );
   }
 
+  // Determine the correct href based on activeNav
+  const getHref = () => {
+    // If we're in activity mode, use the activity page with channel query param
+    if (activeNav === "activity") {
+      return `/demo/workspace/${workspaceId}/activity?channel=${item.id}`;
+    }
+    // Otherwise, use the standard channel route
+    return `/demo/workspace/${workspaceId}/channel/${item.id}`;
+  };
+
   return (
     <Link
-      href={`/demo/workspace/${workspaceId}/channel/${item.id}`}
+      href={getHref()}
       className={className}
       style={style}
     >
