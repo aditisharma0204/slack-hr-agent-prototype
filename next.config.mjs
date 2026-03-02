@@ -18,8 +18,9 @@ const nextConfig = {
             { protocol: "https", hostname: "ui-avatars.com", pathname: "/**" },
         ],
     },
-    // basePath: '/slack-app-shell-template', // Uncomment if Pages URL includes /repository-name/
-    // assetPrefix: '/slack-app-shell-template', // Uncomment if Pages URL includes /repository-name/
+    // Configure for GitSoma Pages deployment
+    basePath: '/pages/prantik-banerjee/slack-app-shell-template',
+    assetPrefix: '/pages/prantik-banerjee/slack-app-shell-template',
 };
 
 export default nextConfig;
