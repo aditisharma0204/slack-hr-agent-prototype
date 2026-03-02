@@ -2,7 +2,12 @@
 const nextConfig = {
     // Enable static export for GitHub Pages (GitSoma)
     // Comment out 'output: export' if deploying to Vercel/Netlify
-    // output: 'export', // Disabled: client components can't use generateStaticParams
+    output: 'export',
+    
+    // Disable server actions for static export
+    experimental: {
+        serverActions: false,
+    },
     
     eslint: {
         ignoreDuringBuilds: true,
