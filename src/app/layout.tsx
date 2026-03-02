@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next";
+// import { NuqsAdapter } from "nuqs/adapters/next"; // Disabled for static export
 import { Suspense } from "react";
 
 import "./globals.css";
 
 import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
-import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+// import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server"; // Disabled for static export
 import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
@@ -40,7 +40,8 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <Toaster />
             {hasConvex && <Modals />}
-            <NuqsAdapter>{children}</NuqsAdapter>
+            {children}
+            {/* <NuqsAdapter>{children}</NuqsAdapter> */}
           </Suspense>
         </DemoDataProvider>
       </JotaiProvider>
@@ -50,11 +51,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={lato.className}>
-        {hasConvex ? (
+        {content}
+        {/* {hasConvex ? (
           <ConvexAuthNextjsServerProvider>{content}</ConvexAuthNextjsServerProvider>
         ) : (
           content
-        )}
+        )} */}
       </body>
     </html>
   );

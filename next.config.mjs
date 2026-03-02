@@ -4,11 +4,6 @@ const nextConfig = {
     // Comment out 'output: export' if deploying to Vercel/Netlify
     output: 'export',
     
-    // Disable server actions for static export
-    experimental: {
-        serverActions: false,
-    },
-    
     eslint: {
         ignoreDuringBuilds: true,
     },
