@@ -180,9 +180,9 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
     const activeDMId = activeChatId || effectiveChannelId;
     
     // Find DMs by name
-    const shwetaDM = dms.find(d => d.name.toLowerCase().includes("shweta")) || dms.find(d => d.name.toLowerCase().includes("humnabadkar")) || dms[0];
-    const jonnieDM = dms.find(d => d.name.toLowerCase().includes("jonnie")) || dms.find(d => d.name.toLowerCase().includes("lee")) || dms.find(d => d.name.toLowerCase().includes("avinash")) || dms.find(d => d.name.toLowerCase().includes("patel"));
-    const miekDM = dms.find(d => d.name.toLowerCase().includes("miek")) || dms.find(d => d.name.toLowerCase().includes("lenz")) || dms.find(d => d.name.toLowerCase().includes("samiksha")) || dms.find(d => d.name.toLowerCase().includes("kharbanda"));
+    const shwetaDM = dms.find(d => d.name.toLowerCase().includes("aisha")) || dms.find(d => d.name.toLowerCase().includes("raman")) || dms.find(d => d.name.toLowerCase().includes("shweta")) || dms[0];
+    const jonnieDM = dms.find(d => d.name.toLowerCase().includes("noah")) || dms.find(d => d.name.toLowerCase().includes("kim")) || dms.find(d => d.name.toLowerCase().includes("jonnie")) || dms.find(d => d.name.toLowerCase().includes("lee"));
+    const miekDM = dms.find(d => d.name.toLowerCase().includes("caleb")) || dms.find(d => d.name.toLowerCase().includes("stone")) || dms.find(d => d.name.toLowerCase().includes("miek")) || dms.find(d => d.name.toLowerCase().includes("lenz"));
     const prantikDM = dms.find(d => d.name.toLowerCase().includes("prantik")) || dms.find(d => d.name.toLowerCase().includes("banerjee"));
     
     // Determine active states - Shweta is default active if nothing selected
@@ -262,16 +262,16 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="relative mr-2">
                   <img 
-                    src={assetPath(shwetaDM.avatarUrl || getAvatarUrl("Shweta", 20) || "/shweta-avatar.png")} 
+                    src={assetPath(shwetaDM.avatarUrl || getAvatarUrl("Aisha Raman", 20) || "/aisha-avatar.png")} 
                     className="w-5 h-5 rounded" 
-                    alt="Shweta" 
+                    alt="Aisha Raman" 
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Shweta", 20);
+                      target.src = getAvatarUrl("Aisha Raman", 20);
                     }}
                   />
                 </div>
-                Shweta <span className="ml-2">🗓️</span>
+                Aisha Raman <span className="ml-2">🗓️</span>
               </button>
             )}
             {/* Jonnie */}
@@ -289,15 +289,15 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="flex items-center">
                   <img 
-                    src={assetPath(jonnieDM.avatarUrl || getAvatarUrl("Jonnie Lee", 20) || "/jonnie-avatar.png")} 
+                    src={assetPath(jonnieDM.avatarUrl || getAvatarUrl("Noah Kim", 20) || "/noah-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
-                    alt="Jonnie Lee"
+                    alt="Noah Kim"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Jonnie Lee", 20);
+                      target.src = getAvatarUrl("Noah Kim", 20);
                     }}
                   /> 
-                  Jonnie Lee
+                  Noah Kim
                 </div>
                 <Edit2Icon className="w-3 h-3 opacity-0 group-hover:opacity-100" />
               </button>
@@ -317,15 +317,15 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="flex items-center">
                   <img 
-                    src={assetPath(miekDM.avatarUrl || getAvatarUrl("Miek Lenz", 20) || "/miek-avatar.png")} 
+                    src={assetPath(miekDM.avatarUrl || getAvatarUrl("Caleb Stone", 20) || "/caleb-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
-                    alt="Miek Lenz"
+                    alt="Caleb Stone"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Miek Lenz", 20);
+                      target.src = getAvatarUrl("Caleb Stone", 20);
                     }}
                   /> 
-                  Miek Lenz <span className="ml-2">🗓️</span>
+                  Caleb Stone <span className="ml-2">🗓️</span>
                 </div>
                 <Edit2Icon className="w-3 h-3 opacity-0 group-hover:opacity-100" />
               </button>
