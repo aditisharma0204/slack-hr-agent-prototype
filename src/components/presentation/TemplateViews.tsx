@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UniversalChatSurface } from "@/components/shared/UniversalChatSurface";
 import { ChatMessage } from "@/components/shared/ChatMessage";
 import { ChevronRight, Search, Star, MoreVertical, ChevronDown } from "lucide-react";
+import { assetPath } from "@/lib/asset-path";
 
 // ─── Shared Chat Messages ────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ const AVATARS = {
   marcus: "https://randomuser.me/api/portraits/med/men/8.jpg",
   lisa: "https://randomuser.me/api/portraits/med/women/65.jpg",
   mike: "https://randomuser.me/api/portraits/med/men/45.jpg",
-  bot: "/slackbot-logo.svg",
+  bot: assetPath("/slackbot-logo.svg"),
 };
 
 const CHANNEL_MESSAGES: Record<string, Msg[]> = {
@@ -422,7 +423,7 @@ export function TemplateAgentforceContent() {
               <div key={agent.name} className="border border-gray-200 rounded-xl p-4 hover:shadow-md cursor-pointer transition-all hover:border-gray-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`w-10 h-10 rounded-xl ${agent.color} flex items-center justify-center shrink-0`}>
-                    <img src="/slackbot-logo.svg" alt="" className="w-5 h-5 opacity-90" />
+                    <img src={assetPath("/slackbot-logo.svg")} alt="" className="w-5 h-5 opacity-90" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[14px] font-bold text-gray-900 truncate">{agent.name}</p>

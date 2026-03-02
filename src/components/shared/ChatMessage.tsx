@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { generateInitialsAvatar, createAvatarErrorHandler } from '@/lib/avatar-utils';
 import { BlockKitRenderer } from '@/components/block-kit/BlockKitRenderer';
 import type { SlackBlock } from '@/components/block-kit/BlockKitRenderer';
+import { assetPath } from "@/lib/asset-path";
 
 interface ChatMessageProps {
   message: {
@@ -37,7 +38,7 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message }: ChatMessageProps) => {
   const [avatarError, setAvatarError] = React.useState(false);
-  const [avatarSrc, setAvatarSrc] = React.useState(message.avatar);
+  const [avatarSrc, setAvatarSrc] = React.useState(assetPath(message.avatar));
 
   const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const img = e.target as HTMLImageElement;
@@ -149,7 +150,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
                 return (
                   <img 
                     key={i} 
-                    src={av} 
+                    src={assetPath(av)} 
                     className="w-6 h-6 rounded border-2 border-white relative z-10" 
                     alt="" 
                     onError={handleReplyAvatarError}

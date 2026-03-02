@@ -7,6 +7,7 @@ import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
 import { usePresentationMode, useNav } from "../_context/demo-layout-context";
 import { useActiveChat } from "@/components/presentation/SlackAppShell";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -60,7 +61,7 @@ export function ActivityListItem({
   const searchParams = useSearchParams();
   const { preview, timestamp } = getChannelPreview(item.id);
   const displayName = item.name;
-  const avatarSrc = item.type === "dm" ? (item.avatarUrl || getAvatarUrl(item.name, 64)) : null;
+  const avatarSrc = item.type === "dm" ? assetPath(item.avatarUrl || getAvatarUrl(item.name, 64)) : null;
 
   // Check if this item is active based on URL query param (for activity page)
   const activeChannelId = searchParams.get("channel");
@@ -140,7 +141,7 @@ export function ActivityListItem({
         <div className="flex items-center gap-1">
           {item.type === "channel" && (
             <img
-              src="/Salesforce.png"
+              src={assetPath("/Salesforce.png")}
               alt="channel"
               className="w-3.5 h-3.5 object-contain opacity-70 grayscale shrink-0"
             />
@@ -199,7 +200,7 @@ export function ActivityListItem({
         <div className="flex items-center gap-1">
           {item.type === "channel" && (
             <img
-              src="/Salesforce.png"
+              src={assetPath("/Salesforce.png")}
               alt="channel"
               className="w-3.5 h-3.5 object-contain opacity-70 grayscale shrink-0"
             />

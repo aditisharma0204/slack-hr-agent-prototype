@@ -9,6 +9,7 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { motion, AnimatePresence } from "framer-motion";
+import { assetPath } from "@/lib/asset-path";
 
 // ── Panel state — tracks both the panel type and the specific deal it was triggered from ──
 type ActivePanel =
@@ -313,7 +314,7 @@ export function SlackbotPanel({ panelData, onClose }: SlackbotPanelProps) {
               </svg>
             </button>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/slackbot-logo.svg" alt="Slackbot" className="w-5 h-5" />
+            <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" className="w-5 h-5" />
             <span className="font-bold text-[15px] text-gray-900">{panelData.title}</span>
           </div>
           <div className="flex items-center gap-1 text-gray-500">
@@ -384,7 +385,7 @@ export function SlackbotPanel({ panelData, onClose }: SlackbotPanelProps) {
           {generationStep >= 2 && (
             <div className="flex gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/slackbot-logo.svg" alt="Slackbot" className="w-8 h-8 rounded flex-shrink-0" />
+              <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" className="w-8 h-8 rounded flex-shrink-0" />
               <div className="flex-1 min-w-0 space-y-3">
                 <div className="text-[13px] font-bold text-gray-900">
                   Slackbot <span className="text-gray-400 font-normal text-[11px] ml-1">Just now</span>
@@ -498,7 +499,7 @@ function MeetIcon({ className }: { className?: string }) {
   }
   
   // Use URL-encoded path to handle spaces in filename
-  const imageSrc = "/Google Meet.png".replace(/ /g, "%20");
+  const imageSrc = assetPath("/Google Meet.png").replace(/ /g, "%20");
   
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -576,7 +577,7 @@ function FocusPill({ onClick, icon, iconBg, label, restGradient, colors }: {
             className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm transition-all whitespace-nowrap flex-shrink-0 ml-3"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/slackbot-logo.svg" alt="" className="w-4 h-4" />
+            <img src={assetPath("/slackbot-logo.svg")} alt="" className="w-4 h-4" />
             Ask
           </button>
         )}
@@ -925,7 +926,7 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-xl text-[13px] font-bold text-gray-800 hover:bg-gray-50 shadow-sm transition-all"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/slackbot-logo.svg" alt="Slackbot" className="w-4 h-4" />
+                        <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" className="w-4 h-4" />
                         Find action items for this week
                       </button>
                     </div>

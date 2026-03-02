@@ -17,11 +17,13 @@ const lato = Lato({
   weight: ["400", "700", "900"],
 });
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export const metadata: Metadata = {
   title: "Slack App Shell",
   description: "A reusable Slack App Shell boilerplate for designing new concepts.",
   icons: {
-    icon: '/slackbot-logo.svg',
+    icon: `${basePath}/slackbot-logo.svg`,
   },
 };
 

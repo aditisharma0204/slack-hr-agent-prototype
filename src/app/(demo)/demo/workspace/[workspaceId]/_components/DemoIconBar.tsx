@@ -18,6 +18,7 @@ import { useDemoData, getAvatarUrl, type DemoDM, type DemoFile, type DemoSavedIt
 import { useNav, usePresentationMode, useDemoContext, type NavView } from "../_context/demo-layout-context";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -227,7 +228,7 @@ function DMsOverlay({
       <div style={{ maxHeight: 400, overflowY: "auto" }}>
         {dms.map((dm) => {
           const { preview, timestamp } = getChannelPreview(dm.id);
-          const avatar = dm.avatarUrl ?? getAvatarUrl(dm.name);
+          const avatar = assetPath(dm.avatarUrl ?? getAvatarUrl(dm.name));
           return (
             <Row key={dm.id} onClick={onSelect}>
               {/* Avatar */}
@@ -426,7 +427,7 @@ export function DemoIconBar({ onPrimaryNavChange, onNavChange, showDMBadge = fal
         <div className="mb-4 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/Salesforce.png"
+            src={assetPath("/Salesforce.png")}
             alt="Salesforce"
             className="w-8 h-8 object-contain"
           />

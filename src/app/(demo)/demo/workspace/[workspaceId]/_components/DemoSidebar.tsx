@@ -52,6 +52,7 @@ import { useNav, usePresentationMode, useDemoContext } from "../_context/demo-la
 import { useActiveChat } from "@/components/presentation/SlackAppShell";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -236,7 +237,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               <StarIcon className="w-3.5 h-3.5 mr-2" /> Starred
             </div>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> proj-ai-council
+              <img src={assetPath("/Salesforce.png")} alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> proj-ai-council
             </button>
           </div>
 
@@ -261,7 +262,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="relative mr-2">
                   <img 
-                    src={shwetaDM.avatarUrl || getAvatarUrl("Shweta Humnabadkar", 20) || "/shweta-avatar.png"} 
+                    src={assetPath(shwetaDM.avatarUrl || getAvatarUrl("Shweta Humnabadkar", 20) || "/shweta-avatar.png")} 
                     className="w-5 h-5 rounded" 
                     alt="Shweta" 
                     onError={(e) => {
@@ -288,7 +289,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="flex items-center">
                   <img 
-                    src={avinashDM.avatarUrl || getAvatarUrl("Avinash Patel", 20) || "/avinash-avatar.png"} 
+                    src={assetPath(avinashDM.avatarUrl || getAvatarUrl("Avinash Patel", 20) || "/avinash-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
                     alt="Avinash"
                     onError={(e) => {
@@ -316,7 +317,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="flex items-center">
                   <img 
-                    src={samikshaDM.avatarUrl || getAvatarUrl("Samiksha Kharbanda", 20) || "/samiksha-avatar.png"} 
+                    src={assetPath(samikshaDM.avatarUrl || getAvatarUrl("Samiksha Kharbanda", 20) || "/samiksha-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
                     alt="Samiksha"
                     onError={(e) => {
@@ -345,7 +346,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
                 <div className="flex items-center">
                   <div className="relative mr-2">
                     <img 
-                      src={prantikDM.avatarUrl || getAvatarUrl("Prantik Banerjee", 20) || "/prantik-avatar.png"} 
+                      src={assetPath(prantikDM.avatarUrl || getAvatarUrl("Prantik Banerjee", 20) || "/prantik-avatar.png")} 
                       className="w-5 h-5 rounded" 
                       alt="Prantik"
                       onError={(e) => {
@@ -386,10 +387,10 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               <span className="w-3 h-3 mr-2 rounded bg-blue-500"></span> Agentforce
             </div>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ai-club
+              <img src={assetPath("/Salesforce.png")} alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ai-club
             </button>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ux-agentic-experiences
+              <img src={assetPath("/Salesforce.png")} alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ux-agentic-experiences
             </button>
           </div>
 
@@ -750,7 +751,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
             : (activeChatId === item.id || effectiveChannelId === item.id || (!effectiveChannelId && !activeChatId && index === 0));
           
           const { preview, timestamp } = getChannelPreview(item.id);
-          const avatarSrc = item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64));
+          const avatarSrc = assetPath(item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64)));
           
           // Check if next item is also unselected (to show divider only between unselected cards)
           const nextItem = dmsOnly[index + 1];
@@ -802,7 +803,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
                       if (!item.isSlackbot && !target.src.startsWith('data:')) {
                         target.src = generateInitialsAvatar(item.name, 24);
                       } else if (item.isSlackbot) {
-                        target.src = "/slackbot-logo.svg";
+                        target.src = assetPath("/slackbot-logo.svg");
                       }
                     }}
                   />
@@ -845,7 +846,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
                     if (!item.isSlackbot && !target.src.startsWith('data:')) {
                       target.src = generateInitialsAvatar(item.name, 24);
                     } else if (item.isSlackbot) {
-                      target.src = "/slackbot-logo.svg";
+                      target.src = assetPath("/slackbot-logo.svg");
                     }
                   }}
                 />
@@ -887,7 +888,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
         {activeNav === "agentforce" && agentforceItems.map((item) => {
           const isActive = activeChatId === item.id || channelId === item.id;
           const { preview, timestamp } = getChannelPreview(item.id);
-          const avatarSrc = item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64));
+          const avatarSrc = assetPath(item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64)));
           const className = cn(
             "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer",
             isActive ? "" : "hover:bg-[#52215A]"
@@ -1017,7 +1018,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
                     if (!item.isSlackbot && !target.src.startsWith('data:')) {
                       target.src = generateInitialsAvatar(item.name, 32);
                     } else if (item.isSlackbot) {
-                      target.src = "/slackbot-logo.svg";
+                      target.src = assetPath("/slackbot-logo.svg");
                     }
                   }}
                 />
