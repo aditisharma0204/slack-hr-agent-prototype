@@ -39,3 +39,6 @@ public/build-id.txt
 *.tsbuildinfo
 next-env.d.ts
 .github/
+
+# GitHub Actions workflows require special permissions
+.github/
