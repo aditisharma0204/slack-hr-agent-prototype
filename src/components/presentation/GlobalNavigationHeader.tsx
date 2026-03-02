@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { assetPath } from "@/lib/asset-path";
 
 /**
  * Simplified global header for the Slack App Shell boilerplate.
@@ -17,7 +18,7 @@ export function GlobalNavigationHeader() {
       <div className="flex items-center gap-4 flex-shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/slackbot-logo.svg"
+          src={assetPath("/slackbot-logo.svg")}
           alt="SlackbotPro"
           className="w-6 h-6 flex-shrink-0"
         />

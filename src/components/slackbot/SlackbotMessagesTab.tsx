@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
 import {
   IconHome,
   IconPencil,
@@ -13,6 +12,7 @@ import type { SlackBlock } from "@/components/block-kit/BlockKitRenderer";
 import { DEMO_USER_NAME } from "@/context/DemoDataContext";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 import { ChatMessage as GlobalChatMessage } from "@/components/shared/ChatMessage";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -202,7 +202,7 @@ interface ChatMessage {
 }
 
 const USER_AVATAR = "https://randomuser.me/api/portraits/med/women/90.jpg";
-const SLACKBOT_AVATAR = "/slackbot-logo.svg";
+const SLACKBOT_AVATAR = assetPath("/slackbot-logo.svg");
 
 interface SlackbotMessagesTabProps {
   history?: ChatMessage[];
@@ -296,7 +296,8 @@ export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessa
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-6 px-2 text-center w-full">
             <div className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] mb-4 flex items-center justify-center shrink-0">
-              <Image src="/slackbot-logo.svg" alt="Slackbot" width={120} height={120} className="max-w-full max-h-full" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={120} height={120} className="max-w-full max-h-full" />
             </div>
             <h2 className="text-base sm:text-lg font-bold text-[#1d1c1d] mb-2 w-full">
               Good morning, {DEMO_USER_NAME}!

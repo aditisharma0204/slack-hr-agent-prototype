@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
 import {
   IconStar,
   IconPencil,
@@ -13,6 +12,7 @@ import { SlackbotMessagesTab } from "./SlackbotMessagesTab";
 import { MessageInput } from "@/components/shared/MessageInput";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -65,7 +65,8 @@ export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistor
             <button type="button" className="p-1.5 rounded hover:bg-[#f8f8f8]" style={{ color: T.colors.textSecondary }} title="Favorite">
               <IconStar width={T.iconSizes.slackbotHeader} height={T.iconSizes.slackbotHeader} stroke="currentColor" />
             </button>
-            <Image src="/slackbot-logo.svg" alt="Slackbot" width={20} height={20} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={20} height={20} />
             <span className="font-semibold" style={{ fontSize: T.typography.body, color: T.colors.text }}>Slackbot</span>
           </div>
           <div className="flex items-center gap-0.5">

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { IconHome, IconPencil, IconSearch, IconLightbulb } from "@/components/icons";
 import { DEMO_USER_NAME, useDemoData } from "@/context/DemoDataContext";
+import { assetPath } from "@/lib/asset-path";
 
 function formatCurrency(n: number) {
   if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
@@ -67,7 +67,8 @@ export function SlackbotProactiveTab() {
       {/* Welcome Section */}
       <div className="flex flex-col items-center text-center py-6 px-4">
         <div className="w-16 h-16 mb-3">
-          <Image src="/slackbot-logo.svg" alt="Slackbot" width={64} height={64} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={64} height={64} />
         </div>
         <h2 className="text-lg font-bold text-[#1d1c1d] mb-2">
           Good morning, {DEMO_USER_NAME}!

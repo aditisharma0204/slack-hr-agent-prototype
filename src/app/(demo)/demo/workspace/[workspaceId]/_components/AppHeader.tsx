@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useSlackbot } from "../_context/demo-layout-context";
-import Image from "next/image";
 import { IconSearch } from "@/components/icons";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
+import { assetPath } from "@/lib/asset-path";
 
 const T = SLACK_TOKENS;
 
@@ -51,7 +51,8 @@ export function AppHeader() {
           title={isOpen ? "Close Slackbot" : "Open Slackbot"}
           style={{ marginLeft: '16px' }}
         >
-          <Image src="/slackbot-logo.svg" alt="Slackbot" width={33} height={33} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={33} height={33} />
         </button>
       </div>
 
