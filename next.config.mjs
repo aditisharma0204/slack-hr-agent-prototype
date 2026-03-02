@@ -2,7 +2,7 @@
 const nextConfig = {
     // Enable static export for GitHub Pages (GitSoma)
     // Comment out 'output: export' if deploying to Vercel/Netlify
-    // output: 'export',
+    // output: 'export', // Disabled: client components can't use generateStaticParams
     
     eslint: {
         ignoreDuringBuilds: true,
@@ -12,7 +12,7 @@ const nextConfig = {
         NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL || "https://demo-disabled.convex.cloud",
     },
     images: {
-        // unoptimized: true, // Uncomment for static export
+        unoptimized: true, // Required for static export
         remotePatterns: [
             { protocol: "https", hostname: "randomuser.me", pathname: "/**" },
             { protocol: "https", hostname: "ui-avatars.com", pathname: "/**" },
