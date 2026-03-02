@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Children } from 'react';
 import { Users, Headphones, Bell, Search } from 'lucide-react';
 import { MessageInput } from './MessageInput';
 
@@ -22,11 +22,35 @@ export const UniversalChatSurface = ({
   children 
 }: UniversalChatSurfaceProps) => {
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousChildrenCountRef = useRef<number>(Children.count(children));
+  const childrenCount = Children.count(children);
 
-  // Global auto-scroll: fires whenever children change (new messages or new generative steps)
+  // Global auto-scroll: only when number of rendered chat items changes.
+  // Using element reference equality causes false positives and visible jumpiness.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [children]);
+    const previousChildrenCount = previousChildrenCountRef.current;
+    const childrenChanged = childrenCount !== previousChildrenCount;
+    previousChildrenCountRef.current = childrenCount;
+
+    if (childrenChanged) {
+      // Clear any pending scroll
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      
+      // Debounce scroll to avoid excessive scrolling
+      scrollTimeoutRef.current = setTimeout(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [childrenCount]);
 
   return (
     <div className="flex-1 flex flex-col bg-white h-full border-l border-gray-200 min-w-0">

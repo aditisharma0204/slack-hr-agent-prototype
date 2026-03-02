@@ -556,15 +556,15 @@ export const mockChannels: Record<string, DemoMessage[]> = {
           elements: [
             {
               type: "mrkdwn",
-              text: "<https://salesforce.com|Salesforce> · Synced 12:34 PM"
+              text: { type: "mrkdwn", text: "<https://salesforce.com|Salesforce> · Synced 12:34 PM" }
             },
             {
               type: "mrkdwn",
-              text: "<https://gong.io|Gong> · Transcripts analyzed 12:35 PM"
+              text: { type: "mrkdwn", text: "<https://gong.io|Gong> · Transcripts analyzed 12:35 PM" }
             },
             {
               type: "mrkdwn",
-              text: "<https://gmail.com|Gmail> · Draft generated 12:36 PM"
+              text: { type: "mrkdwn", text: "<https://gmail.com|Gmail> · Draft generated 12:36 PM" }
             }
           ]
         },

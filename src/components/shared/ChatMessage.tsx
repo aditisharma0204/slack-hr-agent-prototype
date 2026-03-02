@@ -3,6 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { generateInitialsAvatar, createAvatarErrorHandler } from '@/lib/avatar-utils';
+import { BlockKitRenderer } from '@/components/block-kit/BlockKitRenderer';
+import type { SlackBlock } from '@/components/block-kit/BlockKitRenderer';
 
 interface ChatMessageProps {
   message: {
@@ -16,6 +18,14 @@ interface ChatMessageProps {
       source: string;
       data: Record<string, React.ReactNode>;
     };
+    blocks?: SlackBlock[];
+    isBot?: boolean;
+    attachment?: {
+      filename: string;
+      type: 'pdf' | 'doc' | 'sheet' | 'slide';
+      size: string;
+    };
+    threadCount?: number;
     reactions?: Array<{ emoji: string; count: number }>;
     replies?: {
       count: number;
@@ -29,7 +39,8 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
   const [avatarError, setAvatarError] = React.useState(false);
   const [avatarSrc, setAvatarSrc] = React.useState(message.avatar);
 
-  const handleAvatarError = () => {
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.target as HTMLImageElement;
     if (!avatarError) {
       setAvatarError(true);
       setAvatarSrc(generateInitialsAvatar(message.name, 36));
@@ -40,7 +51,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
     <div className="flex gap-3 hover:bg-[#f8f8f8] p-2 -mx-2 rounded transition-colors group">
       <img 
         src={avatarSrc} 
-        className="w-9 h-9 rounded object-cover flex-shrink-0 mt-0.5" 
+        className={`w-9 h-9 object-cover flex-shrink-0 mt-0.5 ${message.isBot ? 'rounded' : 'rounded-md'}`} 
         alt={message.name}
         onError={handleAvatarError}
       />
@@ -53,7 +64,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         </div>
         
         {/* Standard Text */}
-        {message.text && (
+        {message.text && !message.blocks && (
           <div className="text-[15px] text-gray-900 leading-relaxed whitespace-pre-wrap">
             {message.text.split(/(\[.*?\]\(.*?\))/g).map((part, i) => {
               const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
@@ -66,6 +77,13 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               }
               return <span key={i}>{part}</span>;
             })}
+          </div>
+        )}
+
+        {/* Structured Block Content */}
+        {message.blocks && (
+          <div className="mt-1">
+            <BlockKitRenderer blocks={message.blocks} />
           </div>
         )}
         
@@ -86,16 +104,30 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           </div>
         )}
 
+        {/* Shared document attachment */}
+        {message.attachment && (
+          <div className="mt-2 flex items-center gap-3 p-3 border border-gray-200 rounded-xl max-w-sm hover:bg-gray-50 cursor-pointer transition-colors">
+            <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-[10px]">
+              {message.attachment.type.toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-bold text-blue-600 truncate">{message.attachment.filename}</div>
+              <div className="text-[11px] text-gray-500">{message.attachment.size} • Click to view</div>
+            </div>
+          </div>
+        )}
+
         {/* Reactions */}
         {message.reactions && message.reactions.length > 0 && (
-          <div className="flex gap-1.5 mt-2">
+          <div className="flex flex-wrap gap-1 mt-2">
             {message.reactions.map((r, i) => (
               <button 
                 key={i} 
                 type="button" 
-                className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full px-2 py-0.5 text-[12px] font-medium transition-colors"
+                className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition-colors"
               >
-                {r.emoji} {r.count}
+                <span className="text-[13px]">{r.emoji}</span>
+                <span className="text-[11px] font-bold text-blue-700">{r.count}</span>
               </button>
             ))}
           </div>
@@ -129,6 +161,18 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               {message.replies.count} replies
             </span>
             <span className="text-[12px] text-gray-500">Last reply {message.replies.lastTime}</span>
+          </div>
+        )}
+        {!message.replies && message.threadCount && (
+          <div className="mt-1 flex items-center gap-2 cursor-pointer">
+            <div className="flex -space-x-1">
+              <div className="w-5 h-5 rounded bg-gray-300 border border-white"></div>
+              <div className="w-5 h-5 rounded bg-blue-300 border border-white"></div>
+            </div>
+            <span className="text-[13px] font-bold text-blue-600 hover:underline">
+              {message.threadCount} replies
+            </span>
+            <span className="text-[12px] text-gray-400">Last reply today</span>
           </div>
         )}
       </div>

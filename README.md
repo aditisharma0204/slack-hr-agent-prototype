@@ -1,108 +1,124 @@
-<div align="center">
-  <br />
-    <a href="https://github.com/samarth-kamble" target="_blank">
-       <img src="https://ubwp.buffalo.edu/happe/wp-content/uploads/sites/92/2019/12/slack_logo.png" alt="logo" width="200" height="auto" />
-    </a>
-  <br />
+# Slack App Shell Boilerplate
 
-  <div>
-    <img src="https://img.shields.io/badge/-Typescript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
-    <img src="https://img.shields.io/badge/-Next_._JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="nextdotjs" />
-    <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
-    <img src="https://img.shields.io/badge/-ShadCN_UI-black?style=for-the-badge&logoColor=white&logo=shadcnui&color=000000" alt="shadcnui" />
-    <img src="https://img.shields.io/badge/-React-black?style=for-the-badge&logoColor=%2361DAFB&logo=react&color=20232a" alt="react" />
-  </div>
+A clean, reusable Slack App Shell template for designers to build new Slack integration concepts.
 
-<h3 align="center">Slack Clone</h3>
-</div>
+## 🎯 What This Is
 
-## 📋 <a name="table">Table of Contents</a>
+This is a **boilerplate template** that provides a fully functional Slack-like UI shell with:
+- ✅ Complete sidebar navigation (Today, Home, DMs, Activity, Files, Later, Agentforce)
+- ✅ Interactive chat surfaces with message input
+- ✅ Today view with focus prompts, agenda, highlights, and replies
+- ✅ Generic placeholder data ready for your concepts
+- ✅ All interactions working (sidebar clicks, hover states, animations)
 
-1. 🤖 [Introduction](#introduction)
-2. ⚙️ [Tech Stack](#tech-stack)
-3. 🔋 [Features](#features)
-4. 🤸 [Quick Start](#quick-start)
+**Perfect for:** Designers who want to prototype new Slack app experiences without building the shell from scratch.
 
+## 🚀 Quick Start
 
-## <a name="introduction">🤖 Introduction</a>
-In this Project create an end-to-end fullstack and real-time slack clone, all with workspaces, channels, 1:1 conversations, threads, reactions, editing and deleting messages as well as member roles.
+**Prerequisites:**
+- Node.js 18+ 
+- npm or yarn
 
-## <a name="tech-stack">⚙️ Tech Stack</a>
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Convex
-- Convex Auth
-- React.js
-- Next Auth
-- Vercel
-
-## <a name="features">🔋 Features</a>
-- 📡 Real time communication
-- 👍 Reactions to messages
-- 🧵 Threads / Replies system
-- ✏️ Editing messages
-- 🗑️ Deleting messages
-- 🔐 Role based access control
-- 🖼️ Image attachments
-- 🔒 Authentication with Next auth v5
-- 📺 Channel creation
-- 🏢 Workspace creation
-- ✉️ Invite system / Invite codes
-- 💬 Direct messaging
-- 👥 User profiles
-- ⚛️ Framework Next.js 14
-- 🚀 Deployment on Vercel
-- 🎨 ShadCN UI & Tailwind CSS
-
-## <a name="quick-start">🤸 Quick Start</a>
-
-Follow these steps to set up the project locally on your machine.
-
-**Prerequisites**
-
-Make sure you have the following installed on your machine:
-
-- [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en)
-- [npm](https://www.npmjs.com/) (Node Package Manager)
-
-**Cloning the Repository**
-
-```bash
-git clone https://github.com/samarth-kamble/Slack-Clone.git
-cd Slack-Clone
-```
-**Installation**
-
-Install the project dependencies using npm:
+**Installation:**
 
 ```bash
 npm install
-```
-
-**Set Up Environment Variables**
-
-Create a new file named `.env.local` in the root of your project and add the following content:
-
-```env.local
-CONVEX_DEPLOYMENT=
-NEXT_PUBLIC_CONVEX_URL=
-AUTH_GITHUB_ID=
-AUTH_GITHUB_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
-```
-Replace the placeholder values with your actual Convex,Github & google cloud credentials. You can obtain these credentials by signing up on the [Convex](https://www.convex.dev/), [Github](https://www.github.com) and [Google](https://console.cloud.google.com) websites.
-
-**Running the Project**
-```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
+
+Open [http://localhost:3000](http://localhost:3000) — you'll see the Slack App Shell with Today view loaded.
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   └── page.tsx              # Main entry point - renders SlackAppShell
+├── components/
+│   ├── presentation/
+│   │   ├── SlackAppShell.tsx  # Core shell component
+│   │   ├── SlackTodayView.tsx # Today view with focus prompts & agenda
+│   │   └── TemplateViews.tsx  # Generic template views (Home, Activity, Files, etc.)
+│   └── shared/
+│       ├── UniversalChatSurface.tsx  # Reusable chat interface
+│       └── ChatMessage.tsx           # Message component
+└── context/
+    └── DemoDataContext.tsx   # Mock data for channels, DMs, files
+```
+
+## 🎨 Customizing for Your Concept
+
+### 1. Replace Today View Content
+
+Edit `src/components/presentation/SlackTodayView.tsx`:
+- Modify focus prompt pills (top 3 cards)
+- Update agenda items
+- Change highlights and replies sections
+
+### 2. Add Your Own Views
+
+In `src/app/page.tsx`, add new cases to `renderContent()`:
+
+```tsx
+case "your-view":
+  return <YourCustomView />;
+```
+
+### 3. Update Sidebar Data
+
+Edit `src/context/DemoDataContext.tsx` to change:
+- Channel names and previews
+- DM contacts
+- File lists
+- Activity items
+
+### 4. Customize Chat Content
+
+In `src/components/presentation/TemplateViews.tsx`, modify `CHANNEL_MESSAGES` and `DM_MESSAGES` to add your own conversation data.
+
+## 🎯 Key Features
+
+- **Today View:** Focus prompts with animated gradient borders, agenda with hover "Prep"/"Ask" buttons, highlights, replies
+- **Sidebar Navigation:** Fully functional with click handlers that update main content
+- **Chat Surfaces:** Universal chat component with message input (consistent across all views)
+- **Responsive:** Works on different screen sizes
+- **Type-Safe:** Full TypeScript support
+
+## 📝 Notes
+
+- All narrative-specific content has been removed — this is a clean slate
+- The shell uses generic placeholder data (`GENERIC_GLOBAL_DMS`, mock channels)
+- Sidebar clicks automatically update the main chat content
+- Hover states work on focus prompts (animated gradients) and agenda items (button swaps)
+
+## 🤝 Sharing with Your Team
+
+Once you've customized it for your concept:
+
+1. **Initialize git** (if not already):
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit: Slack App Shell boilerplate"
+   ```
+
+2. **Create a GitHub repository** and push:
+   ```bash
+   git remote add origin https://github.com/your-org/your-repo-name.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+3. **Share the repo URL** with your design team — they can clone and start building!
+
+## 🛠️ Tech Stack
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **React** (with hooks)
+- **Framer Motion** (animations)
+
+## 📄 License
+
+This is a template for internal use. Customize as needed for your projects.

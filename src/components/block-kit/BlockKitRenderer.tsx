@@ -278,7 +278,7 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
             if (el.type !== "button") return null;
             const label = el.text?.text ?? "";
             // Remove emoji from label if present
-            const cleanLabel = label.replace(/^[\u{1F300}-\u{1F9FF}]+\s*/u, '').trim();
+            const cleanLabel = label.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF]+\s*/g, '').trim();
             const IconComponent = el.action_id ? iconMap[el.action_id] : null;
             
             const isPrimary = el.style === "primary";
@@ -313,7 +313,7 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
           style={{ color: T.colors.textSecondary }}
         >
           {block.elements.map((el, i) => (
-            <span key={i}>{el.type === "mrkdwn" ? renderMrkdwn(el.text) : el.text?.text ?? ""}</span>
+            <span key={i}>{el.type === "mrkdwn" ? renderMrkdwn(typeof el.text === 'string' ? el.text : el.text?.text ?? '') : el.text?.text ?? ""}</span>
           ))}
         </div>
       );

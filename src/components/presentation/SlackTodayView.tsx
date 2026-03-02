@@ -482,13 +482,37 @@ export function SlackbotPanel({ panelData, onClose }: SlackbotPanelProps) {
 
 // ── Meeting type icons ────────────────────────────────────────────────────────
 function MeetIcon({ className }: { className?: string }) {
+  const [imageError, setImageError] = useState(false);
+  
+  if (imageError) {
+    // Fallback: Simple video/meet icon SVG
+    return (
+      <svg className={`flex-shrink-0 ${className ?? ""}`} viewBox="0 0 24 24" fill="none" style={{ width: 24, height: 24 }}>
+        <rect x="2" y="6" width="20" height="12" rx="2" stroke="#5F6368" strokeWidth="1.5" fill="none" />
+        <path d="M8 2v4M16 2v4" stroke="#5F6368" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M2 10h20" stroke="#5F6368" strokeWidth="1.5" />
+        <circle cx="12" cy="14" r="2" fill="#5F6368" />
+        <path d="M8 14l2-2 2 2 2-2" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  
+  // Use URL-encoded path to handle spaces in filename
+  const imageSrc = "/Google Meet.png".replace(/ /g, "%20");
+  
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/Google Meet.png"
+      src={imageSrc}
       alt="Google Meet"
       className={`flex-shrink-0 ${className ?? ""}`}
       style={{ width: 24, height: 24, objectFit: "contain" }}
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        if (!target.src.startsWith('data:')) {
+          setImageError(true);
+        }
+      }}
     />
   );
 }
@@ -503,37 +527,100 @@ function CalIcon({ className }: { className?: string }) {
   );
 }
 
+// ── Focus Prompt Pill ─────────────────────────────────────────────────────────
+function FocusPill({ onClick, icon, iconBg, label, restGradient, colors }: {
+  onClick: () => void;
+  icon: string;
+  iconBg: string;
+  label: string;
+  restGradient: string;
+  colors: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-[1.5px] rounded-2xl w-full cursor-pointer overflow-hidden"
+      style={{ boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.12)" : "none" }}
+    >
+      {/* Resting border — static gradient, visible at rest */}
+      <div
+        className="absolute inset-0 rounded-2xl transition-opacity duration-300"
+        style={{ background: restGradient, opacity: hovered ? 0 : 0.5 }}
+      />
+      {/* Spinning conic-gradient square — fixed size ensures full coverage on wide pills */}
+      <div
+        className="absolute transition-opacity duration-300"
+        style={{
+          top: "50%",
+          left: "50%",
+          width: "800px",
+          height: "800px",
+          transform: "translate(-50%, -50%)",
+          background: `conic-gradient(${colors})`,
+          animation: hovered ? "spin-border 3s linear infinite" : "none",
+          opacity: hovered ? 1 : 0,
+        }}
+      />
+      <div className="relative flex items-center justify-between p-4 bg-white rounded-[calc(1rem-1.5px)] h-full overflow-hidden">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center flex-shrink-0 text-xl`}>{icon}</div>
+          <span className="text-sm font-medium text-gray-800 leading-snug break-words min-w-0">{label}</span>
+        </div>
+        {hovered && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm transition-all whitespace-nowrap flex-shrink-0 ml-3"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/slackbot-logo.svg" alt="" className="w-4 h-4" />
+            Ask
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Per-meeting card ──────────────────────────────────────────────────────────
 interface AgendaItemProps {
   title: string;
   subtitle?: string;
-  dotColor?: string;          // Tailwind bg-* class for the subtitle dot
+  dotColor?: string;
   time: string;
   badgeText?: string;
-  badgeColor?: string;        // Tailwind classes for the badge
-  barColor: string;           // Tailwind bg-* class for the left bar
+  badgeColor?: string;
+  barColor: string;
   isNow?: boolean;
   icon?: React.ComponentType<{ className?: string }>;
+  isMeeting?: boolean;
   onPrep: () => void;
 }
 
 function AgendaItem({
   title, subtitle, dotColor, time, badgeText, badgeColor,
-  barColor, isNow = false, icon: Icon, onPrep,
+  barColor, isNow = false, icon: Icon, isMeeting = false, onPrep,
 }: AgendaItemProps) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <div
-      className={`group flex justify-between items-center p-3.5 border rounded-2xl shadow-sm transition-all cursor-pointer ${
+      className={`flex items-center p-3.5 border rounded-2xl shadow-sm transition-all cursor-pointer ${
         isNow
           ? "bg-[#eefcf4] border-[#d1f4e0]"
           : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-md"
       }`}
+      onClick={onPrep}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* Left: bar + title + badge + subtitle */}
       <div className="flex items-start gap-3 min-w-0 flex-1">
         <div className={`w-1 h-5 rounded-full mt-0.5 flex-shrink-0 ${barColor}`} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <span className="text-[13px] font-bold text-gray-900 truncate">{title}</span>
             {badgeText && (
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeColor}`}>
@@ -550,20 +637,20 @@ function AgendaItem({
         </div>
       </div>
 
-      {/* Right: time+icon (normal) OR Prep button (hover) — min-w prevents layout shift */}
-      <div className="flex items-center min-w-[72px] justify-end flex-shrink-0 pl-2">
-        {/* Normal state — hidden on hover */}
-        <div className="flex items-center gap-1.5 group-hover:hidden text-gray-600">
-          <span className="text-[12px] tabular-nums text-gray-500">{time}</span>
-          {Icon && <Icon className="w-4 h-4" />}
-        </div>
-        {/* Hover state — shown only on hover */}
-        <button
-          onClick={(e) => { e.stopPropagation(); onPrep(); }}
-          className="hidden group-hover:flex items-center px-3 py-1 text-[11px] font-bold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm transition-all whitespace-nowrap"
-        >
-          Prep
-        </button>
+      <div className="flex items-center w-[80px] justify-end flex-shrink-0 pl-2">
+        {!hovered ? (
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <span className="text-[12px] tabular-nums text-gray-500">{time}</span>
+            {Icon && <Icon className="w-4 h-4" />}
+          </div>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); onPrep(); }}
+            className="px-3 py-1 text-[11px] font-bold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm transition-all whitespace-nowrap"
+          >
+            {isMeeting ? "Prep" : "Ask"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -688,8 +775,8 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="max-w-[1124px] mx-auto px-8 py-8">
+        <div className="flex-1 overflow-y-auto min-h-0 @container">
+          <div className="max-w-[1124px] mx-auto px-5 py-6 w-full">
 
             {/* Hero */}
             <div className="text-center mb-8">
@@ -700,87 +787,36 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
               <p className="text-[14px] text-gray-500">Slackbot found areas for you to focus on today:</p>
             </div>
 
-            {/* Focus Prompts — spinning conic-gradient border on hover, no layout shift */}
-            <div className="grid grid-cols-3 gap-6 mb-12 w-full">
-
-              {/* Pill 1 — pipeline risks */}
-              <div
+            {/* Focus Prompts — spinning conic-gradient border on hover */}
+            <div className="grid grid-cols-3 gap-4 mb-12 w-full" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <FocusPill
                 onClick={openRisks}
-                className="relative p-[1px] rounded-2xl w-full group cursor-pointer transition-shadow hover:shadow-lg overflow-hidden"
-              >
-                {/* Resting border — static, faint */}
-                <div className="absolute inset-0 rounded-2xl opacity-40" style={{ background: "linear-gradient(135deg,#f9a8d4,#c084fc,#fb923c)" }} />
-                {/* Animated border — angle rotates continuously, fades in on hover */}
-                <div className="pill-border-animated pill-border-p1" />
-                <div className="relative flex items-center p-4 bg-white rounded-[calc(1rem-1px)] h-full overflow-hidden">
-                  <div className="flex items-center gap-3 w-full pr-4 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 text-xl">🔍</div>
-                    <span className="text-sm font-medium text-gray-800 leading-snug whitespace-nowrap overflow-hidden text-ellipsis">Review Q1 pipeline risks</span>
-                  </div>
-                  <div className="absolute right-0 top-0 bottom-0 pr-3 pl-12 bg-gradient-to-l from-white via-white to-transparent opacity-0 group-hover:opacity-100 flex items-center transition-opacity duration-200 pointer-events-none rounded-r-2xl">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openRisks(); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 shadow-sm rounded-lg text-[13px] font-bold text-black hover:bg-gray-50 transition-colors pointer-events-auto whitespace-nowrap"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/slackbot-logo.svg" alt="Slackbot" className="w-5 h-5" /> Ask
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pill 2 — Acme prep */}
-              <div
+                icon="🔍"
+                iconBg="bg-orange-50"
+                label="Review Q1 pipeline risks"
+                restGradient="linear-gradient(135deg,#f9a8d4,#c084fc,#fb923c)"
+                colors="#f472b6, #c084fc, #fb923c, #f9a8d4, #f472b6"
+              />
+              <FocusPill
                 onClick={() => openPrep("deal-acme", "11:30am")}
-                className="relative p-[1px] rounded-2xl w-full group cursor-pointer transition-shadow hover:shadow-lg overflow-hidden"
-              >
-                <div className="absolute inset-0 rounded-2xl opacity-40" style={{ background: "linear-gradient(135deg,#34d399,#2dd4bf,#60a5fa)" }} />
-                <div className="pill-border-animated pill-border-p2" />
-                <div className="relative flex items-center p-4 bg-white rounded-[calc(1rem-1px)] h-full overflow-hidden">
-                  <div className="flex items-center gap-3 w-full pr-4 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 text-xl">🤝</div>
-                    <span className="text-sm font-medium text-gray-800 leading-snug whitespace-nowrap overflow-hidden text-ellipsis">Prep for Acme Corp sync</span>
-                  </div>
-                  <div className="absolute right-0 top-0 bottom-0 pr-3 pl-12 bg-gradient-to-l from-white via-white to-transparent opacity-0 group-hover:opacity-100 flex items-center transition-opacity duration-200 pointer-events-none rounded-r-2xl">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openPrep("deal-acme", "11:30am"); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 shadow-sm rounded-lg text-[13px] font-bold text-black hover:bg-gray-50 transition-colors pointer-events-auto whitespace-nowrap"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/slackbot-logo.svg" alt="Slackbot" className="w-5 h-5" /> Ask
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pill 3 — pending quotes */}
-              <div
+                icon="🤝"
+                iconBg="bg-emerald-50"
+                label="Prep for Acme Corp sync"
+                restGradient="linear-gradient(135deg,#34d399,#2dd4bf,#60a5fa)"
+                colors="#34d399, #2dd4bf, #60a5fa, #a5f3fc, #34d399"
+              />
+              <FocusPill
                 onClick={openQuotes}
-                className="relative p-[1px] rounded-2xl w-full group cursor-pointer transition-shadow hover:shadow-lg overflow-hidden"
-              >
-                <div className="absolute inset-0 rounded-2xl opacity-40" style={{ background: "linear-gradient(135deg,#60a5fa,#818cf8,#a78bfa)" }} />
-                <div className="pill-border-animated pill-border-p3" />
-                <div className="relative flex items-center p-4 bg-white rounded-[calc(1rem-1px)] h-full overflow-hidden">
-                  <div className="flex items-center gap-3 w-full pr-4 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 text-xl">✍️</div>
-                    <span className="text-sm font-medium text-gray-800 leading-snug whitespace-nowrap overflow-hidden text-ellipsis">Approve 2 pending quotes</span>
-                  </div>
-                  <div className="absolute right-0 top-0 bottom-0 pr-3 pl-12 bg-gradient-to-l from-white via-white to-transparent opacity-0 group-hover:opacity-100 flex items-center transition-opacity duration-200 pointer-events-none rounded-r-2xl">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openQuotes(); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 shadow-sm rounded-lg text-[13px] font-bold text-black hover:bg-gray-50 transition-colors pointer-events-auto whitespace-nowrap"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/slackbot-logo.svg" alt="Slackbot" className="w-5 h-5" /> Ask
-                    </button>
-                  </div>
-                </div>
-              </div>
-
+                icon="✍️"
+                iconBg="bg-blue-50"
+                label="Approve 2 pending quotes"
+                restGradient="linear-gradient(135deg,#60a5fa,#818cf8,#a78bfa)"
+                colors="#60a5fa, #818cf8, #a78bfa, #c4b5fd, #60a5fa"
+              />
             </div>
 
             {/* Main grid */}
-            <div className="grid grid-cols-[1fr_360px] gap-6 items-start">
+            <div className="grid grid-cols-1 @[680px]:grid-cols-[1fr_minmax(240px,340px)] gap-6 items-start">
 
               {/* ── Left column ── */}
               <div className="flex flex-col gap-5">
@@ -1171,6 +1207,7 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
                     badgeColor="bg-blue-50 text-blue-600"
                     barColor="bg-blue-500"
                     icon={MeetIcon}
+                    isMeeting
                     onPrep={() => {}}
                   />
                   <AgendaItem
@@ -1180,6 +1217,7 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
                     time="11:30am"
                     barColor="bg-purple-500"
                     icon={MeetIcon}
+                    isMeeting
                     onPrep={() => openPrep("deal-acme", "11:30am")}
                   />
                   <AgendaItem
@@ -1206,6 +1244,7 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
                     time="4:00pm"
                     barColor="bg-indigo-500"
                     icon={MeetIcon}
+                    isMeeting
                     onPrep={() => {}}
                   />
                   <AgendaItem
@@ -1233,9 +1272,9 @@ export function SlackTodayView({ onNavigateToActivity }: SlackTodayViewProps = {
                   </button>
                   {showTomorrow && (
                     <div className="mt-3 space-y-2 opacity-60 pointer-events-none">
-                      <AgendaItem title="Pipeline Review" subtitle="Q1 week 1 forecast" time="9:00am" barColor="bg-blue-500" icon={MeetIcon} onPrep={() => {}} />
+                      <AgendaItem title="Pipeline Review" subtitle="Q1 week 1 forecast" time="9:00am" barColor="bg-blue-500" icon={MeetIcon} isMeeting onPrep={() => {}} />
                       <AgendaItem title="Greentech SOW Review" subtitle="SOW v2 with Diane" dotColor="bg-emerald-500" time="2:00pm" barColor="bg-emerald-500" icon={CalIcon} onPrep={() => {}} />
-                      <AgendaItem title="Acme Corp Follow-up" subtitle="Exec path with Priya" dotColor="bg-orange-500" time="4:30pm" barColor="bg-purple-500" icon={MeetIcon} onPrep={() => {}} />
+                      <AgendaItem title="Acme Corp Follow-up" subtitle="Exec path with Priya" dotColor="bg-orange-500" time="4:30pm" barColor="bg-purple-500" icon={MeetIcon} isMeeting onPrep={() => {}} />
                     </div>
                   )}
                 </div>

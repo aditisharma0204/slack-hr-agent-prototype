@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { IconHashtag, IconHeadphones } from "@/components/icons";
+import { IconHeadphones } from "@/components/icons";
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
 import { usePresentationMode, useNav } from "../_context/demo-layout-context";
-import { useActiveChat } from "@/components/presentation/DesktopSlackShell";
+import { useActiveChat } from "@/components/presentation/SlackAppShell";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
 const T = SLACK_TOKENS;
@@ -59,9 +59,9 @@ export function ActivityListItem({
   const { activeNav } = useNav();
   const searchParams = useSearchParams();
   const { preview, timestamp } = getChannelPreview(item.id);
-  const displayName = item.type === "channel" ? `#${item.name}` : item.name;
+  const displayName = item.name;
   const avatarSrc = item.type === "dm" ? (item.avatarUrl || getAvatarUrl(item.name, 64)) : null;
-  
+
   // Check if this item is active based on URL query param (for activity page)
   const activeChannelId = searchParams.get("channel");
   const isActiveFromQuery = activeNav === "activity" && activeChannelId === item.id;
@@ -132,16 +132,19 @@ export function ActivityListItem({
             {getInitials(item.name)}
           </div>
         )}
-        {item.type === "channel" ? (
-          <div className="absolute bottom-0 right-0 w-[14px] h-[14px] rounded-full bg-[#616061] flex items-center justify-center">
-            <IconHashtag width={8} height={8} className="text-white" stroke="currentColor" strokeWidth={2.5} />
-          </div>
-        ) : (
+        {item.type === "channel" ? null : (
           <StatusDot status={item.status} />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
+          {item.type === "channel" && (
+            <img
+              src="/Salesforce.png"
+              alt="channel"
+              className="w-3.5 h-3.5 object-contain opacity-70 grayscale shrink-0"
+            />
+          )}
           <span className="truncate font-medium" style={{ fontSize: T.typography.body, color: T.colors.text }}>
             {displayName}
           </span>
@@ -188,16 +191,19 @@ export function ActivityListItem({
             {getInitials(item.name)}
           </div>
         )}
-        {item.type === "channel" ? (
-          <div className="absolute bottom-0 right-0 w-[14px] h-[14px] rounded-full bg-[#616061] flex items-center justify-center">
-            <IconHashtag width={8} height={8} className="text-white" stroke="currentColor" strokeWidth={2.5} />
-          </div>
-        ) : (
+        {item.type === "channel" ? null : (
           <StatusDot status={item.status} />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
+          {item.type === "channel" && (
+            <img
+              src="/Salesforce.png"
+              alt="channel"
+              className="w-3.5 h-3.5 object-contain opacity-70 grayscale shrink-0"
+            />
+          )}
           <span className="truncate font-medium" style={{ fontSize: T.typography.body, color: T.colors.text }}>
             {displayName}
           </span>

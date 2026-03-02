@@ -9,16 +9,14 @@ import {
   IconPlus,
   IconMoreVertical,
 } from "@/components/icons";
-import { SlackbotProactiveTab } from "./SlackbotProactiveTab";
 import { SlackbotMessagesTab } from "./SlackbotMessagesTab";
 import { MessageInput } from "@/components/shared/MessageInput";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
-import type { DemoContext } from "@/app/(demo)/demo/workspace/[workspaceId]/_context/demo-layout-context";
 
 const T = SLACK_TOKENS;
 
-type TabId = "seller-edge" | "messages" | "history" | "files";
+type TabId = "messages" | "history" | "files";
 
 interface ChatMessage {
   id: string;
@@ -33,15 +31,11 @@ interface SlackbotPanelProps {
   panelData?: any;
   history?: any[];
   onUpdateHistory?: (history: any[]) => void;
-  demoContext?: DemoContext;
 }
 
-export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistory, demoContext = 'N2A1' }: SlackbotPanelProps) {
-  // Determine if we are in a Seller Edge arc
-  const isSellerEdgeArc = demoContext === 'N1A1' || demoContext === 'N2A1';
-  
-  // Default to Messages if not in a Seller Edge arc, otherwise default to Seller Edge
-  const [activeTab, setActiveTab] = useState<TabId>(isSellerEdgeArc ? "seller-edge" : "messages");
+export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistory }: SlackbotPanelProps) {
+  // Always default to Messages - generic 3-tab panel
+  const [activeTab, setActiveTab] = useState<TabId>("messages");
   
   // Ref to store sendMessage function from SlackbotMessagesTab
   const messagesTabSendRef = useRef<((message: string) => void) | null>(null);
@@ -89,20 +83,7 @@ export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistor
       </div>
 
       <div className="flex border-b shrink-0" style={{ borderColor: T.colors.border }}>
-        {/* TABS: Strict Tab Isolation */}
-        {isSellerEdgeArc && (
-          <button
-            type="button"
-            onClick={() => setActiveTab("seller-edge")}
-            className={cn(
-              "px-3 py-2.5 font-medium transition-colors",
-              activeTab === "seller-edge" ? "border-b-2" : "hover:text-[#1d1c1d]"
-            )}
-            style={activeTab === "seller-edge" ? { color: T.colors.link, borderBottomColor: T.colors.link, fontSize: T.typography.small } : { color: T.colors.textSecondary, fontSize: T.typography.small }}
-          >
-            Seller Edge
-          </button>
-        )}
+        {/* TABS: Generic 3-tab panel - Messages, History, Files */}
         <button
           type="button"
           onClick={() => setActiveTab("messages")}
@@ -142,7 +123,6 @@ export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistor
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
-        {activeTab === "seller-edge" && <SlackbotProactiveTab />}
         {activeTab === "messages" && (
           <SlackbotMessagesTab 
             history={history}
@@ -155,36 +135,12 @@ export function SlackbotPanel({ onClose, panelData, history = [], onUpdateHistor
         )}
       </div>
 
-      {/* Chat component at bottom with prompts — same px-3 as ChatEngine for consistent message input alignment */}
+      {/* Universal input style: use shared MessageInput directly */}
       <div className="shrink-0 border-t" style={{ borderColor: T.colors.border }}>
-        <div className="p-3">
-          {/* Quick Prompts (Responsive wrapping) */}
-          <div className="flex flex-wrap gap-2 mb-2">
-            {[
-              "What's my pipeline status?",
-              "Show me at-risk deals",
-              "What should I focus on today?",
-            ].map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => handleChatSubmit(prompt)}
-                className="px-3 py-1.5 text-[13px] rounded-md border hover:bg-[#f8f8f8] transition-colors"
-                style={{
-                  borderColor: T.colors.border,
-                  color: T.colors.textSecondary,
-                }}
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-          {/* SINGLE SOURCE OF TRUTH INPUT */}
-          <MessageInput
-            placeholder="Message Slackbot..."
-            onSendMessage={handleChatSubmit}
-          />
-        </div>
+        <MessageInput
+          placeholder="Message Slackbot..."
+          onSendMessage={handleChatSubmit}
+        />
       </div>
     </div>
   );

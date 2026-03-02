@@ -408,44 +408,11 @@ body.prototype-mode .arc-tooltip {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* ── Rotating linear-gradient border for Focus Pills ────────────────────────
-   Uses @property to animate the gradient angle in place — the gradient always
-   fills the exact inset-0 border area, so it can never have gaps or vanishing
-   segments like the spinning-oversized-div approach. */
-
-@property --pill-border-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes pill-border-rotate {
-  to { --pill-border-angle: 360deg; }
-}
-
-/* Shared position + animation — always running, just invisible at rest */
-.pill-border-animated {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  animation: pill-border-rotate 3s linear infinite;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.group:hover .pill-border-animated {
-  opacity: 1;
-}
-
-/* Per-pill colour palettes */
-.pill-border-p1 {
-  background: linear-gradient(var(--pill-border-angle), #f472b6, #c084fc, #fb923c, #f9a8d4, #f472b6);
-}
-.pill-border-p2 {
-  background: linear-gradient(var(--pill-border-angle), #34d399, #2dd4bf, #60a5fa, #a5f3fc, #34d399);
-}
-.pill-border-p3 {
-  background: linear-gradient(var(--pill-border-angle), #60a5fa, #818cf8, #a78bfa, #c4b5fd, #60a5fa);
+/* Spinning border animation — uses transform: rotate on an oversized
+   conic-gradient disc, clipped by overflow:hidden on the parent. */
+@keyframes spin-border {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* Noise overlay */

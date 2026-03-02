@@ -443,7 +443,7 @@ export function DealCanvasTab() {
       }
       return m;
     }));
-    setCompletedActions(prev => new Set([...prev, milestoneId]));
+    setCompletedActions(prev => new Set([...Array.from(prev), milestoneId]));
   };
 
   // Handle Nudge action

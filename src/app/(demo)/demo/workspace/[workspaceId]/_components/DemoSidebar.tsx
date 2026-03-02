@@ -21,6 +21,7 @@ import {
   IconPencil,
   IconHeadphones,
   IconHome,
+  IconBot,
 } from "@/components/icons";
 import {
   Settings as SettingsIcon,
@@ -48,7 +49,7 @@ import {
 import { useDemoData, getAvatarUrl } from "@/context/DemoDataContext";
 import { ActivityListItem } from "./ActivityListItem";
 import { useNav, usePresentationMode, useDemoContext } from "../_context/demo-layout-context";
-import { useActiveChat } from "@/components/presentation/DesktopSlackShell";
+import { useActiveChat } from "@/components/presentation/SlackAppShell";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 
@@ -83,7 +84,15 @@ function StatusDot({ status }: { status?: "online" | "away" | "dnd" | "call" }) 
   return null;
 }
 
-export function DemoSidebar() {
+interface DemoSidebarProps {
+  activeDmId?: string;
+  onDmSelect?: (id: string) => void;
+  overrideDms?: import('@/context/DemoDataContext').DemoDM[];
+  overrideChannels?: import('@/context/DemoDataContext').DemoChannel[];
+  sidebarApps?: Array<{ id: string; name: string; icon: string }>;
+}
+
+export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDms, overrideChannels, sidebarApps }: DemoSidebarProps = {}) {
   const params = useParams();
   const channelId = (params.channelId as string) || undefined;
   const { activeNav } = useNav();
@@ -92,13 +101,11 @@ export function DemoSidebar() {
   const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead } = useDemoData();
   const searchParams = useSearchParams();
   
-  // STRICT NARRATIVE ISOLATION: Filter out Slackbot (Seller Edge) DM unless in N1A1 or N2A1
-  // This ensures the "Slackbot (Seller Edge)" DM exclusively appears during Narrative 1, Arc 1 and Narrative 2, Arc 1
-  // It must be completely hidden in all other scenarios (N1A2, N2A2, OTHER, etc.)
-  const shouldShowSlackbot = demoContext === 'N1A1' || demoContext === 'N2A1';
-  const filteredDms = shouldShowSlackbot 
-    ? dms 
-    : dms.filter((dm) => !dm.isSlackbot);
+  // Use overrideDms if provided (for GlobalDMsView), otherwise use filtered DMs from context
+  const filteredDms = overrideDms || dms.filter((dm) => !dm.isSlackbot);
+  
+  // Use overrideChannels if provided, otherwise use channels from context
+  const filteredChannels = overrideChannels || channels;
   
   // For activity page, check query param for selected channel
   const activityChannelId = activeNav === "activity" ? searchParams.get("channel") : null;
@@ -110,6 +117,14 @@ export function DemoSidebar() {
   const chatContext = useActiveChat();
   let activeChatId: string | undefined = chatContext.activeChatId;
   const setActiveChatId: ((id: string) => void) = chatContext.setActiveChatId;
+  
+  // Use prop activeDmId if provided (for GlobalDMsView), otherwise use context
+  // Treat empty string as "not provided" to allow auto-selection to work
+  // When overrideDms is provided, default to first DM if no prop is set (for GlobalDMsView auto-selection)
+  const hasPropSelection = propActiveDmId !== undefined && propActiveDmId !== '';
+  const defaultDmId = overrideDms && overrideDms.length > 0 ? overrideDms[0].id : undefined;
+  const effectiveActiveDmId = hasPropSelection ? propActiveDmId : (defaultDmId || activeChatId);
+  
   const [filter, setFilter] = useState<ViewFilter>("all");
   const [search, setSearch] = useState("");
   const [unreadsOnly, setUnreadsOnly] = useState(false);
@@ -117,14 +132,14 @@ export function DemoSidebar() {
   const [viewMode, setViewMode] = useState<"list" | "compact">("list");
 
   const showAllDmsTabs = activeNav === "home" || activeNav === "activity" || activeNav === "more";
-  const showSearchAndFilters = activeNav !== "files" && activeNav !== "later";
+  const showSearchAndFilters = activeNav !== "later";
   const isDmView = activeNav === "dms" || activeNav === "agentforce";
   const useDarkTheme = isDmView;
 
   const channelAndDmItems = (
     filter === "dms"
       ? filteredDms.map((dm) => ({ ...dm, type: "dm" as const }))
-      : [...channels.map((ch) => ({ ...ch, type: "channel" as const })), ...filteredDms.map((dm) => ({ ...dm, type: "dm" as const }))]
+      : [...filteredChannels.map((ch) => ({ ...ch, type: "channel" as const })), ...filteredDms.map((dm) => ({ ...dm, type: "dm" as const }))]
   ).filter((item) => {
     if (!search) return true;
     return item.name.toLowerCase().includes(search.toLowerCase());
@@ -136,23 +151,28 @@ export function DemoSidebar() {
     return dm.name.toLowerCase().includes(search.toLowerCase());
   });
 
-  const agentforceItems = filteredDms.filter((dm) => dm.isSlackbot).filter((dm) => {
-    if (unreadsOnly && !dm.unread) return false;
-    if (!search) return true;
-    return dm.name.toLowerCase().includes(search.toLowerCase());
-  });
+  const agentforceItems: typeof filteredDms = [
+    { id: "af-employee", name: "Employee Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
+    { id: "af-support", name: "Agentforce Support Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
+    { id: "af-data", name: "Data Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
+  ];
 
   const filteredFiles = files.filter((f) => {
     if (!search) return true;
     return f.name.toLowerCase().includes(search.toLowerCase());
   });
 
+  // Filter out Arc 1 specific saved items (slackbot) from global sidebar
   const filteredSaved = savedItems.filter((s) => {
+    // Remove slackbot saved items (Arc 1 specific)
+    if (s.channelId === "slackbot") return false;
     if (!search) return true;
     return s.preview.toLowerCase().includes(search.toLowerCase());
   });
 
   const title = NAV_TITLES[activeNav] ?? "Activity";
+  const showBetaBadge = activeNav === "activity" || activeNav === "home";
+  const showChannelAndDmItems = activeNav === "home" || activeNav === "activity" || activeNav === "more";
 
   // Home view: Render Slack workspace sidebar
   if (activeNav === "home") {
@@ -216,7 +236,7 @@ export function DemoSidebar() {
               <StarIcon className="w-3.5 h-3.5 mr-2" /> Starred
             </div>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <span className="mr-2 text-lg leading-none opacity-60">#</span> proj-ai-council
+              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> proj-ai-council
             </button>
           </div>
 
@@ -366,10 +386,10 @@ export function DemoSidebar() {
               <span className="w-3 h-3 mr-2 rounded bg-blue-500"></span> Agentforce
             </div>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <span className="mr-2 text-lg leading-none opacity-60">#</span> ai-club
+              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ai-club
             </button>
             <button className="w-full flex items-center px-4 py-1 pl-9 hover:bg-white/5 text-[15px] text-[#D1C2D0]">
-              <span className="mr-2 text-lg leading-none opacity-60">#</span> ux-agentic-experiences
+              <img src="/Salesforce.png" alt="channel" className="w-3.5 h-3.5 mr-2 object-contain opacity-70 grayscale" /> ux-agentic-experiences
             </button>
           </div>
 
@@ -378,6 +398,111 @@ export function DemoSidebar() {
             <button className="bg-[#e4b5f8] text-[#350d36] text-[13px] font-bold px-4 py-1.5 rounded-full shadow-lg pointer-events-auto flex items-center gap-2 hover:bg-[#d6a5eb]">
               ↓ Unread mentions
             </button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // Files view: Slack-style dark sidebar with file nav + recently viewed + starred
+  if (activeNav === "files") {
+    const recentFiles = [
+      "Sales Cloud UX Pattern Gr...",
+      "2nd Brain Program overvi...",
+      "2nd brain — Goal & Weekl...",
+      "Frame and Resolution Gui...",
+      "Revenue Cloud Sales Offsi...",
+      "Sales UX — January 2026 ...",
+      "FY26 H2 Corporate Mess...",
+      "Claude Code Getting Star...",
+      "Sales UX Onsite RSVPs — ...",
+      "AI Council Approvals: C36...",
+    ];
+    const starredFiles = [
+      "AI Coding Tools: How to S...",
+      "Exp. Org Guidelines for Pr...",
+      "Agentic Convo: Campaign...",
+      "Pattern Workbook Playbo...",
+      "Project Brief: C360 Unife...",
+      "Suite First Patterns Playbo...",
+      "Project Brief",
+      "Design Prototyping in Cur...",
+      "T&P and Marketing Gen A...",
+      { name: "Sales UX Documentation", bold: true },
+      "Maestro 2.0 — Multi-Agent...",
+      "Guided Experiences at Sal...",
+      "[Archived]Sales Cloud: Co...",
+      "Sales Cloud — Meeting Pre...",
+      "UX Newsletter | March 20...",
+      "Welcome to the Apps & In...",
+      "Agentforce In-App Branding",
+    ];
+
+    return (
+      <aside className="w-[340px] h-full bg-[#350d36] text-[#D1C2D0] flex flex-col flex-shrink-0 border-r border-white/10 font-sans">
+        {/* Header */}
+        <div className="h-14 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
+          <span className="font-bold text-white text-[15px]">Files</span>
+          <button className="w-7 h-7 rounded hover:bg-white/10 flex items-center justify-center">
+            <IconPlus width={16} height={16} className="text-white" stroke="currentColor" />
+          </button>
+        </div>
+
+        {/* Scrollable nav + file lists */}
+        <div className="flex-1 overflow-y-auto py-3 custom-scrollbar">
+          {/* Nav items */}
+          <div className="space-y-0.5 mb-5 px-2">
+            <button className="w-full flex items-center px-3 py-1.5 rounded-md bg-[#5c2c5d] text-white text-[14px] font-bold">
+              All files
+            </button>
+            <button className="w-full flex items-center px-3 py-1.5 rounded-md hover:bg-white/5 text-[14px] text-[#D1C2D0]">
+              Canvases
+            </button>
+            <button className="w-full flex items-center px-3 py-1.5 rounded-md hover:bg-white/5 text-[14px] text-[#D1C2D0]">
+              Lists
+            </button>
+            <button className="w-full flex items-center px-3 py-1.5 rounded-md hover:bg-white/5 text-[14px] text-[#D1C2D0]">
+              Assigned to you
+            </button>
+          </div>
+
+          {/* Recently viewed */}
+          <div className="mb-4">
+            <div className="px-4 py-1 text-[11px] font-medium text-white/50 uppercase tracking-wider">
+              Recently viewed
+            </div>
+            {recentFiles.map((f, i) => (
+              <button
+                key={i}
+                className="w-full flex items-center gap-2 px-4 py-1 hover:bg-white/5 text-[13px] text-[#D1C2D0] truncate"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+                <span className="truncate">{f}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Starred */}
+          <div className="mb-4">
+            <div className="px-4 py-1 text-[11px] font-medium text-white/50 uppercase tracking-wider">
+              Starred
+            </div>
+            {starredFiles.map((f, i) => {
+              const name = typeof f === "string" ? f : f.name;
+              const isBold = typeof f === "object" && f.bold;
+              return (
+                <button
+                  key={i}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-4 py-1 hover:bg-white/5 text-[13px] truncate",
+                    isBold ? "text-white font-bold" : "text-[#D1C2D0]"
+                  )}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+                  <span className="truncate">{name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </aside>
@@ -399,10 +524,12 @@ export function DemoSidebar() {
       {/* PERMANENT SIDEBAR HEADER - Never disappears, always visible */}
       {isDmView ? (
         <>
-          {/* DM Header - Direct messages title row */}
+          {/* DM/Agentforce Header */}
           <div className="px-4 py-4 flex items-center justify-between gap-3 shrink-0">
             <button type="button" className="flex items-center gap-1.5 hover:opacity-90 shrink-0">
-              <span className="font-bold text-white whitespace-nowrap" style={{ fontSize: T.typography.header }}>Direct messages</span>
+              <span className="font-bold text-white whitespace-nowrap" style={{ fontSize: T.typography.header }}>
+                {activeNav === "agentforce" ? "Agentforce" : "Direct messages"}
+              </span>
               <IconChevronDown width={14} height={14} className="text-white shrink-0" stroke="currentColor" />
             </button>
             <div className="flex items-center gap-3">
@@ -440,7 +567,7 @@ export function DemoSidebar() {
               <IconSearch width={14} height={14} style={{ color: T.colors.dmSearchPlaceholder }} stroke="currentColor" />
               <input
                 type="text"
-                placeholder="Find a DM"
+                placeholder={activeNav === "agentforce" ? "Find an agent" : "Find a DM"}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex-1 min-w-0 bg-transparent focus:outline-none placeholder:text-[#c1acD1]"
@@ -455,7 +582,7 @@ export function DemoSidebar() {
           <div className="px-3 py-3 border-b flex items-center justify-between gap-2 shrink-0" style={{ borderColor: T.colors.border }}>
             <div className="flex items-center gap-2">
               <span className="font-bold" style={{ fontSize: T.typography.header, color: T.colors.text }}>{title}</span>
-              {(activeNav === "activity" || activeNav === "home") && (
+              {showBetaBadge && (
                 <span className="px-1.5 py-0.5 text-[10px] font-medium rounded" style={{ backgroundColor: T.colors.betaBadgeBg, color: T.colors.betaBadgeText }}>Beta</span>
               )}
             </div>
@@ -547,8 +674,8 @@ export function DemoSidebar() {
             </div>
           )}
 
-          {/* Files/Later Search Bar */}
-          {(activeNav === "files" || activeNav === "later") && (
+          {/* Later Search Bar */}
+          {activeNav === "later" && (
             <div className="px-2 py-1.5 border-b shrink-0" style={{ borderColor: T.colors.border }}>
               <div className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: T.colors.backgroundAlt }}>
                 <IconSearch width={14} height={14} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
@@ -566,54 +693,7 @@ export function DemoSidebar() {
         </>
       )}
 
-      <div className="flex-1 overflow-y-auto min-h-0 p-3 flex flex-col gap-2">
-        {activeNav === "files" && filteredFiles.map((file) => {
-          const isActive = activeChatId === file.channelId || channelId === file.channelId;
-          const className = cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer",
-            isActive ? "" : "hover:bg-[#f0e6f0]"
-          );
-          const style = {
-            ...(isActive ? { backgroundColor: "#ebe0eb", boxShadow: "inset 0 0 0 1px rgba(97,31,105,0.25)" } : {}),
-            borderBottom: "1px solid rgba(97,31,105,0.12)",
-          };
-          
-          if (isPresentationMode && setActiveChatId) {
-            // In presentation mode, use local state navigation ONLY - no URL updates
-            return (
-              <div
-                key={file.id}
-                className={className}
-                style={style}
-                onClick={() => {
-                  setActiveChatId(file.channelId);
-                  // DO NOT update URL in presentation mode - causes 404 errors
-                }}
-              >
-                <IconFolder width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-                <div className="flex-1 min-w-0">
-                  <span className="truncate block" style={{ fontSize: T.typography.body, color: T.colors.text }}>{file.name}</span>
-                </div>
-                <span className="shrink-0" style={{ fontSize: T.typography.smaller, color: T.colors.textSecondary }}>{file.timestamp}</span>
-              </div>
-            );
-          }
-          
-          return (
-            <Link
-              key={file.id}
-              href={`/demo/workspace/${workspace.id}/channel/${file.channelId}`}
-              className={className}
-              style={style}
-            >
-              <IconFolder width={16} height={16} className="shrink-0" style={{ color: T.colors.textSecondary }} stroke="currentColor" />
-              <div className="flex-1 min-w-0">
-                <span className="truncate block" style={{ fontSize: T.typography.body, color: T.colors.text }}>{file.name}</span>
-              </div>
-              <span className="shrink-0" style={{ fontSize: T.typography.smaller, color: T.colors.textSecondary }}>{file.timestamp}</span>
-            </Link>
-          );
-        })}
+      <div className={cn("flex-1 overflow-y-auto min-h-0 flex flex-col", activeNav === "dms" ? "p-0" : "p-3 gap-2")}>
         {activeNav === "later" && filteredSaved.map((saved) => {
           const isActive = activeChatId === saved.channelId || channelId === saved.channelId;
           const className = cn(
@@ -662,149 +742,108 @@ export function DemoSidebar() {
           );
         })}
         {activeNav === "dms" && dmsOnly.map((item, index) => {
-          // Check if this is the active item: URL match, context match, or first item if nothing selected
-          const isActive = activeChatId === item.id || effectiveChannelId === item.id || (!effectiveChannelId && !activeChatId && index === 0);
+          // Check if this is the active item: use prop activeDmId if provided (and not empty), otherwise use context/URL logic
+          // When overrideDms is provided, use effectiveActiveDmId (which defaults to first DM)
+          const hasPropSelection = propActiveDmId !== undefined && propActiveDmId !== '';
+          const isActive = (hasPropSelection || overrideDms) 
+            ? effectiveActiveDmId === item.id 
+            : (activeChatId === item.id || effectiveChannelId === item.id || (!effectiveChannelId && !activeChatId && index === 0));
+          
           const { preview, timestamp } = getChannelPreview(item.id);
           const avatarSrc = item.isSlackbot ? "/slackbot-logo.svg" : (item.avatarUrl || getAvatarUrl(item.name, 64));
-          const className = cn(
-            "flex items-start gap-3 px-3 py-2.5 rounded-lg group w-full transition-colors cursor-pointer",
-            isActive ? "" : "hover:bg-[#52215A]"
-          );
-          const style = {
-            ...(isActive ? { backgroundColor: T.colors.dmSidebarSelect } : openDropdownId === item.id ? { backgroundColor: "#52215A" } : {}),
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          
+          // Check if next item is also unselected (to show divider only between unselected cards)
+          const nextItem = dmsOnly[index + 1];
+          const nextIsActive = nextItem && ((hasPropSelection || overrideDms)
+            ? effectiveActiveDmId === nextItem.id 
+            : (activeChatId === nextItem.id || effectiveChannelId === nextItem.id));
+          const showDivider = !isActive && !nextIsActive && nextItem; // Only show divider between unselected cards
+          
+          // Handler: use onDmSelect if provided (GlobalDMsView), otherwise use context
+          const handleClick = () => {
+            if (onDmSelect) {
+              onDmSelect(item.id);
+            } else if (isPresentationMode) {
+              setActiveChatId(item.id);
+            }
           };
           
-          if (isPresentationMode && setActiveChatId) {
-            // In presentation mode, use local state navigation ONLY - no URL updates
-            // URL updates cause Next.js to try to navigate to routes that don't exist in presentation mode
+          // Dense modern Slack-style DM button: flush edges, two-line layout, #5c2c5d active state
+          const buttonClassName = cn(
+            "w-full flex items-start px-4 py-2 cursor-pointer select-none caret-transparent outline-none focus:outline-none transition-colors group text-left",
+            isActive 
+              ? "bg-[#5c2c5d] text-white" 
+              : "text-[#D1C2D0] hover:bg-white/5"
+          );
+          const buttonStyle = showDivider ? { borderBottom: "1px solid rgba(255,255,255,0.06)" } : {};
+          
+          // Text colors: white for selected, light gray for unselected
+          const nameColor = isActive ? "#FFFFFF" : "#D1C2D0";
+          const previewColor = isActive ? "rgba(255,255,255,0.8)" : "rgba(209,194,208,0.7)";
+          const timestampColor = isActive ? "rgba(255,255,255,0.6)" : "rgba(209,194,208,0.6)";
+          
+          if (isPresentationMode && (!!setActiveChatId || !!onDmSelect)) {
+            // In presentation mode, use button element (no URL navigation)
             return (
-              <div
+              <button
                 key={item.id}
-                className={className}
-                style={style}
-                onClick={() => {
-                  setActiveChatId(item.id);
-                  // DO NOT update URL in presentation mode - causes 404 errors
-                  // The prototype is rendered in SceneLayout on root "/" route, not on /demo routes
-                }}
+                type="button"
+                className={buttonClassName}
+                style={buttonStyle}
+                onClick={handleClick}
               >
-              <div className="relative shrink-0 mt-0.5">
-                <img 
-                  src={avatarSrc} 
-                  alt="" 
-                  className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (!item.isSlackbot && !target.src.startsWith('data:')) {
-                      target.src = generateInitialsAvatar(item.name, 32);
-                    } else if (item.isSlackbot) {
-                      target.src = "/slackbot-logo.svg";
-                    }
-                  }}
-                />
-                <StatusDot status={item.status} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
-                  {item.isSlackbot && (
-                    <span className="ml-2 text-[10px] bg-[#611f69] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wide shrink-0">Seller Edge</span>
+                <div className="relative mr-3 flex-shrink-0 mt-0.5">
+                  <img 
+                    src={avatarSrc} 
+                    alt="" 
+                    className={`w-6 h-6 rounded ${item.isSlackbot ? "object-contain" : "object-cover"}`}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!item.isSlackbot && !target.src.startsWith('data:')) {
+                        target.src = generateInitialsAvatar(item.name, 24);
+                      } else if (item.isSlackbot) {
+                        target.src = "/slackbot-logo.svg";
+                      }
+                    }}
+                  />
+                  <StatusDot status={item.status} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-baseline">
+                    <span className={cn("truncate text-[15px]", isActive ? "font-bold text-white" : "font-medium text-[#D1C2D0]")}>
+                      {item.name}
+                    </span>
+                    {timestamp && (
+                      <span className="text-[11px] flex-shrink-0 ml-2" style={{ color: timestampColor }}>{timestamp}</span>
+                    )}
+                  </div>
+                  {preview && (
+                    <div className="truncate text-[13px] mt-0.5 leading-tight" style={{ color: previewColor }}>
+                      {preview}
+                    </div>
                   )}
                 </div>
-                {preview && (
-                  <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
-                )}
-              </div>
-              {/* On hover: white action card (bookmark + more); otherwise timestamp. Keep visible when dropdown open. */}
-              <div className="shrink-0 mt-0.5 w-[72px] flex justify-end items-center" onClick={(e) => e.stopPropagation()}>
-                <div className={cn("items-center gap-1 px-2 py-1 rounded-lg bg-white shadow-sm", (openDropdownId === item.id ? "flex" : "hidden group-hover:flex"))}>
-                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="Save for later">
-                    <IconBookmark width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
-                  </button>
-                  <DropdownMenu modal={false} open={openDropdownId === item.id} onOpenChange={(open) => setOpenDropdownId(open ? item.id : null)}>
-                    <DropdownMenuTrigger asChild>
-                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="More options">
-                        <IconMoreVertical width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="right" className="w-56 bg-white rounded-lg shadow-lg border border-gray-200" sideOffset={4}>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconSquare width={14} height={14} stroke="currentColor" />
-                        Mark as unread
-                        <DropdownMenuShortcut>U</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconBookmark width={14} height={14} stroke="currentColor" />
-                        Save for later
-                        <DropdownMenuShortcut>A</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
-                          Remind me about this
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 20 minutes</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 1 hour</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 3 hours</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Tomorrow</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Next week</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Custom...</DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
-                          Copy
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy name</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy link</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy huddle link</DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconHome width={14} height={14} stroke="currentColor" />
-                        Open in home
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconLayoutGrid width={14} height={14} stroke="currentColor" />
-                        Open in split view
-                        <DropdownMenuShortcut>⌘ Opt Click</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconLink width={14} height={14} stroke="currentColor" />
-                        Open in new window
-                        <DropdownMenuShortcut>⌘ Click</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                {timestamp && (
-                  <span className={cn("text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller, color: T.colors.dmMutedText }}>{timestamp}</span>
-                )}
-              </div>
-              </div>
+              </button>
             );
           }
           
+          // For non-presentation mode, render as Link (legacy behavior)
           return (
             <Link
               key={item.id}
               href={`/demo/workspace/${workspace.id}/channel/${item.id}`}
-              className={className}
-              style={style}
+              className={buttonClassName}
+              style={buttonStyle}
             >
-              <div className="relative shrink-0 mt-0.5">
+              <div className="relative mr-3 flex-shrink-0 mt-0.5">
                 <img 
                   src={avatarSrc} 
                   alt="" 
-                  className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`}
+                  className={`w-6 h-6 rounded ${item.isSlackbot ? "object-contain" : "object-cover"}`}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!item.isSlackbot && !target.src.startsWith('data:')) {
-                      target.src = generateInitialsAvatar(item.name, 32);
+                      target.src = generateInitialsAvatar(item.name, 24);
                     } else if (item.isSlackbot) {
                       target.src = "/slackbot-logo.svg";
                     }
@@ -813,88 +852,38 @@ export function DemoSidebar() {
                 <StatusDot status={item.status} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
-                  {item.isSlackbot && (
-                    <span className="ml-2 text-[10px] bg-[#611f69] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wide shrink-0">Seller Edge</span>
+                <div className="flex justify-between items-baseline">
+                  <span className={cn("truncate text-[15px]", isActive ? "font-bold text-white" : "font-medium text-[#D1C2D0]")}>
+                    {item.name}
+                  </span>
+                  {timestamp && (
+                    <span className="text-[11px] flex-shrink-0 ml-2" style={{ color: timestampColor }}>{timestamp}</span>
                   )}
                 </div>
                 {preview && (
-                  <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
-                )}
-              </div>
-              {/* On hover: white action card (bookmark + more); otherwise timestamp. Keep visible when dropdown open. */}
-              <div className="shrink-0 mt-0.5 w-[72px] flex justify-end items-center" onClick={(e) => e.stopPropagation()}>
-                <div className={cn("items-center gap-1 px-2 py-1 rounded-lg bg-white shadow-sm", (openDropdownId === item.id ? "flex" : "hidden group-hover:flex"))}>
-                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="Save for later">
-                    <IconBookmark width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
-                  </button>
-                  <DropdownMenu modal={false} open={openDropdownId === item.id} onOpenChange={(open) => setOpenDropdownId(open ? item.id : null)}>
-                    <DropdownMenuTrigger asChild>
-                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="p-0.5 rounded hover:bg-gray-100" title="More options">
-                        <IconMoreVertical width={14} height={14} style={{ color: "#1d1c1d" }} stroke="currentColor" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="right" className="w-56 bg-white rounded-lg shadow-lg border border-gray-200" sideOffset={4}>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconSquare width={14} height={14} stroke="currentColor" />
-                        Mark as unread
-                        <DropdownMenuShortcut>U</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconBookmark width={14} height={14} stroke="currentColor" />
-                        Save for later
-                        <DropdownMenuShortcut>A</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
-                          Remind me about this
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 20 minutes</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 1 hour</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">In 3 hours</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Tomorrow</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Next week</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Custom...</DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer text-sm text-[#1d1c1d]">
-                          Copy
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-44 bg-white rounded-lg shadow-lg border border-gray-200">
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy name</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy link</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-sm">Copy huddle link</DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconHome width={14} height={14} stroke="currentColor" />
-                        Open in home
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconLayoutGrid width={14} height={14} stroke="currentColor" />
-                        Open in split view
-                        <DropdownMenuShortcut>⌘ Opt Click</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-sm text-[#1d1c1d]">
-                        <IconLink width={14} height={14} stroke="currentColor" />
-                        Open in new window
-                        <DropdownMenuShortcut>⌘ Click</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                {timestamp && (
-                  <span className={cn("text-right", openDropdownId === item.id ? "hidden" : "group-hover:hidden")} style={{ fontSize: T.typography.smaller, color: T.colors.dmMutedText }}>{timestamp}</span>
+                  <div className="truncate text-[13px] mt-0.5 leading-tight" style={{ color: previewColor }}>
+                    {preview}
+                  </div>
                 )}
               </div>
             </Link>
           );
         })}
+        {activeNav === "agentforce" && (
+          <div className="px-2 mb-2 space-y-0.5">
+            <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors text-[14px]">
+              <IconPlus width={16} height={16} stroke="currentColor" className="opacity-70" />
+              <span className="font-medium">New conversation</span>
+            </button>
+            <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/15 text-white text-[14px]">
+              <IconBot width={16} height={16} stroke="currentColor" className="opacity-70" />
+              <span className="font-bold">All agents</span>
+            </button>
+            <div className="px-3 pt-3 pb-1">
+              <span className="text-[11px] font-medium text-white/50 uppercase tracking-wider">Recent agents</span>
+            </div>
+          </div>
+        )}
         {activeNav === "agentforce" && agentforceItems.map((item) => {
           const isActive = activeChatId === item.id || channelId === item.id;
           const { preview, timestamp } = getChannelPreview(item.id);
@@ -921,21 +910,19 @@ export function DemoSidebar() {
                 }}
               >
                 <div className="relative shrink-0 mt-0.5">
-                  <img src={avatarSrc} alt="" className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`} />
+                  <img 
+                  src={avatarSrc} 
+                  alt="" 
+                  className={`w-8 h-8 rounded-md ${item.isSlackbot ? "object-contain" : "object-cover"}`}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                  }}
+                />
                   <StatusDot status={item.status} />
                 </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>
-                    {item.isSlackbot ? (
-                      <>
-                        {item.name}
-                        <span className="ml-2 text-[10px] bg-[#611f69] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Seller Edge</span>
-                      </>
-                    ) : (
-                      item.name
-                    )}
-                  </span>
+                  <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
                 </div>
                   {preview && (
                     <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
@@ -1039,9 +1026,6 @@ export function DemoSidebar() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
                   <span className="truncate font-medium text-white" style={{ fontSize: T.typography.body }}>{item.name}</span>
-                  {item.isSlackbot && (
-                    <span className="ml-2 text-[10px] bg-[#611f69] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wide shrink-0">Seller Edge</span>
-                  )}
                 </div>
                 {preview && (
                   <p className="mt-0.5 min-w-0 line-clamp-2 break-words" style={{ color: T.colors.dmMutedText }}>{preview}</p>
@@ -1118,7 +1102,7 @@ export function DemoSidebar() {
             </Link>
           );
         })}
-        {(activeNav === "home" || activeNav === "activity" || activeNav === "more") && channelAndDmItems.map((item) => {
+        {showChannelAndDmItems && channelAndDmItems.map((item) => {
           // Use activeChatId from context if available, otherwise fall back to effectiveChannelId
           const itemIsActive = activeChatId === item.id || effectiveChannelId === item.id;
           return (

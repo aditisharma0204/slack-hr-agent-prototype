@@ -114,7 +114,6 @@ export default function DemoWorkspaceLayout({
                       panelData={slackbotPanelData}
                       history={globalSlackbotHistory}
                       onUpdateHistory={setGlobalSlackbotHistory}
-                      demoContext={demoContext}
                     />
                   </div>
                 </ResizablePanel>

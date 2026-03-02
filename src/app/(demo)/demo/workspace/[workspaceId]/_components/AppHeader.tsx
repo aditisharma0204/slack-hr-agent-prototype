@@ -48,7 +48,7 @@ export function AppHeader() {
           type="button"
           onClick={toggle}
           className={`p-2 rounded hover:bg-white/10 transition-colors shrink-0 cursor-pointer ${isOpen ? "bg-white/15" : ""}`}
-          title={isOpen ? "Close Seller Edge Assistant" : "Open Seller Edge Assistant"}
+          title={isOpen ? "Close Slackbot" : "Open Slackbot"}
           style={{ marginLeft: '16px' }}
         >
           <Image src="/slackbot-logo.svg" alt="Slackbot" width={33} height={33} />

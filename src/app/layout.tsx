@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next";
+import { Suspense } from "react";
 
 import "./globals.css";
 
@@ -9,11 +10,7 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
-import { PresentationSceneProvider } from "@/context/PresentationSceneContext";
-import { PrototypeModeProvider } from "@/context/PrototypeModeContext";
-import { ArcNavigationProvider } from "@/context/ArcNavigationContext";
-import { ScenarioVisibilityProvider } from "@/context/ScenarioVisibilityContext";
-import { GlobalNavigationHeader } from "@/components/presentation/GlobalNavigationHeader";
+import { DemoDataProvider } from "@/context/DemoDataContext";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -21,8 +18,8 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "SlackbotPro",
-  description: "Future of Selling - Evolving the CRM into an invisible, omnipresent layer",
+  title: "Slack App Shell",
+  description: "A reusable Slack App Shell boilerplate for designing new concepts.",
   icons: {
     icon: '/slackbot-logo.svg',
   },
@@ -39,19 +36,13 @@ export default function RootLayout({
   const content = (
     <ConvexClientProvider>
       <JotaiProvider>
-        <PresentationSceneProvider>
-          <PrototypeModeProvider>
-            <ArcNavigationProvider>
-              <ScenarioVisibilityProvider>
-                <Toaster />
-                {hasConvex && <Modals />}
-                {/* Global Navigation Header - rendered once at root level */}
-                <GlobalNavigationHeader />
-                <NuqsAdapter>{children}</NuqsAdapter>
-              </ScenarioVisibilityProvider>
-            </ArcNavigationProvider>
-          </PrototypeModeProvider>
-        </PresentationSceneProvider>
+        <DemoDataProvider>
+          <Suspense fallback={null}>
+            <Toaster />
+            {hasConvex && <Modals />}
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </Suspense>
+        </DemoDataProvider>
       </JotaiProvider>
     </ConvexClientProvider>
   );

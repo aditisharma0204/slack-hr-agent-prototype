@@ -66,7 +66,9 @@ export const MainChatArea = ({ channelName = 'community-cursor', memberCount = 8
       name: 'Rita Patel', // The current user
       avatar: 'https://randomuser.me/api/portraits/med/women/75.jpg',
       time: 'Just now',
-      text: text
+      text: text,
+      reactions: [],
+      replies: { count: 0, avatars: [], lastTime: "" }
     };
     setMessages([...messages, newMessage]);
   };

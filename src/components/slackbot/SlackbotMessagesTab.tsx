@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import {
   IconHome,
@@ -9,12 +9,10 @@ import {
   IconLightbulb,
   IconPlus,
 } from "@/components/icons";
-import { BlockKitRenderer } from "@/components/block-kit/BlockKitRenderer";
 import type { SlackBlock } from "@/components/block-kit/BlockKitRenderer";
-import { cn } from "@/lib/utils";
 import { DEMO_USER_NAME } from "@/context/DemoDataContext";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
-import { MessageInput } from "@/components/shared/MessageInput";
+import { ChatMessage as GlobalChatMessage } from "@/components/shared/ChatMessage";
 
 const T = SLACK_TOKENS;
 
@@ -203,6 +201,9 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+const USER_AVATAR = "https://randomuser.me/api/portraits/med/women/90.jpg";
+const SLACKBOT_AVATAR = "/slackbot-logo.svg";
+
 interface SlackbotMessagesTabProps {
   history?: ChatMessage[];
   onUpdateHistory?: (history: ChatMessage[]) => void;
@@ -212,13 +213,32 @@ interface SlackbotMessagesTabProps {
 export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessage }: SlackbotMessagesTabProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(history);
   const [isTyping, setIsTyping] = useState(false);
+  const prevHistoryRef = useRef<string>(JSON.stringify(history));
+  const historyLengthRef = useRef<number>(history.length);
 
-  // Sync local messages with history prop when it changes externally
+  // Sync local messages with history prop when it changes externally (only if actually different)
   useEffect(() => {
-    if (history.length > 0 && history.length !== messages.length) {
-      setMessages(history);
+    // Compare by stringifying to avoid infinite loops from reference changes
+    const currentHistoryStr = JSON.stringify(history);
+    const prevHistoryStr = prevHistoryRef.current;
+    const currentLength = history.length;
+    const prevLength = historyLengthRef.current;
+    
+    // Only update if history actually changed (deep comparison) OR length changed
+    if (currentHistoryStr !== prevHistoryStr || currentLength !== prevLength) {
+      prevHistoryRef.current = currentHistoryStr;
+      historyLengthRef.current = currentLength;
+      // Only update if messages are actually different to prevent loops
+      // Use a ref to get current messages value without including it in deps
+      setMessages(prevMessages => {
+        const currentMessagesStr = JSON.stringify(prevMessages);
+        if (currentHistoryStr !== currentMessagesStr) {
+          return history.length > 0 ? history : [];
+        }
+        return prevMessages; // No change needed
+      });
     }
-  }, [history, messages.length]);
+  }, [history]); // Only depend on history - messages comparison done inside via setState updater
 
   const sendMessage = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -256,17 +276,23 @@ export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessa
     }, 600);
   }, [onUpdateHistory]);
 
-  // Expose sendMessage to parent via callback
+  // Expose sendMessage to parent via callback (use ref to avoid infinite loops)
+  const sendMessageRef = useRef(sendMessage);
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
+
   useEffect(() => {
     if (onSendMessage) {
-      // Pass sendMessage function to parent
-      onSendMessage(sendMessage);
+      // Pass sendMessage function to parent via ref to avoid recreating on every render
+      onSendMessage((message: string) => sendMessageRef.current(message));
     }
-  }, [onSendMessage, sendMessage]);
+  }, [onSendMessage]); // Only depend on onSendMessage, not sendMessage itself
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto space-y-4 p-3 min-h-0">
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col custom-scrollbar min-h-0">
+        <div className="mt-auto flex flex-col gap-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-6 px-2 text-center w-full">
             <div className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] mb-4 flex items-center justify-center shrink-0">
@@ -298,31 +324,35 @@ export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessa
             </div>
           </div>
         )}
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={cn(
-              "rounded-lg p-2.5 sm:p-3 text-sm break-words",
-              m.role === "user"
-                ? "bg-[#f8f8f8] ml-2 sm:ml-4"
-                : "bg-white border border-[#e8e8e8] mr-2 sm:mr-4"
-            )}
-          >
-            <div className="font-medium text-xs text-[#616061] mb-1">
-              {m.role === "user" ? "You" : "Slackbot"}
-            </div>
-            {m.blocks ? (
-              <BlockKitRenderer blocks={m.blocks} />
-            ) : (
-              <p className="text-sm sm:text-[15px] text-[#1d1c1d] break-words">{m.content}</p>
-            )}
-          </div>
-        ))}
+        {messages.map((m) => {
+          const isUser = m.role === "user";
+          const fallbackText = m.content || "Shared a structured update";
+          return (
+            <GlobalChatMessage
+              key={m.id}
+              message={{
+                id: m.id,
+                name: isUser ? "You" : "Slackbot",
+                avatar: isUser ? USER_AVATAR : SLACKBOT_AVATAR,
+                time: isUser ? "Just now" : "Just now",
+                text: fallbackText,
+                blocks: m.blocks,
+              }}
+            />
+          );
+        })}
         {isTyping && (
-          <div className="rounded-lg p-2.5 sm:p-3 bg-white border border-[#e8e8e8] mr-2 sm:mr-4 text-sm text-[#616061]">
-            Slackbot is typing...
-          </div>
+          <GlobalChatMessage
+            message={{
+              id: "typing",
+              name: "Slackbot",
+              avatar: SLACKBOT_AVATAR,
+              time: "Now",
+              text: "Slackbot is typing...",
+            }}
+          />
         )}
+        </div>
       </div>
       {/* REMOVED: Duplicate MessageInput - using SSOT input from SlackbotPanel instead */}
     </div>
