@@ -1,14 +1,22 @@
 "use client";
 
-import { useLayoutEffect, useState, useEffect, useMemo, useRef } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useNav } from "../_context/demo-layout-context";
-import { useDemoData, useDemoMessages } from "@/context/DemoDataContext";
-import { DemoChannelHeader } from "../channel/[channelId]/_components/DemoChannelHeader";
-import { DemoMessageList } from "../channel/[channelId]/_components/DemoMessageList";
-import { DemoMessageInput } from "../channel/[channelId]/_components/DemoMessageInput";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DemoActivityPage() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Redirect old demo routes to root boilerplate
+    router.replace("/");
+  }, [router]);
+  
+  return (
+    <div className="h-full flex items-center justify-center bg-white">
+      <p className="text-[#616061] text-sm">Redirecting to boilerplate...</p>
+    </div>
+  );
+}
   const { setActiveNav } = useNav();
   const { channels, dms } = useDemoData();
   const params = useParams();

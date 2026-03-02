@@ -1,23 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { useLayoutEffect } from "react";
-import { useDemoMessages, useDemoData } from "@/context/DemoDataContext";
-import { useNav } from "../../_context/demo-layout-context";
-import { DemoChannelHeader } from "./_components/DemoChannelHeader";
-import { DemoMessageList } from "./_components/DemoMessageList";
-import { DemoMessageInput } from "./_components/DemoMessageInput";
-import { DealCanvasTab } from "./_components/DealCanvasTab";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DemoChannelPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const channelId = params.channelId as string;
-  const messages = useDemoMessages(channelId);
-  const { dms, markChannelAsRead } = useDemoData();
-  const { setActiveNav } = useNav();
-  const isDM = dms.some((d) => d.id === channelId);
+  const router = useRouter();
+  
+  useEffect(() => {
+    router.replace("/");
+  }, [router]);
+  
+  return (
+    <div className="h-full flex items-center justify-center bg-white">
+      <p className="text-[#616061] text-sm">Redirecting to boilerplate...</p>
+    </div>
+  );
+}
   const dm = dms.find((d) => d.id === channelId);
   const isSlackbot = dm?.isSlackbot ?? false;
   const placeholder = isDM ? "Reply..." : `Message #${channelId}`;

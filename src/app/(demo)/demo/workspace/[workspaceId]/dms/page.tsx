@@ -1,23 +1,21 @@
 "use client";
 
-import { useLayoutEffect, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useNav } from "../_context/demo-layout-context";
-import { useDemoData } from "@/context/DemoDataContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DemoDMsPage() {
-  const { setActiveNav } = useNav();
-  const { dms } = useDemoData();
-  const params = useParams();
   const router = useRouter();
-  const workspaceId = params.workspaceId as string;
-
-  useLayoutEffect(() => {
-    setActiveNav("dms");
-  }, [setActiveNav]);
-
-  // Auto-redirect to first DM if available
-  useLayoutEffect(() => {
+  
+  useEffect(() => {
+    router.replace("/");
+  }, [router]);
+  
+  return (
+    <div className="h-full flex items-center justify-center bg-white">
+      <p className="text-[#616061] text-sm">Redirecting to boilerplate...</p>
+    </div>
+  );
+}
     if (dms.length > 0) {
       const firstDm = dms[0];
       router.replace(`/demo/workspace/${workspaceId}/channel/${firstDm.id}`, { scroll: false });

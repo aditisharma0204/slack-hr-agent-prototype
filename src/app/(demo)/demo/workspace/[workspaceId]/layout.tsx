@@ -1,53 +1,26 @@
 "use client";
 
-import { useState, useLayoutEffect, useMemo } from "react";
-import { usePathname } from "next/navigation";
-import { SLACK_TOKENS } from "@/design/slack-tokens";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { AppHeader } from "./_components/AppHeader";
-import { DemoIconBar } from "./_components/DemoIconBar";
-import { DemoSidebar } from "./_components/DemoSidebar";
-import { SlackbotPanel } from "@/components/slackbot/SlackbotPanel";
-import {
-  DemoLayoutProviders,
-  type NavView,
-  type DemoContext,
-} from "./_context/demo-layout-context";
-
-const T = SLACK_TOKENS;
-
-const NAV_VIEWS: NavView[] = ["home", "dms", "activity", "files", "later", "agentforce", "more"];
-
-function getNavFromPathname(pathname: string | null): NavView {
-  if (!pathname) return "activity";
-  const segments = pathname.split("/");
-  const i = segments.indexOf("workspace");
-  const segment = i >= 0 ? segments[i + 2] : undefined; // [ '', 'demo', 'workspace', workspaceId, segment ]
-  if (segment && NAV_VIEWS.includes(segment as NavView)) return segment as NavView;
-  if (segment === "channel") return "activity";
-  return "activity";
-}
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DemoWorkspaceLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const navFromPath = useMemo(() => getNavFromPathname(pathname), [pathname]);
-  const [isSlackbotOpen, setIsSlackbotOpen] = useState(true);
-  const [activeNav, setActiveNav] = useState<NavView>(() => navFromPath);
-  const [demoContext, setDemoContext] = useState<DemoContext>('N2A1'); // Default to Narrative 2 Arc 1
-  const [slackbotPanelData, setSlackbotPanelData] = useState<any>(null);
-  const [globalSlackbotHistory, setGlobalSlackbotHistory] = useState<any[]>([]);
-
-  useLayoutEffect(() => {
-    setActiveNav(navFromPath);
-  }, [navFromPath]);
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Redirect all old demo routes to root boilerplate
+    router.replace("/");
+  }, [router]);
+  
+  return (
+    <div className="h-full flex items-center justify-center bg-white">
+      <p className="text-[#616061] text-sm">Redirecting to boilerplate...</p>
+    </div>
+  );
+}
 
   return (
     <DemoLayoutProviders

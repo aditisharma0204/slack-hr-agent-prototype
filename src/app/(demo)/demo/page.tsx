@@ -7,12 +7,13 @@ export default function DemoPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/demo/workspace/demo-1/channel/general");
+    // Redirect old demo route to root boilerplate
+    router.replace("/");
   }, [router]);
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#f8f8f8]">
-      <p className="text-[#616061]">Loading demo...</p>
+      <p className="text-[#616061]">Redirecting to boilerplate...</p>
     </div>
   );
 }
