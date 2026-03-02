@@ -33,7 +33,7 @@ export function AppHeader() {
       </div>
 
       {/* Center: Search bar + Slackbot icon grouped together */}
-      <div className="flex-1 flex items-center justify-center min-w-0 max-w-xl mx-4" style={{ marginLeft: '-8px' }}>
+      <div className="flex-1 flex items-center justify-center min-w-0 max-w-[776px] mx-4" style={{ marginLeft: '-8px' }}>
         {/* Search bar */}
         <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-white/10 min-w-0">
           <IconSearch width={18} height={18} className="text-white/70 shrink-0" stroke="currentColor" />

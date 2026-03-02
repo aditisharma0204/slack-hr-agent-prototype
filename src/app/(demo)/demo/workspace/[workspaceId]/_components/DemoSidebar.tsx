@@ -181,14 +181,14 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
     
     // Find DMs by name
     const shwetaDM = dms.find(d => d.name.toLowerCase().includes("shweta")) || dms.find(d => d.name.toLowerCase().includes("humnabadkar")) || dms[0];
-    const avinashDM = dms.find(d => d.name.toLowerCase().includes("avinash")) || dms.find(d => d.name.toLowerCase().includes("patel"));
-    const samikshaDM = dms.find(d => d.name.toLowerCase().includes("samiksha")) || dms.find(d => d.name.toLowerCase().includes("kharbanda"));
+    const jonnieDM = dms.find(d => d.name.toLowerCase().includes("jonnie")) || dms.find(d => d.name.toLowerCase().includes("lee")) || dms.find(d => d.name.toLowerCase().includes("avinash")) || dms.find(d => d.name.toLowerCase().includes("patel"));
+    const miekDM = dms.find(d => d.name.toLowerCase().includes("miek")) || dms.find(d => d.name.toLowerCase().includes("lenz")) || dms.find(d => d.name.toLowerCase().includes("samiksha")) || dms.find(d => d.name.toLowerCase().includes("kharbanda"));
     const prantikDM = dms.find(d => d.name.toLowerCase().includes("prantik")) || dms.find(d => d.name.toLowerCase().includes("banerjee"));
     
     // Determine active states - Shweta is default active if nothing selected
     const isShwetaActive = activeDMId === shwetaDM?.id || (!activeDMId && shwetaDM);
-    const isAvinashActive = activeDMId === avinashDM?.id;
-    const isSamikshaActive = activeDMId === samikshaDM?.id;
+    const isJonnieActive = activeDMId === jonnieDM?.id;
+    const isMiekActive = activeDMId === miekDM?.id;
     const isPrantikActive = activeDMId === prantikDM?.id;
     
     return (
@@ -262,70 +262,70 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
               >
                 <div className="relative mr-2">
                   <img 
-                    src={assetPath(shwetaDM.avatarUrl || getAvatarUrl("Shweta Humnabadkar", 20) || "/shweta-avatar.png")} 
+                    src={assetPath(shwetaDM.avatarUrl || getAvatarUrl("Shweta", 20) || "/shweta-avatar.png")} 
                     className="w-5 h-5 rounded" 
                     alt="Shweta" 
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Shweta Humnabadkar", 20);
+                      target.src = getAvatarUrl("Shweta", 20);
                     }}
                   />
                 </div>
-                Shweta Humnabadkar <span className="ml-2">🗓️</span>
+                Shweta <span className="ml-2">🗓️</span>
               </button>
             )}
-            {/* Avinash */}
-            {avinashDM && (
+            {/* Jonnie */}
+            {jonnieDM && (
               <button 
                 onClick={() => {
                   if (setActiveChatId) {
-                    setActiveChatId(avinashDM.id);
+                    setActiveChatId(jonnieDM.id);
                   }
                 }}
                 className={cn(
                   "w-full flex items-center justify-between px-4 py-1 pl-8 text-[15px] group",
-                  isAvinashActive ? "bg-white text-black font-medium rounded-r-full mr-4" : "hover:bg-white/5 text-[#D1C2D0]"
+                  isJonnieActive ? "bg-white text-black font-medium rounded-r-full mr-4" : "hover:bg-white/5 text-[#D1C2D0]"
                 )}
               >
                 <div className="flex items-center">
                   <img 
-                    src={assetPath(avinashDM.avatarUrl || getAvatarUrl("Avinash Patel", 20) || "/avinash-avatar.png")} 
+                    src={assetPath(jonnieDM.avatarUrl || getAvatarUrl("Jonnie Lee", 20) || "/jonnie-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
-                    alt="Avinash"
+                    alt="Jonnie Lee"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Avinash Patel", 20);
+                      target.src = getAvatarUrl("Jonnie Lee", 20);
                     }}
                   /> 
-                  Avinash Patel
+                  Jonnie Lee
                 </div>
                 <Edit2Icon className="w-3 h-3 opacity-0 group-hover:opacity-100" />
               </button>
             )}
-            {/* Samiksha */}
-            {samikshaDM && (
+            {/* Miek */}
+            {miekDM && (
               <button 
                 onClick={() => {
                   if (setActiveChatId) {
-                    setActiveChatId(samikshaDM.id);
+                    setActiveChatId(miekDM.id);
                   }
                 }}
                 className={cn(
                   "w-full flex items-center justify-between px-4 py-1 pl-8 text-[15px] group",
-                  isSamikshaActive ? "bg-white text-black font-medium rounded-r-full mr-4" : "hover:bg-white/5 text-[#D1C2D0]"
+                  isMiekActive ? "bg-white text-black font-medium rounded-r-full mr-4" : "hover:bg-white/5 text-[#D1C2D0]"
                 )}
               >
                 <div className="flex items-center">
                   <img 
-                    src={assetPath(samikshaDM.avatarUrl || getAvatarUrl("Samiksha Kharbanda", 20) || "/samiksha-avatar.png")} 
+                    src={assetPath(miekDM.avatarUrl || getAvatarUrl("Miek Lenz", 20) || "/miek-avatar.png")} 
                     className="w-5 h-5 rounded mr-2" 
-                    alt="Samiksha"
+                    alt="Miek Lenz"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = getAvatarUrl("Samiksha Kharbanda", 20);
+                      target.src = getAvatarUrl("Miek Lenz", 20);
                     }}
                   /> 
-                  Samiksha Kharbanda <span className="ml-2">🗓️</span>
+                  Miek Lenz <span className="ml-2">🗓️</span>
                 </div>
                 <Edit2Icon className="w-3 h-3 opacity-0 group-hover:opacity-100" />
               </button>

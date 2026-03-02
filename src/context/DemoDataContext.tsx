@@ -124,6 +124,9 @@ const MESSAGE_AVATAR_MAP: Record<string, string> = {
   "Srinivas Tallapragada": "https://randomuser.me/api/portraits/med/men/33.jpg",
   "Jack Lakkapragada": "https://randomuser.me/api/portraits/med/men/45.jpg",
   "Mike Lenz": "https://randomuser.me/api/portraits/med/men/46.jpg",
+  Shweta: "https://randomuser.me/api/portraits/med/women/21.jpg",
+  "Jonnie Lee": "https://randomuser.me/api/portraits/med/men/47.jpg",
+  "Miek Lenz": "https://randomuser.me/api/portraits/med/men/46.jpg",
 };
 
 export function getMessageAvatarUrl(author: string): string | null {
@@ -134,6 +137,9 @@ export function getMessageAvatarUrl(author: string): string | null {
 // All DMs must have meaningful preview data - see DM_PREVIEWS above
 const DEMO_DMS: DemoDM[] = [
   { id: "slackbot", name: "Slackbot", isSlackbot: true, unread: true },
+  { id: "shweta", name: "Shweta", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/women/21.jpg", unread: true },
+  { id: "jonnie-lee", name: "Jonnie Lee", status: "away", avatarUrl: "https://randomuser.me/api/portraits/med/men/47.jpg" },
+  { id: "miek-lenz", name: "Miek Lenz", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/men/46.jpg", unread: true },
   { id: "sarah-chen", name: "Sarah Chen", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/women/44.jpg", unread: true },
   { id: "priya-shah", name: "Priya Shah", status: "away", avatarUrl: "https://randomuser.me/api/portraits/med/women/32.jpg" },
   { id: "jordan-hayes", name: "Jordan Hayes", status: "online", avatarUrl: "https://randomuser.me/api/portraits/med/men/22.jpg", unread: true },
@@ -204,6 +210,18 @@ const DM_PREVIEWS: Record<string, { preview: string; timestamp: string }> = {
   "slackbot": { 
     preview: "Q4 performance summary: $471K attained (94% of $500K quota). Win rate 52% ↑ from Q3. Proactive insights for Q1 — $410K on track.", 
     timestamp: "Today" 
+  },
+  "shweta": {
+    preview: "Reviewed your Q1 planning deck. Looks strong — added 3 comments in the notes for the Acme risk section.",
+    timestamp: "Today"
+  },
+  "jonnie-lee": {
+    preview: "Can jump on a quick sync this afternoon if you want to pressure-test the value justification narrative.",
+    timestamp: "Today"
+  },
+  "miek-lenz": {
+    preview: "Updated the pipeline snapshot with latest numbers. Sporty and Acme are now flagged as top risks for this week.",
+    timestamp: "Today"
   },
   "sarah-chen": { 
     preview: "Q4 wrap-up: Done. Priya should have the intro email. Good luck with Acme — that's a big one for Q1.", 
