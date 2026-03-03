@@ -12,7 +12,7 @@
 
 # next.js
 /.next/
-# /out/  # Uncommented to allow GitHub Pages deployment
+/out/  # Build artifacts - we use /docs/ for GitHub Pages deployment instead
 
 # production
 /build
