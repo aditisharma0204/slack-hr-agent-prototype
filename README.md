@@ -47,18 +47,6 @@ Open [http://localhost:3000](http://localhost:3000) — you'll see the Slack App
 - Changes appear instantly in your browser
 - Commit and push to your fork when ready
 
-## 🌐 Deploy & Share
-
-**Want to deploy so your team can access it via a live URL?**
-
-👉 See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for step-by-step instructions.
-
-**Quick option:** Deploy to [Vercel](https://vercel.com) (free, ~5 minutes):
-1. Sign up at vercel.com
-2. Import your GitSoma repository
-3. Click "Deploy"
-4. Share the live URL with your team!
-
 ## 📁 Project Structure
 
 ```
