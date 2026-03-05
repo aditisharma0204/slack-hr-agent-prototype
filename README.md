@@ -47,6 +47,47 @@ Open [http://localhost:3000](http://localhost:3000) — you'll see the Slack App
 - Changes appear instantly in your browser
 - Commit and push to your fork when ready
 
+### 🚀 Quick Cursor Prompts for Concept Creation
+
+**Use these prompts in Cursor AI to quickly customize the template:**
+
+**Customize Today View:**
+```
+Update the focus prompts in SlackTodayView to show [your concept idea]. 
+Change the agenda items to reflect [your use case]. 
+Update highlights and replies to match [your narrative].
+```
+
+**Add New Sidebar View:**
+```
+Add a new sidebar navigation item called "[Your View]" that shows [description]. 
+Create a new view component and wire it up to the sidebar navigation.
+```
+
+**Update Chat Content:**
+```
+Replace the channel messages in TemplateViews with conversations about [your topic]. 
+Update DM previews to show [your scenario].
+```
+
+**Customize Data:**
+```
+Update DemoDataContext to include [your channels/DMs/files]. 
+Change contact names and channel names to match [your concept].
+```
+
+**Change Styling:**
+```
+Update the color scheme to [your brand colors]. 
+Modify the Today view layout to [your design preference].
+```
+
+**Add Interactive Features:**
+```
+Add a [button/modal/form] that [does something specific] when clicked. 
+Make the [component] respond to [user action] with [desired behavior].
+```
+
 ## 🌐 Deploy & Share
 
 **Want to deploy so your team can access it via a live URL?**
