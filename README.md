@@ -2,6 +2,8 @@
 
 A clean, reusable Slack App Shell template for designers to build new Slack integration concepts.
 
+> **⚠️ This is a read-only template repository.** To make changes, please **fork** this repository and work in your own fork.
+
 ## 🎯 What This Is
 
 This is a **boilerplate template** that provides a fully functional Slack-like UI shell with:
@@ -19,14 +21,31 @@ This is a **boilerplate template** that provides a fully functional Slack-like U
 - Node.js 18+ 
 - npm or yarn
 
-**Installation:**
+### For Designers (GitSoma)
 
+**Step 1: Fork the repository**
+- Go to: `https://git.soma.salesforce.com/prantik-banerjee/slack-app-shell-template`
+- Click the **"Fork"** button (top right)
+- This creates your own copy
+
+**Step 2: Clone your fork**
+```bash
+git clone https://git.soma.salesforce.com/YOUR-USERNAME/slack-app-shell-template.git
+cd slack-app-shell-template
+```
+
+**Step 3: Install & Run**
 ```bash
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) — you'll see the Slack App Shell with Today view loaded.
+
+**Step 4: Make changes**
+- Edit files in `src/` folder
+- Changes appear instantly in your browser
+- Commit and push to your fork when ready
 
 ## 🌐 Deploy & Share
 
