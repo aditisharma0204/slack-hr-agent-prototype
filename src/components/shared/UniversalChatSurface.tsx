@@ -10,6 +10,8 @@ interface UniversalChatSurfaceProps {
   memberCount?: number;
   placeholder?: string;
   onSendMessage: (text: string) => void;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
   children: React.ReactNode; // Accepts ChatMessages or Generative Sequences
 }
 
@@ -19,6 +21,8 @@ export const UniversalChatSurface = ({
   memberCount, 
   placeholder, 
   onSendMessage, 
+  inputValue,
+  onInputChange,
   children 
 }: UniversalChatSurfaceProps) => {
   const endRef = useRef<HTMLDivElement>(null);
@@ -84,7 +88,9 @@ export const UniversalChatSurface = ({
       {/* Universal Input Box */}
       <MessageInput 
         placeholder={placeholder || `Message ${typeof title === 'string' ? title : ''}`} 
-        onSendMessage={onSendMessage} 
+        onSendMessage={onSendMessage}
+        value={inputValue}
+        onChange={onInputChange}
       />
       
     </div>

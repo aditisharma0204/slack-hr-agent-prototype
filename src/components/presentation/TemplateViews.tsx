@@ -122,7 +122,7 @@ const DM_MESSAGES: Record<string, Msg[]> = {
 
 const AGENT_MESSAGES: Record<string, Msg[]> = {
   "af-employee": [
-    { name: "Employee Agent", avatar: AVATARS.bot, time: "Just now", text: "Hi! I'm the Employee Agent. I can help you find information about company policies, benefits, and perform routine tasks. What can I help you with today?" },
+    { name: "Employee Performance Management Agent", avatar: AVATARS.bot, time: "Just now", text: "Hi! I'm the Employee Performance Management Agent. I can help you find information about company policies, benefits, and perform routine tasks. What can I help you with today?" },
   ],
   "af-support": [
     { name: "Agentforce Support Agent", avatar: AVATARS.bot, time: "Just now", text: "Welcome! I'm the Agentforce Support Agent. I can answer questions about Agentforce features, setup, and best practices. How can I assist you?" },
@@ -371,7 +371,7 @@ const AGENT_CARDS = [
   { name: "CKO Agent", org: "Salesforce", desc: "FY27 Company Kickoff has wrapped, but you can still share feedback through the surveys.", color: "bg-indigo-600", prompts: [] },
   { name: "Data Agent", org: "OrgEmp", desc: "Hello! I help users discover and answer questions about data artifacts created and maintained by the Data and Analytics team.", color: "bg-purple-600", prompts: ["What prompts does Data Agent support?", "What are the usage statistics for the ACT ..."] },
   { name: "Data Modeling Agent", org: "Salesforce EPIC360", desc: "Helps you discover entities across Salesforce data models (Core or Data Cloud objects).", color: "bg-violet-600", prompts: [] },
-  { name: "Employee Agent", org: "OrgEmp", desc: "Employee Agent is an AI Agent that helps you find information and perform routine tasks.", color: "bg-sky-500", prompts: [] },
+  { name: "Employee Performance Management Agent", org: "OrgEmp", desc: "Employee Performance Management Agent is an AI Agent that helps you find information and perform routine tasks.", color: "bg-sky-500", prompts: [] },
   { name: "EPIC Analytics Agent", org: "Salesforce EPIC360", desc: "Help people see and understand data with conversational analytics.", color: "bg-blue-500", prompts: [] },
   { name: "EPIC OrgFarm Agent", org: "Salesforce EPIC360", desc: "Everything you need about and around #OrgFarm", color: "bg-slate-600", prompts: [] },
 ];

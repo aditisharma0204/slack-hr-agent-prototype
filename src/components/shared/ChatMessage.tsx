@@ -34,9 +34,10 @@ interface ChatMessageProps {
       lastTime: string;
     };
   };
+  onAction?: (actionId: string) => void;
 }
 
-export const ChatMessage = ({ message }: ChatMessageProps) => {
+export const ChatMessage = ({ message, onAction }: ChatMessageProps) => {
   const [avatarError, setAvatarError] = React.useState(false);
   const [avatarSrc, setAvatarSrc] = React.useState(assetPath(message.avatar));
 
@@ -84,7 +85,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         {/* Structured Block Content */}
         {message.blocks && (
           <div className="mt-1">
-            <BlockKitRenderer blocks={message.blocks} />
+            <BlockKitRenderer blocks={message.blocks} onAction={onAction} />
           </div>
         )}
         

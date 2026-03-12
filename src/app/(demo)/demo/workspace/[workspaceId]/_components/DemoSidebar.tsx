@@ -153,7 +153,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
   });
 
   const agentforceItems: typeof filteredDms = [
-    { id: "af-employee", name: "Employee Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
+    { id: "af-employee", name: "Employee Performance Management Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
     { id: "af-support", name: "Agentforce Support Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
     { id: "af-data", name: "Data Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
   ];

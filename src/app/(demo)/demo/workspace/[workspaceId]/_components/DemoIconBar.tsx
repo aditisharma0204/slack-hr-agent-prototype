@@ -16,6 +16,7 @@ import {
 import { Sun, BarChart3 } from "lucide-react";
 import { useDemoData, getAvatarUrl, type DemoDM, type DemoFile, type DemoSavedItem } from "@/context/DemoDataContext";
 import { useNav, usePresentationMode, useDemoContext, type NavView } from "../_context/demo-layout-context";
+import { useActiveChat } from "@/components/presentation/SlackAppShell";
 import { cn } from "@/lib/utils";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 import { assetPath } from "@/lib/asset-path";
@@ -309,19 +310,19 @@ function LaterOverlay({ savedItems }: { savedItems: DemoSavedItem[] }) {
 // ─── Overlay: Agentforce ────────────────────────────────────────────────────
 
 const AGENTS = [
-  { id: "new",      label: "New Conversation",         sub: "Start a conversation with an agent",          emoji: "+",  emojiColor: "#7C3AED", bg: "#ede9fe" },
-  { id: "all",      label: "All agents",                sub: "Your available agents",                       emoji: "🤖", emojiColor: "#444",    bg: "#f0f0f0" },
-  { id: "employee", label: "Employee Agent",            sub: "Employee Agent is an AI Agent that helps you…", emoji: "🤖", emojiColor: "#fff",    bg: "#0ea5e9" },
-  { id: "support",  label: "Agentforce Support Agent",  sub: "Help users answer all the questions related to…",emoji: "🤖", emojiColor: "#fff",    bg: "#2563eb" },
-  { id: "data",     label: "Data Agent",                sub: "Hello! I help users discover and answer questi…",emoji: "🤖", emojiColor: "#fff",    bg: "#7c3aed" },
+  { id: "new",      chatId: "",            label: "New Conversation",         sub: "Start a conversation with an agent",          emoji: "+",  emojiColor: "#7C3AED", bg: "#ede9fe" },
+  { id: "all",      chatId: "",            label: "All agents",                sub: "Your available agents",                       emoji: "🤖", emojiColor: "#444",    bg: "#f0f0f0" },
+  { id: "employee", chatId: "af-employee", label: "Employee Performance Management Agent",            sub: "Employee Performance Management Agent is an AI Agent that helps you…", emoji: "🤖", emojiColor: "#fff",    bg: "#0ea5e9" },
+  { id: "support",  chatId: "af-support",  label: "Agentforce Support Agent",  sub: "Help users answer all the questions related to…",emoji: "🤖", emojiColor: "#fff",    bg: "#2563eb" },
+  { id: "data",     chatId: "af-data",     label: "Data Agent",                sub: "Hello! I help users discover and answer questi…",emoji: "🤖", emojiColor: "#fff",    bg: "#7c3aed" },
 ];
 
-function AgentforceOverlay() {
+function AgentforceOverlay({ onSelect }: { onSelect?: (chatId: string) => void }) {
   return (
     <div style={PANEL}>
       <div style={HEADER}><span>Agentforce</span></div>
       {AGENTS.map((a) => (
-        <Row key={a.id}>
+        <Row key={a.id} onClick={a.chatId ? () => onSelect?.(a.chatId) : undefined}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: a.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: a.id === "new" ? 22 : 18, flexShrink: 0, color: a.emojiColor, fontWeight: 700 }}>
             {a.emoji}
           </div>
@@ -386,6 +387,7 @@ export function DemoIconBar({ onPrimaryNavChange, onNavChange, showDMBadge = fal
   const { activeNav, setActiveNav } = useNav();
   const { isPresentationMode } = usePresentationMode();
   const { demoContext } = useDemoContext();
+  const { setActiveChatId } = useActiveChat();
 
   const { dms, files, savedItems, getChannelPreview } = useDemoData();
 
@@ -563,7 +565,14 @@ export function DemoIconBar({ onPrimaryNavChange, onNavChange, showDMBadge = fal
           )}
           {hoveredId === "files"      && <FilesOverlay files={files} />}
           {hoveredId === "later"      && <LaterOverlay savedItems={savedItems} />}
-          {hoveredId === "agentforce" && <AgentforceOverlay />}
+          {hoveredId === "agentforce" && (
+            <AgentforceOverlay onSelect={(chatId) => {
+              setActiveNav("agentforce");
+              onNavChange?.("agentforce");
+              setActiveChatId(chatId);
+              setHoveredId(null);
+            }} />
+          )}
           {hoveredId === "more"       && <MoreOverlay />}
         </div>
       )}

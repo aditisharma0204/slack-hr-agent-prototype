@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const useBasePath = basePath.startsWith("/pages/");
+
 const nextConfig = {
     // Enable static export for GitHub Pages (GitSoma)
     // Comment out 'output: export' if deploying to Vercel/Netlify
@@ -10,7 +13,7 @@ const nextConfig = {
     // Demo mode: use placeholder when Convex not configured (Convex auth requires var to be set)
     env: {
         NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL || "https://demo-disabled.convex.cloud",
-        NEXT_PUBLIC_BASE_PATH: "/pages/prantik-banerjee/slack-app-shell-template",
+        NEXT_PUBLIC_BASE_PATH: basePath,
     },
     images: {
         unoptimized: true, // Required for static export
@@ -20,8 +23,8 @@ const nextConfig = {
         ],
     },
     // Configure for GitSoma Pages deployment
-    basePath: '/pages/prantik-banerjee/slack-app-shell-template',
-    assetPrefix: '/pages/prantik-banerjee/slack-app-shell-template',
+    basePath: useBasePath ? basePath : undefined,
+    assetPrefix: useBasePath ? basePath : undefined,
 };
 
 export default nextConfig;

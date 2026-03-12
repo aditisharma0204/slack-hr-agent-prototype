@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { SlackAppShell } from "@/components/presentation/SlackAppShell";
 import { GlobalDMsView, GENERIC_GLOBAL_DMS } from "@/components/presentation/GlobalDMsView";
 import { SlackTodayView } from "@/components/presentation/SlackTodayView";
+import { HRAgentChat } from "@/components/hr/HRAgentChat";
 import {
   TemplateChatContent,
   TemplateFilesView,
@@ -26,7 +27,10 @@ export default function Home() {
 
   const handleNavChange = useCallback((nav: NavView) => {
     setActiveNavId(nav);
-    setActiveChatId(DEFAULT_CHAT[nav] ?? "");
+    // Always set the default chat for the new nav, or empty string if none
+    const defaultChat = DEFAULT_CHAT[nav] ?? "";
+    setActiveChatId(defaultChat);
+    console.log(`Nav changed to: ${nav}, setting activeChatId to: ${defaultChat}`);
   }, []);
 
   const handleChatChange = useCallback((id: string) => {
@@ -59,7 +63,12 @@ export default function Home() {
       case "later":
         return <TemplateChatContent activeChatId={effectiveChatId} channelName="#deal-greentech" />;
       case "agentforce":
-        return <TemplateChatContent activeChatId={effectiveChatId} />;
+        console.log(`Agentforce case - effectiveChatId: "${effectiveChatId}", should render HRAgentChat: ${effectiveChatId === "af-employee"}`);
+        return effectiveChatId === "af-employee" ? (
+          <HRAgentChat agentId="af-employee" />
+        ) : (
+          <TemplateChatContent activeChatId={effectiveChatId} />
+        );
       case "more":
         return <TemplateMoreView />;
       default:
