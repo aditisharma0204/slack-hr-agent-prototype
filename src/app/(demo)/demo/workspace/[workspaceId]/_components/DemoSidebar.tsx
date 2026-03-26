@@ -99,7 +99,7 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
   const { activeNav } = useNav();
   const { isPresentationMode } = usePresentationMode();
   const { demoContext } = useDemoContext();
-  const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead } = useDemoData();
+  const { workspace, channels, dms, files, savedItems, getChannelPreview, isChannelRead, agentforceAgents } = useDemoData();
   const searchParams = useSearchParams();
   
   // Use overrideDms if provided (for GlobalDMsView), otherwise use filtered DMs from context
@@ -152,11 +152,13 @@ export function DemoSidebar({ activeDmId: propActiveDmId, onDmSelect, overrideDm
     return dm.name.toLowerCase().includes(search.toLowerCase());
   });
 
-  const agentforceItems: typeof filteredDms = [
-    { id: "af-employee", name: "Employee Performance Management Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
-    { id: "af-support", name: "Agentforce Support Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
-    { id: "af-data", name: "Data Agent", status: "online" as const, avatarUrl: "/slackbot-logo.svg", isSlackbot: true },
-  ];
+  const agentforceItems: typeof filteredDms = agentforceAgents.map((a) => ({
+    id: a.id,
+    name: a.name,
+    status: "online" as const,
+    avatarUrl: "/slackbot-logo.svg",
+    isSlackbot: true,
+  }));
 
   const filteredFiles = files.filter((f) => {
     if (!search) return true;

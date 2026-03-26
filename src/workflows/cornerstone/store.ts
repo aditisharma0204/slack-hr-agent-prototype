@@ -1,27 +1,22 @@
 "use client";
 
 import { atom, useAtom } from "jotai";
-import type { HrAgentId, HrChatMessage, HrWorkflow, HrWorkflowSession } from "./types";
+import type { CsAgentId, CsChatMessage, CsWorkflow, CsWorkflowSession } from "./types";
 import { assetPath } from "@/lib/asset-path";
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function nowLabel() {
-  return "Just now";
-}
-
-function createIdleWorkflow(): HrWorkflow {
+function createIdleWorkflow(): CsWorkflow {
   return {
     id: makeId("wf"),
     kind: "idle",
     step: "start",
-    draft: {},
   };
 }
 
-function createDefaultSession(agentId: HrAgentId): HrWorkflowSession {
+function createDefaultSession(agentId: CsAgentId): CsWorkflowSession {
   return {
     agentId,
     composerText: "",
@@ -30,32 +25,33 @@ function createDefaultSession(agentId: HrAgentId): HrWorkflowSession {
     messages: [
       {
         id: makeId("m"),
-        name: "Employee Performance Management Agent",
-        avatar: assetPath("/slackbot-logo.svg"),
-        time: nowLabel(),
+        name: "Employee Agent",
+        avatar: assetPath("/single-person.png"),
+        time: "Just now",
         isBot: true,
-        text: "Hi \u2014 I'm here to help with goals, self-reviews, and performance questions. What would you like to work on today?",
+        tag: "AGENTFORCE",
+        text: "Hi \u2014 I'm here to help with career development, skill growth, and mentorship. Powered by Cornerstone OnDemand.\n\nWhat would you like to work on today?",
       },
     ],
   };
 }
 
-type SessionsByAgent = Record<string, HrWorkflowSession | undefined>;
+type SessionsByAgent = Record<string, CsWorkflowSession | undefined>;
 
-const hrSessionsAtom = atom<SessionsByAgent>({});
+const csSessionsAtom = atom<SessionsByAgent>({});
 
-export function useHrSession(agentId: HrAgentId) {
-  const [sessions, setSessions] = useAtom(hrSessionsAtom);
+export function useCsSession(agentId: CsAgentId) {
+  const [sessions, setSessions] = useAtom(csSessionsAtom);
   const session = sessions[agentId] ?? createDefaultSession(agentId);
 
-  const updateSession = (updater: (prev: HrWorkflowSession) => HrWorkflowSession) => {
+  const updateSession = (updater: (prev: CsWorkflowSession) => CsWorkflowSession) => {
     setSessions((prev) => {
       const current = prev[agentId] ?? createDefaultSession(agentId);
       return { ...prev, [agentId]: updater(current) };
     });
   };
 
-  const appendMessages = (msgs: HrChatMessage[]) => {
+  const appendMessages = (msgs: CsChatMessage[]) => {
     updateSession((prev) => ({ ...prev, messages: [...prev.messages, ...msgs] }));
   };
 
@@ -67,7 +63,7 @@ export function useHrSession(agentId: HrAgentId) {
     updateSession((prev) => ({ ...prev, composerText: "" }));
   };
 
-  const setActiveWorkflow = (workflow: HrWorkflow) => {
+  const setActiveWorkflow = (workflow: CsWorkflow) => {
     updateSession((prev) => ({ ...prev, activeWorkflow: workflow }));
   };
 

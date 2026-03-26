@@ -17,6 +17,7 @@ import {
   type DemoContext,
 } from "@/app/(demo)/demo/workspace/[workspaceId]/_context/demo-layout-context";
 import { motion } from "framer-motion";
+import type { EpicEntry } from "@/stories";
 
 const T = SLACK_TOKENS;
 
@@ -77,6 +78,11 @@ export interface SlackAppShellProps {
   sidebarOverrideDms?: import('@/context/DemoDataContext').DemoDM[];
   sidebarOverrideChannels?: import('@/context/DemoDataContext').DemoChannel[];
   sidebarApps?: Array<{ id: string; name: string; icon: string }>;
+
+  /** Epic switcher — drives the header dropdown for toggling product epics. */
+  epics?: EpicEntry[];
+  activeEpicId?: string;
+  onEpicChange?: (id: string) => void;
 }
 
 // -----------------------------------------------------------
@@ -100,6 +106,9 @@ export function SlackAppShell({
   sidebarOverrideDms,
   sidebarOverrideChannels,
   sidebarApps,
+  epics,
+  activeEpicId,
+  onEpicChange,
 }: SlackAppShellProps) {
   const [isSlackbotOpen, setIsSlackbotOpen] = useState(forceSlackbotOpen);
 
@@ -147,7 +156,7 @@ export function SlackAppShell({
         >
           {/* ── Top header ── */}
           <div className="slack-app-header relative shrink-0 w-full z-[100]">
-            <AppHeader />
+            <AppHeader epics={epics} activeEpicId={activeEpicId} onEpicChange={onEpicChange} />
           </div>
 
           {/* ── Body ── */}

@@ -19,7 +19,21 @@ export type HrWorkflowStep =
   | "goal_refine_outcome"
   | "goal_refine_metric"
   | "goal_draft_review"
-  | "goal_submit_confirm";
+  | "goal_submit_confirm"
+  // goalView sub-steps
+  | "perf_dashboard"
+  | "perf_suggestions"
+  | "perf_mentor_card"
+  // promoTransfer sub-steps
+  | "promo_readiness"
+  | "promo_growth_plan"
+  | "promo_skills";
+
+/** A numbered action the user can pick by typing "1", "2", etc. */
+export interface PendingAction {
+  key: string;
+  label: string;
+}
 
 export interface HrGoalDraft {
   raw: string;
@@ -54,6 +68,8 @@ export interface HrWorkflow {
     policyQuestion?: string;
   };
   meta?: Record<string, unknown>;
+  /** Numbered options the user can pick from. Cleared after each selection. */
+  pendingActions?: PendingAction[];
 }
 
 export interface HrChatMessage {
@@ -66,12 +82,15 @@ export interface HrChatMessage {
   isBot?: boolean;
 }
 
+export type ConversationPhase = "welcome" | "active";
+
 export interface HrWorkflowSession {
   agentId: HrAgentId;
   messages: HrChatMessage[];
   activeWorkflow: HrWorkflow;
-  /** Holds all drafting text at workflow level (controlled composer). */
   composerText: string;
+  /** Tracks whether the user has started a conversation yet. */
+  phase: ConversationPhase;
 }
 
 export type HrIntent =

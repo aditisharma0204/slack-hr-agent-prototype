@@ -7,6 +7,19 @@ import { BlockKitRenderer } from '@/components/block-kit/BlockKitRenderer';
 import type { SlackBlock } from '@/components/block-kit/BlockKitRenderer';
 import { assetPath } from "@/lib/asset-path";
 
+function renderMrkdwn(text: string): React.ReactNode[] {
+  const tokens = text.split(/(\*[^*]+\*|_[^_]+_|\[.*?\]\(.*?\))/g);
+  return tokens.map((tok, i) => {
+    const bold = tok.match(/^\*(.+)\*$/);
+    if (bold) return <strong key={i}>{bold[1]}</strong>;
+    const italic = tok.match(/^_(.+)_$/);
+    if (italic) return <em key={i}>{italic[1]}</em>;
+    const link = tok.match(/^\[(.*?)\]\((.*?)\)$/);
+    if (link) return <Link key={i} href={link[2]} className="text-blue-600 hover:underline">{link[1]}</Link>;
+    return <span key={i}>{tok}</span>;
+  });
+}
+
 interface ChatMessageProps {
   message: {
     id: string;
@@ -61,24 +74,14 @@ export const ChatMessage = ({ message, onAction }: ChatMessageProps) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 mb-0.5">
           <span className="font-bold text-[15px] text-gray-900">{message.name}</span>
-          {message.tag && <span className="bg-gray-200 text-gray-700 text-[10px] px-1 rounded font-bold">{message.tag}</span>}
+          {message.tag && <span className="border border-gray-400 text-gray-600 text-[10px] px-1.5 py-px rounded font-semibold uppercase tracking-wide">{message.tag}</span>}
           <span className="text-[12px] text-gray-500 hover:underline cursor-pointer">{message.time}</span>
         </div>
         
-        {/* Standard Text */}
+        {/* Standard Text with mrkdwn support */}
         {message.text && !message.blocks && (
           <div className="text-[15px] text-gray-900 leading-relaxed whitespace-pre-wrap">
-            {message.text.split(/(\[.*?\]\(.*?\))/g).map((part, i) => {
-              const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-              if (linkMatch) {
-                return (
-                  <Link key={i} href={linkMatch[2]} className="text-blue-600 hover:underline">
-                    {linkMatch[1]}
-                  </Link>
-                );
-              }
-              return <span key={i}>{part}</span>;
-            })}
+            {renderMrkdwn(message.text)}
           </div>
         )}
 

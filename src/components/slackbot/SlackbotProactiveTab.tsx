@@ -1,7 +1,7 @@
 "use client";
 
 import { IconHome, IconPencil, IconSearch, IconLightbulb } from "@/components/icons";
-import { DEMO_USER_NAME, useDemoData } from "@/context/DemoDataContext";
+import { useDemoData } from "@/context/DemoDataContext";
 import { assetPath } from "@/lib/asset-path";
 
 function formatCurrency(n: number) {
@@ -11,7 +11,7 @@ function formatCurrency(n: number) {
 }
 
 export function SlackbotProactiveTab() {
-  const { demoData } = useDemoData();
+  const { demoData, userName } = useDemoData();
   const data = demoData as Record<string, unknown> | null;
 
   if (!data || Object.keys(data).length === 0) {
@@ -71,7 +71,7 @@ export function SlackbotProactiveTab() {
           <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={64} height={64} />
         </div>
         <h2 className="text-lg font-bold text-[#1d1c1d] mb-2">
-          Good morning, {DEMO_USER_NAME}!
+          Good morning, {userName}!
         </h2>
         <p className="text-sm text-[#616061] mb-6">
           Here's where you stand.

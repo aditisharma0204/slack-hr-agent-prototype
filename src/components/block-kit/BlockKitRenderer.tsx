@@ -273,32 +273,65 @@ function Block({ block, onAction }: { block: SlackBlock; onAction?: (actionId: s
       };
       
       return (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap mt-2" style={{ gap: 12 }}>
           {block.elements.map((el, i) => {
             if (el.type !== "button") return null;
             const label = el.text?.text ?? "";
-            // Remove emoji from label if present
-            const cleanLabel = label.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF]+\s*/g, '').trim();
             const IconComponent = el.action_id ? iconMap[el.action_id] : null;
-            
+
             const isPrimary = el.style === "primary";
+            const isDanger = el.style === "danger";
+
+            let bg = "#ffffff";
+            let hoverBg = "#f8f8f8";
+            let borderColor = "#d0d0d0";
+            let textColor = T.colors.text;
+            let hoverBorder = "#b0b0b0";
+
+            if (isPrimary) {
+              bg = "#007a5a";
+              hoverBg = "#005e47";
+              borderColor = "#007a5a";
+              textColor = "#ffffff";
+              hoverBorder = "#005e47";
+            } else if (isDanger) {
+              bg = "#e01e5a";
+              hoverBg = "#c4133a";
+              borderColor = "#e01e5a";
+              textColor = "#ffffff";
+              hoverBorder = "#c4133a";
+            }
+
             return (
               <button
                 key={i}
                 type="button"
                 onClick={() => el.action_id && onAction?.(el.action_id)}
-                className={`px-4 py-2 text-sm font-medium border transition-colors flex items-center gap-2 ${
-                  isPrimary 
-                    ? "bg-[#611f69] border-[#611f69] text-white hover:bg-[#4a154b]" 
-                    : "bg-white border-gray-300 hover:bg-gray-50"
-                }`}
+                className="transition-all flex items-center justify-center gap-1.5 text-[13px] font-bold"
                 style={{
-                  borderRadius: `${T.radius.button}px`,
-                  color: isPrimary ? '#ffffff' : T.colors.text,
+                  borderRadius: 6,
+                  minHeight: 36,
+                  minWidth: 80,
+                  padding: "0 16px",
+                  color: textColor,
+                  backgroundColor: bg,
+                  border: `1px solid ${borderColor}`,
+                  boxShadow: isPrimary || isDanger ? "none" : T.shadows.button,
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  const btn = e.currentTarget as HTMLButtonElement;
+                  btn.style.backgroundColor = hoverBg;
+                  btn.style.borderColor = hoverBorder;
+                }}
+                onMouseLeave={(e) => {
+                  const btn = e.currentTarget as HTMLButtonElement;
+                  btn.style.backgroundColor = bg;
+                  btn.style.borderColor = borderColor;
                 }}
               >
                 {IconComponent && <IconComponent className="w-4 h-4" />}
-                {cleanLabel}
+                {label}
               </button>
             );
           })}

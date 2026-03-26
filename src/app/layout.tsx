@@ -10,7 +10,6 @@ import { ConvexClientProvider } from "@/components/providers/ConvexClientProvide
 import Modals from "@/components/modals";
 import { Toaster } from "@/components/ui/sonner";
 import JotaiProvider from "@/components/providers/JotaiProvider";
-import { DemoDataProvider } from "@/context/DemoDataContext";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -38,14 +37,12 @@ export default function RootLayout({
   const content = (
     <ConvexClientProvider>
       <JotaiProvider>
-        <DemoDataProvider>
-          <Suspense fallback={null}>
-            <Toaster />
-            {hasConvex && <Modals />}
-            {children}
-            {/* <NuqsAdapter>{children}</NuqsAdapter> */}
-          </Suspense>
-        </DemoDataProvider>
+        <Suspense fallback={null}>
+          <Toaster />
+          {hasConvex && <Modals />}
+          {children}
+          {/* <NuqsAdapter>{children}</NuqsAdapter> */}
+        </Suspense>
       </JotaiProvider>
     </ConvexClientProvider>
   );

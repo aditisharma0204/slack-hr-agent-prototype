@@ -1,58 +1,118 @@
-# Slack App Shell Boilerplate
+# How to use Slack-app-shell-template
 
-A clean, reusable Slack App Shell template for designers to build new Slack integration concepts.
+## Github
 
-> **⚠️ This is a read-only template repository.** To make changes, please **fork** this repository and work in your own fork.
+### Step 1: Create a Personal Access Token on GitSoma -- this is very important
 
-## 🎯 What This Is
+1. Go to https://git.soma.salesforce.com/settings/tokens
+2. Click "Generate new token"
+3. Give it a name (something like `slack-template-clone`)
+4. Check the `repo` scope (full control of private repositories)
+5. Click Generate token
+6. Copy the token immediately — it only shows once
 
-This is a **boilerplate template** that provides a fully functional Slack-like UI shell with:
-- ✅ Complete sidebar navigation (Today, Home, DMs, Activity, Files, Later, Agentforce)
-- ✅ Interactive chat surfaces with message input
-- ✅ Today view with focus prompts, agenda, highlights, and replies
-- ✅ Generic placeholder data ready for your concepts
-- ✅ All interactions working (sidebar clicks, hover states, animations)
+### Step 2: Clone the Template Using the Token
 
-**Perfect for:** Designers who want to prototype new Slack app experiences without building the shell from scratch.
-
-## 🚀 Quick Start
-
-**Prerequisites:**
-- Node.js 18+ 
-- npm or yarn
-
-### For Designers (GitSoma)
-
-**Step 1: Fork the repository**
-- Go to: `https://git.soma.salesforce.com/prantik-banerjee/slack-app-shell-template`
-- Click the **"Fork"** button (top right)
-- This creates your own copy
-
-**Step 2: Clone your fork**
 ```bash
-git clone https://git.soma.salesforce.com/YOUR-USERNAME/slack-app-shell-template.git
-cd slack-app-shell-template
+git clone https://git.soma.salesforce.com/prantik-banerjee/slack-app-shell-template.git
 ```
 
-**Step 3: Install & Run**
+When prompted for credentials:
+- **Username:** your SSO username (e.g. `aditi.sharma2`)
+- **Password:** paste the Personal Access Token (not your actual password)
+
+### Step 3: Install Dependencies & Run
+
 ```bash
+cd slack-app-shell-template
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you'll see the Slack App Shell with Today view loaded.
+Open http://localhost:3000 — the Slack shell loads.
 
-**Step 4: Make changes**
-- Edit files in `src/` folder
-- Changes appear instantly in your browser
-- Commit and push to your fork when ready
+### Step 4: Create Your Own Repo & Push
 
-## 📁 Project Structure
+Create a new repo on GitHub (e.g. `aditisharma0204/slack-hr-agent-prototype`) and re-point the origin:
+
+```bash
+git remote set-url origin https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+git push -u origin main
+```
+
+### Step 5: Customize with Cursor
+
+From there, use Cursor Agent to build on top of the template (workflow engine, chat UI, starter chips, etc.).
+
+---
+
+## Troubleshooting
+
+### 404 — "This page could not be found"
+
+Make sure you're going to **http://localhost:3000** (with the port), not just `http://localhost`.
+
+### `removeChild` hydration error
+
+```
+NotFoundError: Failed to execute 'removeChild' on 'Node':
+The node to be removed is not a child of this node.
+```
+
+This is a React hydration mismatch. Try these fixes in order:
+
+**1. Disable browser extensions**
+
+Browser extensions like Grammarly, Google Translate, LastPass, and ad blockers inject DOM nodes into `<body>`, which breaks React's hydration. Try opening **http://localhost:3000** in an **incognito/private window** (with extensions disabled).
+
+**2. Comment out `output: 'export'` for local dev**
+
+The template ships with static export enabled (for GitHub Pages). This can cause hydration issues in dev mode. Open `next.config.mjs` and comment it out:
+
+```js
+const nextConfig = {
+    // output: 'export',  // comment this out for local dev
+    ...
+};
+```
+
+Then restart the server (`Ctrl+C`, then `npm run dev`).
+
+**3. Verify Node version**
+
+The template requires Node 18+. Check your version:
+
+```bash
+node -v
+```
+
+If you're below v18, update via [nvm](https://github.com/nvm-sh/nvm) or [nodejs.org](https://nodejs.org/).
+
+**4. Clean install**
+
+If all else fails, nuke `node_modules` and the Next.js cache and reinstall:
+
+```bash
+rm -rf node_modules .next
+npm install
+npm run dev
+```
+
+### Still stuck?
+
+Reach out in the team channel with:
+- Your Node version (`node -v`)
+- Your OS (macOS / Windows / Linux)
+- The full error from your terminal
+
+---
+
+## Project Structure
 
 ```
 src/
 ├── app/
-│   └── page.tsx              # Main entry point - renders SlackAppShell
+│   └── page.tsx              # Main entry — renders SlackAppShell
 ├── components/
 │   ├── presentation/
 │   │   ├── SlackAppShell.tsx  # Core shell component
@@ -65,15 +125,10 @@ src/
     └── DemoDataContext.tsx   # Mock data for channels, DMs, files
 ```
 
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Next.js 14** (App Router)
 - **TypeScript**
 - **Tailwind CSS**
 - **React** (with hooks)
 - **Framer Motion** (animations)
-
-## 📄 License
-
-This is a template for internal use. Customize as needed for your projects.

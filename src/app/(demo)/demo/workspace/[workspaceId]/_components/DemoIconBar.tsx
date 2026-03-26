@@ -309,19 +309,28 @@ function LaterOverlay({ savedItems }: { savedItems: DemoSavedItem[] }) {
 
 // ─── Overlay: Agentforce ────────────────────────────────────────────────────
 
-const AGENTS = [
-  { id: "new",      chatId: "",            label: "New Conversation",         sub: "Start a conversation with an agent",          emoji: "+",  emojiColor: "#7C3AED", bg: "#ede9fe" },
-  { id: "all",      chatId: "",            label: "All agents",                sub: "Your available agents",                       emoji: "🤖", emojiColor: "#444",    bg: "#f0f0f0" },
-  { id: "employee", chatId: "af-employee", label: "Employee Performance Management Agent",            sub: "Employee Performance Management Agent is an AI Agent that helps you…", emoji: "🤖", emojiColor: "#fff",    bg: "#0ea5e9" },
-  { id: "support",  chatId: "af-support",  label: "Agentforce Support Agent",  sub: "Help users answer all the questions related to…",emoji: "🤖", emojiColor: "#fff",    bg: "#2563eb" },
-  { id: "data",     chatId: "af-data",     label: "Data Agent",                sub: "Hello! I help users discover and answer questi…",emoji: "🤖", emojiColor: "#fff",    bg: "#7c3aed" },
-];
+const AGENT_COLORS = ["#0ea5e9", "#2563eb", "#7c3aed", "#059669", "#d97706"];
 
-function AgentforceOverlay({ onSelect }: { onSelect?: (chatId: string) => void }) {
+function AgentforceOverlay({ onSelect, agents }: { onSelect?: (chatId: string) => void; agents: Array<{ id: string; name: string }> }) {
+  const staticRows = [
+    { id: "new", chatId: "", label: "New Conversation", sub: "Start a conversation with an agent", emoji: "+", emojiColor: "#7C3AED", bg: "#ede9fe" },
+    { id: "all", chatId: "", label: "All agents", sub: "Your available agents", emoji: "🤖", emojiColor: "#444", bg: "#f0f0f0" },
+  ];
+  const agentRows = agents.map((a, i) => ({
+    id: a.id,
+    chatId: a.id,
+    label: a.name,
+    sub: `${a.name} is an AI Agent that helps you…`,
+    emoji: "🤖",
+    emojiColor: "#fff",
+    bg: AGENT_COLORS[i % AGENT_COLORS.length],
+  }));
+  const allRows = [...staticRows, ...agentRows];
+
   return (
     <div style={PANEL}>
       <div style={HEADER}><span>Agentforce</span></div>
-      {AGENTS.map((a) => (
+      {allRows.map((a) => (
         <Row key={a.id} onClick={a.chatId ? () => onSelect?.(a.chatId) : undefined}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: a.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: a.id === "new" ? 22 : 18, flexShrink: 0, color: a.emojiColor, fontWeight: 700 }}>
             {a.emoji}
@@ -389,7 +398,7 @@ export function DemoIconBar({ onPrimaryNavChange, onNavChange, showDMBadge = fal
   const { demoContext } = useDemoContext();
   const { setActiveChatId } = useActiveChat();
 
-  const { dms, files, savedItems, getChannelPreview } = useDemoData();
+  const { dms, files, savedItems, getChannelPreview, agentforceAgents } = useDemoData();
 
   // Global icon bar: Always filter out Slackbot DM (Seller Edge is Arc 1 specific)
   const filteredDms = dms.filter((dm) => !dm.isSlackbot);
@@ -566,7 +575,7 @@ export function DemoIconBar({ onPrimaryNavChange, onNavChange, showDMBadge = fal
           {hoveredId === "files"      && <FilesOverlay files={files} />}
           {hoveredId === "later"      && <LaterOverlay savedItems={savedItems} />}
           {hoveredId === "agentforce" && (
-            <AgentforceOverlay onSelect={(chatId) => {
+            <AgentforceOverlay agents={agentforceAgents} onSelect={(chatId) => {
               setActiveNav("agentforce");
               onNavChange?.("agentforce");
               setActiveChatId(chatId);

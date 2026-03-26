@@ -37,7 +37,10 @@ export function detectIntent(text: string): HrIntent {
   }
 
   // Promotion / transfer
-  if (/\b(promotion|promote|level up|eligible)\b/.test(t) || /\btransfer\b/.test(t)) {
+  if (/\b(promotion|promote|level up|eligible|ready for promotion)\b/.test(t) || /\btransfer\b/.test(t)) {
+    return { type: "promoTransfer" };
+  }
+  if (/\bam i (eligible|ready)\b/.test(t)) {
     return { type: "promoTransfer" };
   }
 

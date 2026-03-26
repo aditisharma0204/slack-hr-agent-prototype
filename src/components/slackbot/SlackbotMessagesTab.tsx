@@ -9,7 +9,7 @@ import {
   IconPlus,
 } from "@/components/icons";
 import type { SlackBlock } from "@/components/block-kit/BlockKitRenderer";
-import { DEMO_USER_NAME } from "@/context/DemoDataContext";
+import { useDemoData } from "@/context/DemoDataContext";
 import { SLACK_TOKENS } from "@/design/slack-tokens";
 import { ChatMessage as GlobalChatMessage } from "@/components/shared/ChatMessage";
 import { assetPath } from "@/lib/asset-path";
@@ -211,6 +211,7 @@ interface SlackbotMessagesTabProps {
 }
 
 export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessage }: SlackbotMessagesTabProps) {
+  const { userName } = useDemoData();
   const [messages, setMessages] = useState<ChatMessage[]>(history);
   const [isTyping, setIsTyping] = useState(false);
   const prevHistoryRef = useRef<string>(JSON.stringify(history));
@@ -300,7 +301,7 @@ export function SlackbotMessagesTab({ history = [], onUpdateHistory, onSendMessa
               <img src={assetPath("/slackbot-logo.svg")} alt="Slackbot" width={120} height={120} className="max-w-full max-h-full" />
             </div>
             <h2 className="text-base sm:text-lg font-bold text-[#1d1c1d] mb-2 w-full">
-              Good morning, {DEMO_USER_NAME}!
+              Good morning, {userName}!
             </h2>
             <p className="text-sm sm:text-[15px] text-[#616061] mb-5 w-full">
               The day loads, one unread message at a time.

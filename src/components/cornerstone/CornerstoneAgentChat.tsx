@@ -3,24 +3,23 @@
 import { useCallback } from "react";
 import { UniversalChatSurface } from "@/components/shared/UniversalChatSurface";
 import { ChatMessage } from "@/components/shared/ChatMessage";
-import { StarterPromptChips } from "./StarterPromptChips";
-import { hrReduceTurn } from "@/workflows/hr/engine";
-import { useHrSession } from "@/workflows/hr/store";
+import { StarterPromptChips } from "@/components/hr/StarterPromptChips";
+import { csReduceTurn } from "@/workflows/cornerstone/engine";
+import { useCsSession } from "@/workflows/cornerstone/store";
 import { assetPath } from "@/lib/asset-path";
 
 const STARTER_PROMPTS = [
-  "Create a goal",
-  "Show my goals",
-  "Help me write my self-review",
-  "Am I eligible for promotion?",
+  "Explore internal roles",
+  "How ready am I for a Product Manager role?",
+  "I need help improving time management",
 ];
 
-export function HRAgentChat({ agentId = "af-employee" }: { agentId?: string }) {
-  const { session, updateSession, setComposerText } = useHrSession(agentId);
+export function CornerstoneAgentChat({ agentId = "af-employee-cs" }: { agentId?: string }) {
+  const { session, updateSession, setComposerText } = useCsSession(agentId);
 
   const handleSend = useCallback(
     (text: string) => {
-      updateSession((prev) => hrReduceTurn(prev, text).next);
+      updateSession((prev) => csReduceTurn(prev, text).next);
     },
     [updateSession],
   );
@@ -30,16 +29,16 @@ export function HRAgentChat({ agentId = "af-employee" }: { agentId?: string }) {
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
       <UniversalChatSurface
-        title="Employee Performance Management Agent"
+        title="Employee Agent"
         icon={
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={assetPath("/slackbot-logo.svg")}
+            src={assetPath("/single-person.png")}
             className="w-5 h-5 rounded"
-            alt="Employee Performance Management Agent"
+            alt="Employee Agent"
           />
         }
-        placeholder="Ask about goals, self-reviews, promotions, or policy\u2026"
+        placeholder="Ask about careers, skills, mentorship, or learning\u2026"
         inputValue={session.composerText}
         onInputChange={setComposerText}
         onSendMessage={handleSend}
